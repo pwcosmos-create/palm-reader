@@ -47,12 +47,15 @@
 
 .resultsList {
   flex: 1;
-  padding: 2rem;
-  background: linear-gradient(to bottom, #111231 0%, #050510 100%);
+  padding: 1.5rem 1.2rem 4rem;
+  background: linear-gradient(to bottom, #0a0b1e 0%, #050510 100%);
   border-radius: 30px 30px 0 0;
-  margin-top: -20px;
+  margin-top: -30px;
   position: relative;
   z-index: 10;
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
 }
 
 .headerRow {
@@ -101,13 +104,93 @@
   letter-spacing: 1px;
 }
 
+/* Summary / Advice card variants */
+.summaryCard {
+  border-color: rgba(0, 242, 255, 0.15);
+}
+
+.adviceCard {
+  border-color: rgba(255, 215, 0, 0.15);
+}
+
+/* Premium Cards */
+.premiumCard {
+  position: relative;
+  padding: 1.8rem;
+  border-radius: 24px;
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  backdrop-filter: blur(10px);
+  overflow: hidden;
+}
+
+.cardAccent {
+  position: absolute;
+  top: 0; left: 0; bottom: 0;
+  width: 4px;
+  background: linear-gradient(to bottom, var(--primary), transparent);
+}
+
+.cardAccentGold {
+  position: absolute;
+  top: 0; left: 0; bottom: 0;
+  width: 4px;
+  background: linear-gradient(to bottom, var(--secondary), transparent);
+}
+
+.summaryText {
+  font-size: 0.95rem;
+  line-height: 1.6;
+  color: rgba(255, 255, 255, 0.9);
+  margin-bottom: 1rem;
+}
+
+.personalizationMsg {
+  font-size: 0.7rem;
+  color: var(--primary);
+  opacity: 0.8;
+  font-family: monospace;
+  letter-spacing: 0.5px;
+}
+
+.lineCard {
+  transition: all 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.lineCard.hidden {
+  opacity: 0;
+  transform: translateY(20px);
+}
+
+.lineCard.visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.lineHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 0.8rem;
+}
+
+.badge {
+  font-size: 0.6rem;
+  padding: 2px 8px;
+  border: 1px solid;
+  border-radius: 10px;
+  text-transform: uppercase;
+  font-weight: 700;
+  letter-spacing: 1px;
+}
+
 .ratingBox {
   display: flex;
   flex-direction: column;
   gap: 0.5rem;
   margin-top: 1rem;
   padding-top: 1rem;
-  border-top: 1px solid var(--glass-border);
+  border-top: 1px solid rgba(255, 255, 255, 0.05);
 }
 
 .stars {
@@ -120,27 +203,40 @@
   border: none;
   font-size: 1.5rem;
   cursor: pointer;
-  transition: transform 0.1s;
-}
-
-.stars button:active {
-  transform: scale(0.8);
+  transition: transform 0.1s, color 0.2s;
 }
 
 .starOn {
-  color: var(--secondary);
-  text-shadow: var(--glow-gold);
+  color: var(--secondary) !important;
+  text-shadow: 0 0 10px rgba(255, 215, 0, 0.5);
+}
+
+.starOn:hover {
+  transform: scale(1.1);
 }
 
 .starOff {
-  color: rgba(255, 255, 255, 0.2);
+  color: rgba(255, 255, 255, 0.1) !important;
 }
 
 .actions {
-  margin-top: 3rem;
+  margin-top: 1rem;
   display: flex;
   flex-direction: column;
   gap: 1rem;
+  transition: all 0.8s ease;
+}
+
+.actions.hidden { opacity: 0; pointer-events: none; }
+.actions.visible { opacity: 1; }
+
+@keyframes fadeInUp {
+  from { opacity: 0; transform: translateY(30px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+:global(.fade-in-up) {
+  animation: fadeInUp 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards;
 }
 
 @media (max-width: 480px) {
