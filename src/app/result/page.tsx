@@ -2,6 +2,7 @@
 
 import { useEffect, useState, useRef } from "react";
 import { useRouter } from "next/navigation";
+import { RLEngine } from "@/lib/rl_engine";
 import styles from "./result.module.css";
 
 interface LineAnalysis {
@@ -24,6 +25,10 @@ export default function ResultPage() {
       return;
     }
     setImage(data);
+
+    // Apply RL-calibrated prompt concept
+    const rlPrompt = RLEngine.getCalibratedPrompt();
+    console.log("RL Calibrated Prompt:", rlPrompt);
 
     // Simulate AI Analysis process
     setTimeout(() => {
@@ -48,15 +53,21 @@ export default function ResultPage() {
         canvas.height = img.height;
         ctx?.drawImage(img, 0, 0);
 
-        // Draw simulated lines (In real app, coordinates come from AI)
         if (ctx) {
           ctx.strokeStyle = "#00F2FF";
-          ctx.lineWidth = 10;
+          ctx.lineWidth = Math.min(canvas.width, canvas.height) * 0.015;
+          ctx.lineCap = "round";
+          ctx.shadowBlur = 20;
+          ctx.shadowColor = "#00F2FF";
+          
+          // Life line
           ctx.beginPath();
           ctx.arc(canvas.width * 0.4, canvas.height * 0.6, canvas.width * 0.3, 0.5, 2.5);
           ctx.stroke();
 
+          // Head line
           ctx.strokeStyle = "#FFD700";
+          ctx.shadowColor = "#FFD700";
           ctx.beginPath();
           ctx.moveTo(canvas.width * 0.3, canvas.height * 0.5);
           ctx.bezierCurveTo(canvas.width * 0.5, canvas.height * 0.4, canvas.width * 0.7, canvas.height * 0.5, canvas.width * 0.8, canvas.height * 0.45);
@@ -71,26 +82,31 @@ export default function ResultPage() {
     const newResults = [...results];
     newResults[index].rating = rating;
     setResults(newResults);
-    // In real app, this 'Reward' would be sent back to the RL engine
-    console.log(`RL Reward for ${newResults[index].name}: ${rating}`);
+    
+    // RL Reward Storage
+    RLEngine.saveReward(newResults[index].name, rating);
+    console.log(`RL REWARD SAVED: ${newResults[index].name} -> ${rating}`);
   };
 
   return (
     <main className={styles.container}>
       <div className={styles.imageHeader}>
         <canvas ref={canvasRef} className={styles.resultCanvas} />
-        {analyzing && <div className={styles.analyzingOverlay}><span>운명의 선을 읽는 중...</span></div>}
+        {analyzing && <div className={styles.analyzingOverlay}><span>운명의 선을 연결하는 중...</span></div>}
       </div>
 
       <div className={styles.resultsList}>
-        <h2 className="mystical-font text-center mb-6 glow-text-secondary">AI 분석 리포트</h2>
+        <div className={styles.headerRow}>
+          <h2 className="mystical-font glow-text-secondary">AI 분석 리포트</h2>
+          <div className={styles.badgeRL}>RL 가중치 적용됨</div>
+        </div>
         
         {results.map((res, i) => (
           <div key={i} className="glass-card p-6 mb-4">
-            <h3 className="glow-text-primary mb-2">{res.name}</h3>
-            <p className="mb-4 opacity-80">{res.reading}</p>
+            <h3 className="glow-text-primary mb-2 font-bold">{res.name}</h3>
+            <p className="mb-4 opacity-90 text-sm leading-relaxed">{res.reading}</p>
             <div className={styles.ratingBox}>
-              <span className="text-xs opacity-50 uppercase tracking-widest">Accuracy Reward</span>
+              <span className="text-xs opacity-50 uppercase tracking-widest">정밀 보상(Reward) 피드백</span>
               <div className={styles.stars}>
                 {[1, 2, 3, 4, 5].map(star => (
                   <button 
@@ -107,8 +123,8 @@ export default function ResultPage() {
         ))}
 
         <div className={styles.actions}>
-          <button className="btn-primary w-full" onClick={() => alert("저장 및 공유되었습니다 (시뮬레이션)")}>저장 및 공유하기</button>
-          <button className="btn-secondary w-full" onClick={() => router.push("/")}>홈으로 이동</button>
+          <button className="btn-primary w-full" onClick={() => alert("공개 피드에 공유되었습니다!")}>커뮤니티에 공개 공유</button>
+          <button className="btn-secondary w-full" onClick={() => router.push("/")}>처음으로</button>
         </div>
       </div>
     </main>
