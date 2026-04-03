@@ -21,8 +21,16 @@ interface AnalysisResult {
 
 export default function ResultPage() {
   const [image, setImage] = useState<string | null>(null);
+  const [analyzing, setAnalyzing] = useState(true);
+  const [analysis, setAnalysis] = useState<AnalysisResult | null>(null);
+  const [visibleItems, setVisibleItems] = useState<number>(0);
+  const [personalizationLevel, setPersonalizationLevel] = useState(0);
+  const [globalScore, setGlobalScore] = useState(42500);
+  const [syncing, setSyncing] = useState(false);
   const [analyzingMessage, setAnalyzingMessage] = useState("데이터 수집 중...");
   const [analyzingStage, setAnalyzingStage] = useState(0); 
+  const canvasRef = useRef<HTMLCanvasElement>(null);
+  const router = useRouter();
 
   useEffect(() => {
     const data = sessionStorage.getItem("capturedPalm");
@@ -32,9 +40,10 @@ export default function ResultPage() {
     }
     setImage(data);
 
-    // Get current RL maturity
+    // Get current RL maturity and global score
     const level = RLEngine.getPersonalizationLevel();
     setPersonalizationLevel(level);
+    setGlobalScore(RLEngine.getGlobalIntelligenceScore());
 
     // ── Phase: AI Joint Reflection Loop ───────────────────────────────────
     const stages = [
@@ -60,7 +69,7 @@ export default function ResultPage() {
       await new Promise(r => setTimeout(r, stages[2].time));
 
       // All set!
-      setAnalysis({
+      const resultData = {
         summary: "Gemini의 '신비적 직관'과 Claude의 '논리적 분석'이 결합된 결과입니다. 당신의 손금은 현대 사회에서 강력한 영향력을 행사할 수 있는 '개척자'의 길을 가리키고 있습니다.",
         lines: [
           { name: "생명선 (Life)", reading: "강한 활력과 에너지가 느껴집니다. 장수와 건강한 신체 구조를 타고나셨네요.", rating: 0, color: "#00F2FF" },
@@ -72,12 +81,31 @@ export default function ResultPage() {
         personalizationMsg: level > 10 
           ? `당신의 ${level}% 학습된 성향을 분석하여 맞춤형 통찰을 도출했습니다.`
           : "초기 분석 단계입니다. 평가를 남겨주시면 AI가 당신의 성향을 더 깊게 학습합니다."
-      });
+      };
+      
+      setAnalysis(resultData);
       setAnalyzing(false);
+
+      // ── Saving to History ───────────────────────────────────────────────
+      try {
+        const history = JSON.parse(localStorage.getItem('palm_history_v2') || '[]');
+        const newEntry = {
+          id: Date.now().toString(),
+          date: new Date().toLocaleDateString('ko-KR'),
+          summary: resultData.summary,
+          imageUrl: image,
+          consensusBadge: true,
+          maturity: level,
+          globalScore: RLEngine.getGlobalIntelligenceScore()
+        };
+        localStorage.setItem('palm_history_v2', JSON.stringify([newEntry, ...history].slice(0, 50)));
+      } catch (e) {
+        console.error("History Save Error:", e);
+      }
     };
 
     runAnalysis();
-  }, [router]);
+  }, [router, image]);
 
   // Effect for sequential reveal animation
   useEffect(() => {
@@ -102,156 +130,125 @@ export default function ResultPage() {
 
     const img = new Image();
     img.onload = () => {
-      // Match canvas internal resolution to image
       canvas.width = img.width;
       canvas.height = img.height;
       ctx.clearRect(0, 0, canvas.width, canvas.height);
-
       const W = canvas.width;
       const H = canvas.height;
 
-      // Helper: draw a bezier curve with neon glow effect
-      const drawNeonCurve = (
-        path: (ctx: CanvasRenderingContext2D) => void,
-        color: string,
-        labelText: string,
-        labelX: number,
-        labelY: number
-      ) => {
-        ctx.lineCap = "round";
-        ctx.lineJoin = "round";
-        ctx.shadowColor = color;
+      // ── 픽셀 분석으로 실제 손금 위치 감지 ───────────────
+      const off = document.createElement("canvas");
+      off.width = W; off.height = H;
+      const offCtx = off.getContext("2d")!;
+      offCtx.drawImage(img, 0, 0);
+      const px = offCtx.getImageData(0, 0, W, H).data;
 
-        // Wide outer glow
-        ctx.globalAlpha = 0.35;
-        ctx.shadowBlur = 40;
-        ctx.lineWidth = W * 0.028;
-        ctx.strokeStyle = color;
-        ctx.beginPath(); path(ctx); ctx.stroke();
-
-        // Mid glow
-        ctx.globalAlpha = 0.6;
-        ctx.shadowBlur = 20;
-        ctx.lineWidth = W * 0.016;
-        ctx.beginPath(); path(ctx); ctx.stroke();
-
-        // Bright white core
-        ctx.globalAlpha = 1;
-        ctx.shadowBlur = 8;
-        ctx.lineWidth = W * 0.007;
-        ctx.strokeStyle = "#ffffff";
-        ctx.beginPath(); path(ctx); ctx.stroke();
-
-        // Colored thin top layer
-        ctx.globalAlpha = 0.9;
-        ctx.lineWidth = W * 0.009;
-        ctx.strokeStyle = color;
-        ctx.beginPath(); path(ctx); ctx.stroke();
-
-        // Label
-        ctx.globalAlpha = 1;
-        ctx.shadowBlur = 6;
-        ctx.shadowColor = color;
-        ctx.fillStyle = color;
-        ctx.font = `bold ${Math.floor(W * 0.028)}px Cinzel, serif`;
-        ctx.fillText(labelText, labelX, labelY);
-
-        // Start dot
-        ctx.shadowBlur = 10;
-        ctx.fillStyle = "#ffffff";
-        ctx.beginPath();
-        ctx.arc(labelX - W * 0.01, labelY + W * 0.012, W * 0.008, 0, Math.PI * 2);
-        ctx.fill();
-
-        ctx.globalAlpha = 1;
-        ctx.shadowBlur = 0;
+      const gray = (x: number, y: number) => {
+        const xi = Math.max(0, Math.min(W - 1, Math.round(x)));
+        const yi = Math.max(0, Math.min(H - 1, Math.round(y)));
+        const i = (yi * W + xi) * 4;
+        return (px[i] + px[i + 1] + px[i + 2]) / 3;
       };
 
-      // ─────────────────────────────────────────────────────
-      // 손금 해부학 기준 좌표 (오른손 기준, 엄지 왼쪽)
-      // 이미지 600×600 → 비율 좌표 사용
-      // ─────────────────────────────────────────────────────
+      // 열(x)에서 y범위 안의 가장 어두운 y 반환
+      const minY = (x: number, y0: number, y1: number) => {
+        let best = (y0 + y1) / 2, minG = 999;
+        for (let y = y0; y <= y1; y += 1.5) {
+          const g = gray(x, y);
+          if (g < minG) { minG = g; best = y; }
+        }
+        return best;
+      };
 
-      // ── 감정선 Heart Line ──────────────────────────────────
-      // 새끼-약지 아래(우)에서 검지 아래(좌)로 완만한 호
-      // 실제 위치: 손바닥 상단 1/3 지점 (y ≈ 40~48%)
-      drawNeonCurve(
-        c => {
-          c.moveTo(W * 0.76, H * 0.43);
-          c.bezierCurveTo(
-            W * 0.62, H * 0.38,   // CP1: 중지 아래서 위로 솟음
-            W * 0.45, H * 0.39,   // CP2: 검지 방향으로 꺾임
-            W * 0.28, H * 0.46    // 끝: 검지-엄지 경계 부근
-          );
-        },
-        "#FF2EF7",
-        "Heart",
-        W * 0.77, H * 0.40
-      );
+      // 행(y)에서 x범위 안의 가장 어두운 x 반환
+      const minX = (y: number, x0: number, x1: number) => {
+        let best = (x0 + x1) / 2, minG = 999;
+        for (let x = x0; x <= x1; x += 1.5) {
+          const g = gray(x, y);
+          if (g < minG) { minG = g; best = x; }
+        }
+        return best;
+      };
 
-      // ── 두뇌선 Head Line ──────────────────────────────────
-      // 생명선과 동일 기원(엄지-검지 사이)에서 출발, 새끼 방향으로 사선
-      // 실제 위치: 손바닥 중앙 (y ≈ 51~60%)
-      drawNeonCurve(
-        c => {
-          c.moveTo(W * 0.30, H * 0.53);
-          c.bezierCurveTo(
-            W * 0.46, H * 0.52,   // CP1
-            W * 0.60, H * 0.55,   // CP2
-            W * 0.74, H * 0.60    // 끝: 약지 아래 방향
-          );
-        },
-        "#FFD700",
-        "Head",
-        W * 0.27, H * 0.50
-      );
+      // 이동 평균 스무딩
+      const smooth = (arr: number[], w = 3) =>
+        arr.map((_, i) => {
+          const s = Math.max(0, i - w), e = Math.min(arr.length - 1, i + w);
+          return arr.slice(s, e + 1).reduce((a, b) => a + b, 0) / (e - s + 1);
+        });
 
-      // ── 생명선 Life Line ──────────────────────────────────
-      // 두뇌선과 동일 기원, 엄지 두덩(Thenar)을 감싸며 손목 쪽으로 큰 호
-      // 실제 위치: 엄지 볼록 부위 감싸는 곡선 (x ≈ 18~35%)
-      drawNeonCurve(
-        c => {
-          c.moveTo(W * 0.30, H * 0.53);
-          c.bezierCurveTo(
-            W * 0.20, H * 0.63,   // CP1: 엄지 두덩 상단
-            W * 0.18, H * 0.76,   // CP2: 엄지 두덩 하단
-            W * 0.30, H * 0.88    // 끝: 손목 엄지 쪽
-          );
-        },
-        "#00F2FF",
-        "Life",
-        W * 0.10, H * 0.68
-      );
+      // 감지된 포인트로 네온 선 렌더링
+      const drawNeon = (pts: {x:number;y:number}[], color: string, label: string, lx: number, ly: number) => {
+        if (pts.length < 2) return;
+        const stroke = (lw: number, alpha: number, blur: number, col: string) => {
+          ctx.lineWidth = lw; ctx.globalAlpha = alpha;
+          ctx.shadowBlur = blur; ctx.shadowColor = color;
+          ctx.strokeStyle = col; ctx.lineCap = "round"; ctx.lineJoin = "round";
+          ctx.beginPath(); ctx.moveTo(pts[0].x, pts[0].y);
+          for (let i = 1; i < pts.length - 1; i++) {
+            const mx = (pts[i].x + pts[i+1].x) / 2;
+            const my = (pts[i].y + pts[i+1].y) / 2;
+            ctx.quadraticCurveTo(pts[i].x, pts[i].y, mx, my);
+          }
+          ctx.lineTo(pts[pts.length-1].x, pts[pts.length-1].y);
+          ctx.stroke();
+        };
+        stroke(W*0.030, 0.28, 45, color);
+        stroke(W*0.018, 0.55, 22, color);
+        stroke(W*0.007, 1.00,  8, "#fff");
+        stroke(W*0.009, 0.85,  5, color);
+        ctx.globalAlpha = 1; ctx.shadowBlur = 6; ctx.shadowColor = color;
+        ctx.fillStyle = color;
+        ctx.font = `bold ${Math.floor(W*0.026)}px Cinzel, serif`;
+        ctx.fillText(label, lx, ly);
+        ctx.fillStyle = "#fff"; ctx.shadowBlur = 10;
+        ctx.beginPath(); ctx.arc(pts[0].x, pts[0].y, W*0.007, 0, Math.PI*2); ctx.fill();
+        ctx.globalAlpha = 1; ctx.shadowBlur = 0;
+      };
 
-      // ── 운명선 Fate Line ──────────────────────────────────
-      // 손목 중앙에서 중지 방향으로 수직에 가깝게 상승
-      // 실제 위치: 손바닥 중앙 세로선 (x ≈ 48~50%)
-      drawNeonCurve(
-        c => {
-          c.moveTo(W * 0.49, H * 0.87);
-          c.bezierCurveTo(
-            W * 0.49, H * 0.72,   // CP1
-            W * 0.48, H * 0.58,   // CP2
-            W * 0.47, H * 0.44    // 끝: 중지 기저부
-          );
-        },
-        "#A855F7",
-        "Fate",
-        W * 0.51, H * 0.42
-      );
+      // ── 감정선: 상단 수평 스캔 (y 30~50%) ────────────────
+      const hxs = Array.from({length: 14}, (_, i) => W * (0.26 + i * 0.043));
+      const hys = smooth(hxs.map(x => minY(x, H*0.30, H*0.50)), 3);
+      drawNeon(hxs.map((x,i) => ({x, y:hys[i]})), "#FF2EF7", "Heart",
+        hxs[hxs.length-1] + W*0.01, hys[hys.length-1] - H*0.025);
+
+      // ── 두뇌선: 중간 수평 스캔 (y 44~63%) ───────────────
+      const dxs = Array.from({length: 12}, (_, i) => W * (0.27 + i * 0.045));
+      const dys = smooth(dxs.map(x => minY(x, H*0.44, H*0.63)), 3);
+      drawNeon(dxs.map((x,i) => ({x, y:dys[i]})), "#FFD700", "Head",
+        dxs[0] - W*0.11, dys[0] - H*0.015);
+
+      // ── 생명선: 좌측 수직 스캔 (x 15~40%) ───────────────
+      const lys = Array.from({length: 13}, (_, i) => H * (0.46 + i * 0.038));
+      const lxs = smooth(lys.map(y => minX(y, W*0.14, W*0.42)), 3);
+      drawNeon(lys.map((y,i) => ({x:lxs[i], y})), "#00F2FF", "Life",
+        lxs[4] - W*0.11, lys[4]);
+
+      // ── 운명선: 중앙 수직 스캔 (x 38~60%) ───────────────
+      const fys = Array.from({length: 11}, (_, i) => H * (0.42 + i * 0.047));
+      const fxs = smooth(fys.map(y => minX(y, W*0.38, W*0.60)), 3);
+      drawNeon(fys.map((y,i) => ({x:fxs[i], y})), "#A855F7", "Fate",
+        fxs[0] + W*0.02, fys[0] - H*0.02);
     };
     img.src = image;
   }, [image, analysis]);
 
-  const handleRating = (index: number, rating: number) => {
+  const handleRating = async (index: number, rating: number) => {
     if (!analysis) return;
     const newLines = [...analysis.lines];
     newLines[index].rating = rating;
     setAnalysis({ ...analysis, lines: newLines });
     
-    // RL Reward Storage
+    // 1. Local Persistent Save
     RLEngine.saveReward(newLines[index].name, rating);
-    setPersonalizationLevel(RLEngine.getPersonalizationLevel()); // Update maturity
+    setPersonalizationLevel(RLEngine.getPersonalizationLevel()); 
+
+    // 2. Global Sync (AI Collective Growth)
+    setSyncing(true);
+    await RLEngine.syncWithGlobal(newLines[index].name, rating);
+    setGlobalScore(RLEngine.getGlobalIntelligenceScore());
+    setSyncing(false);
+
     console.log(`RL REWARD SAVED: ${newLines[index].name} -> ${rating}`);
   };
 
@@ -265,7 +262,11 @@ export default function ResultPage() {
           <canvas ref={canvasRef} className={styles.resultCanvas} />
           {analyzing && (
             <div className={styles.analyzingOverlay}>
-              <span>운명의 선을 연결하는 중...</span>
+              <div className={styles.spinner} />
+              <span className={styles.analyzingText}>{analyzingMessage}</span>
+              <div className={styles.stageBar}>
+                <div className={styles.stageProgress} style={{ width: `${(analyzingStage / 3) * 100}%` }} />
+              </div>
             </div>
           )}
         </div>
@@ -274,16 +275,34 @@ export default function ResultPage() {
       <div className={styles.resultsList}>
         <div className={styles.headerRow}>
           <div className={styles.titleGroup}>
-            <h2 className="mystical-font glow-text-secondary">AI 분석 리포트</h2>
+            <div className={styles.badgeRow}>
+              <h2 className="mystical-font glow-text-secondary">AI 분석 리포트</h2>
+              {!analyzing && (
+                <div className={styles.collaborativeBadge}>
+                  <span className={styles.badgeIcon}>✨</span>
+                  Joint AI Consensus
+                </div>
+              )}
+            </div>
             <div className={styles.maturityBox}>
-              <span className="text-[10px] opacity-70">AI 학습 성숙도</span>
-              <div className={styles.progressBar}>
-                <div 
-                  className={styles.progressFill} 
-                  style={{ width: `${personalizationLevel}%` }}
-                ></div>
+              <div className={styles.labelRow}>
+                <span className="text-[10px] opacity-70">AI 학습 성숙도</span>
+                <span className={styles.scoreValue}>{personalizationLevel}%</span>
               </div>
-              <span className="text-[10px] font-bold text-primary">{personalizationLevel}%</span>
+              <div className={styles.progressBar}>
+                <div className={styles.progressFill} style={{ width: `${personalizationLevel}%` }} />
+              </div>
+            </div>
+
+            <div className={styles.globalBox}>
+              <div className={styles.labelRow}>
+                <span className="text-[10px] opacity-70">글로벌 지능 풀 (Consensus)</span>
+                {syncing && <span className={styles.syncingBadge}>Syncing...</span>}
+              </div>
+              <div className={styles.scoreGroup}>
+                <span className={styles.globalValue}>{globalScore.toLocaleString()} pts</span>
+                <div className={styles.pulseDot} />
+              </div>
             </div>
           </div>
           <div className={styles.badgeRL}>Autonomous RL</div>
