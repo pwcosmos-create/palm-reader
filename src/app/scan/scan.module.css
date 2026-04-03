@@ -156,46 +156,46 @@
 
 .bottomControls {
   position: absolute;
-  bottom: 0;
+  bottom: 2rem; /* Lifted up significantly */
   width: 100%;
-  padding: 1rem 1.5rem 1.5rem 1.5rem; /* Even tighter for desktop */
-  background: linear-gradient(to top, rgba(5, 5, 16, 0.98) 0%, transparent 100%);
+  padding: 0 1.5rem;
   z-index: 3;
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 0.5rem;
+  gap: 1.2rem;
 }
 
 .bottomControls h2 {
-  font-size: 1rem !important; /* Smaller on desktop */
-  margin-bottom: 0.5rem !important;
-  opacity: 0.8;
+  font-size: 0.95rem !important;
+  margin-bottom: 0 !important;
+  opacity: 0.9;
+  text-shadow: 0 2px 10px rgba(0,0,0,0.5);
 }
 
 .btnGroup {
-  display: flex;
-  flex-direction: column;
-  gap: 1rem;
+  display: grid;
+  grid-template-columns: 1.5fr 1fr; /* Scan is primary, Gallery is secondary */
+  gap: 0.8rem;
   width: 100%;
-  max-width: 320px;
+  max-width: 360px;
 }
 
 .uploadBtn {
   display: flex;
   justify-content: center;
   align-items: center;
-  padding: 1rem 2rem;
-  background: rgba(255, 255, 255, 0.05);
-  border: 1px dashed var(--glass-border);
+  padding: 0.8rem 1rem;
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid var(--glass-border);
   color: white;
-  border-radius: 15px;
+  border-radius: 12px;
   cursor: pointer;
   transition: all 0.3s ease;
-  font-size: 0.9rem;
+  font-size: 0.8rem;
   font-family: inherit;
-  backdrop-filter: blur(5px);
-  width: 100%;
+  backdrop-filter: blur(10px);
+  white-space: nowrap;
 }
 
 .uploadBtn:disabled {
