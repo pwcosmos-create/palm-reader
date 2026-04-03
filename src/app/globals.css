@@ -2,6 +2,7 @@
 @import "tailwindcss";
 
 :root {
+  /* ── Brand colors ── */
   --background: #050510;
   --foreground: #F0F0FF;
   --primary: #00F2FF;
@@ -11,6 +12,28 @@
   --glass-border: rgba(255, 255, 255, 0.1);
   --glow-teal: 0 0 15px rgba(0, 242, 255, 0.4);
   --glow-gold: 0 0 15px rgba(255, 215, 0, 0.4);
+
+  /* ── Fluid typography — clamp(mobile, fluid, desktop) ── */
+  --text-xs:   clamp(0.625rem, 0.9vw,  0.75rem);
+  --text-sm:   clamp(0.75rem,  1.1vw,  0.875rem);
+  --text-base: clamp(0.875rem, 1.3vw,  1rem);
+  --text-lg:   clamp(1rem,     1.6vw,  1.2rem);
+  --text-xl:   clamp(1.15rem,  2vw,    1.4rem);
+  --text-2xl:  clamp(1.35rem,  2.5vw,  1.8rem);
+  --text-3xl:  clamp(1.6rem,   3.2vw,  2.4rem);
+
+  /* ── Fluid spacing ── */
+  --space-xs:  clamp(0.25rem,  0.5vw,  0.5rem);
+  --space-sm:  clamp(0.5rem,   0.8vw,  0.75rem);
+  --space-md:  clamp(0.75rem,  1.2vw,  1.25rem);
+  --space-lg:  clamp(1rem,     1.8vw,  1.75rem);
+  --space-xl:  clamp(1.25rem,  2.5vw,  2.5rem);
+  --space-2xl: clamp(1.75rem,  3.5vw,  3.5rem);
+
+  /* ── Fluid radius ── */
+  --radius-sm: clamp(8px,  1vw, 12px);
+  --radius-md: clamp(12px, 1.5vw, 20px);
+  --radius-lg: clamp(16px, 2vw,  28px);
 }
 
 * {
@@ -70,13 +93,31 @@ body::after {
   background-color: var(--background);
   color: var(--foreground);
   position: relative;
-  box-shadow: 0 20px 80px rgba(0, 0, 0, 0.9);
+  box-shadow: 0 40px 100px rgba(0, 0, 0, 0.8);
   border: 1px solid var(--glass-border);
   border-radius: 24px; 
   overflow: hidden;
   display: grid;
-  grid-template-rows: auto 1fr auto; /* THE FIX: Bottom is ALWAYS visible */
+  grid-template-rows: auto 1fr auto;
   margin: auto;
+  transition: max-width 0.5s cubic-bezier(0.16, 1, 0.3, 1), height 0.5s;
+}
+
+/* 💻 Desktop: Web Dashboard Mode */
+@media (min-width: 1024px) {
+  .app-container {
+    max-width: 1200px;
+    height: 94vh;
+    border-radius: 32px;
+    border-color: rgba(255, 255, 255, 0.15);
+  }
+}
+
+/* 📱 Mobile: Native App Mode */
+@media (max-width: 1024px) {
+  .app-container {
+    max-width: 500px;
+  }
 }
 
 @media (max-width: 480px) {
@@ -85,11 +126,20 @@ body::after {
     max-height: none;
     border-radius: 0;
     box-shadow: none;
+    max-width: 100%;
   }
 }
 
+h1 { font-size: var(--text-3xl); }
+h2 { font-size: var(--text-2xl); }
+h3 { font-size: var(--text-xl); }
+
 h1, h2, h3, .mystical-font {
   font-family: 'Cinzel', serif;
+}
+
+body {
+  font-size: var(--text-base);
 }
 
 .glass-card {
@@ -97,7 +147,7 @@ h1, h2, h3, .mystical-font {
   backdrop-filter: blur(10px);
   -webkit-backdrop-filter: blur(10px);
   border: 1px solid var(--glass-border);
-  border-radius: 16px;
+  border-radius: var(--radius-md);
 }
 
 .glow-text-primary {
@@ -114,8 +164,9 @@ h1, h2, h3, .mystical-font {
   background: linear-gradient(135deg, var(--primary), var(--accent));
   color: white;
   border: none;
-  padding: 12px 24px;
+  padding: var(--space-sm) var(--space-xl);
   border-radius: 30px;
+  font-size: var(--text-sm);
   font-weight: 600;
   cursor: pointer;
   transition: transform 0.2s, box-shadow 0.2s;
@@ -132,8 +183,9 @@ h1, h2, h3, .mystical-font {
   background: transparent;
   color: var(--foreground);
   border: 1px solid var(--glass-border);
-  padding: 12px 24px;
+  padding: var(--space-sm) var(--space-xl);
   border-radius: 30px;
+  font-size: var(--text-sm);
   font-weight: 600;
   cursor: pointer;
   transition: transform 0.2s, border-color 0.2s;

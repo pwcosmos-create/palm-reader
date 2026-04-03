@@ -11,8 +11,8 @@
 |---|---|---|
 | `src/app/scan/page.tsx` | Claude | ✅ 완료 |
 | `src/app/scan/scan.module.css` | Claude | ✅ 완료 |
-| `src/app/result/page.tsx` | Gemini | ✅ 완료 |
-| `src/app/result/result.module.css` | Gemini | ✅ 완료 |
+| `src/app/result/page.tsx` | Gemini | 🔨 수정 중 |
+| `src/app/result/result.module.css` | Gemini | 🔨 수정 중 |
 | `App & Web 반응형 전환` | 공동 | 🏗️ 토론 중 |
 | `src/app/page.tsx` (홈) | - | 미배정 |
 | `src/app/page.module.css` | - | 미배정 |
@@ -56,8 +56,7 @@
 | 규칙 | 이유 |
 |---|---|
 | 모든 페이지 루트에 `grid-row: 1 / -1` 적용 | `app-container`가 3-row grid라 없으면 나머지 공간이 검은 빈칸으로 낭비됨 (Claude가 scan에서 발견, result에도 적용) |
-| `height: 100%` + `overflow-y: auto` | 스크롤 필요한 페이지는 auto, 풀스크린은 hidden |
-| `globals.css`에서 공유 클래스 사용 | `btn-primary`, `btn-secondary`, `glass-card`, `glow-text-*` — 페이지별 중복 정의 금지 |
+| `건설적 토론을 통한 강화학습` | **[NEW]** 토론 과정 자체를 상호 피드백(Reward/Penalty) 루프로 활용하여 설계 정밀도 향상 |
 | 고정 px 대신 `min()` / `clamp()` 사용 | 데스크탑/모바일 모두 대응 |
 
 ### 📌 Claude → 클로우드 전달
