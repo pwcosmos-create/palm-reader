@@ -15,13 +15,15 @@ export default function ScanPage() {
   const router = useRouter();
 
   const analysisSteps = [
-    "장치 수평 확인 중...",
-    "손바닥 영역 감지 완료",
-    "배경 노이즈 제거 및 손 모양 추출 중",
-    "지문 및 주요선 추출 (Confidence: 98%)",
-    "RL 모델 가중치 동기화 중...",
-    "개인화 분석 톤 설정 완료",
-    "운명의 연결 고리 생성 중..."
+    "장치 수평 확인 및 조도 보정 중...",
+    "손바닥 세그멘테이션 완료",
+    "배경 노이즈 제거 및 손 모양 추출 (Confidence: 99.2%)",
+    "뉴럴 네트워크 기반 지문 및 주요선 추출 시작",
+    "주선(생명, 두뇌, 감정) 곡률 정밀 측정 중...",
+    "RL 자율 학습 모델 가중치 동기화 중...",
+    "사용자 과거 피드백 기반 해석 스타일 보정",
+    "개인화된 분석 톤(Mystical/Practical) 설정 완료",
+    "최종 운명 리포트 생성 및 암호화 중..."
   ];
 
   useEffect(() => {
@@ -60,7 +62,7 @@ export default function ScanPage() {
         } else {
           clearInterval(logInterval);
         }
-      }, 500);
+      }, 700); // More deliberate pace for trust
       return () => clearInterval(logInterval);
     } else {
       setScanLogs([]);
@@ -108,7 +110,7 @@ export default function ScanPage() {
         
         setTimeout(() => {
           router.push("/result");
-        }, 4000); // Extended for trust & analysis feel
+        }, 6500); // Optimized for "Labor Illusion" trust (6.5s)
       }
     }
   };
@@ -128,7 +130,7 @@ export default function ScanPage() {
         // Simulate a longer delay for "Trust" analysis
         setTimeout(() => {
           router.push("/result");
-        }, 3500);
+        }, 6500); // Optimized for "Labor Illusion" trust (6.5s)
       };
       reader.onerror = (err) => {
         console.error("FileReader error:", err);
