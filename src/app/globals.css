@@ -65,8 +65,8 @@ body::after {
 .app-container {
   width: 100%;
   max-width: 480px;
-  height: 90vh; /* Don't take full height on desktop to look like a device */
-  max-height: 850px;
+  height: min(90vh, 800px); /* Slightly shorter to fit all UI elements */
+  max-height: 800px;
   background-color: var(--background);
   color: var(--foreground);
   position: relative;
