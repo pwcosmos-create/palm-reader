@@ -16,15 +16,61 @@ export default function ScanPage() {
 
   const analysisSteps = [
     "장치 수평 확인 및 조도 보정 중...",
-    "손바닥 세그멘테이션 완료",
-    "배경 노이즈 제거 및 손 모양 추출 (Confidence: 99.2%)",
-    "뉴럴 네트워크 기반 지문 및 주요선 추출 시작",
-    "주선(생명, 두뇌, 감정) 곡률 정밀 측정 중...",
-    "RL 자율 학습 모델 가중치 동기화 중...",
-    "사용자 과거 피드백 기반 해석 스타일 보정",
-    "개인화된 분석 톤(Mystical/Practical) 설정 완료",
-    "최종 운명 리포트 생성 및 암호화 중..."
+    "손바닥 중심부(Palm Center) 탐색 및 정렬",
+    "스마트 자동 줌(Auto-Zoom) 실행 중...",
+    "배경 노이즈 제거 및 실루엣(Silhouette) 추출",
+    "강화학습 기반 블루프린트(Blueprint) 필터 적용",
+    "뉴럴 네트워크 지문 및 주요선 정밀 매핑",
+    "RL 모듈 가중치 동기화 및 해석 스타일 로드",
+    "최종 운명 데이터 리포트 암호화 생성 완료"
   ];
+
+  // Helper to process image (Auto-zoom & Styling)
+  const processHandImage = (rawData: string) => {
+    return new Promise<string>((resolve) => {
+      const img = new Image();
+      img.onload = () => {
+        const canvas = document.createElement("canvas");
+        const ctx = canvas.getContext("2d");
+        if (!ctx) return resolve(rawData);
+
+        // 1. Auto-Zoom (Crop toward center)
+        const size = Math.min(img.width, img.height);
+        const zoomFactor = 0.65; // Focus on center 65%
+        const sourceSize = size * zoomFactor;
+        const sourceX = (img.width - sourceSize) / 2;
+        const sourceY = (img.height - sourceSize) / 2;
+
+        canvas.width = 600; // Output normalized size
+        canvas.height = 600;
+
+        // 2. Blueprint Stylization
+        ctx.fillStyle = "#020205"; // Deep background
+        ctx.fillRect(0, 0, 600, 600);
+        
+        // Draw centered and zoomed with high contrast
+        ctx.filter = "contrast(1.5) brightness(1.1) grayscale(1)"; 
+        ctx.drawImage(
+          img,
+          sourceX, sourceY, sourceSize, sourceSize,
+          0, 0, 600, 600
+        );
+
+        // Add a "Blueprint Tint" (Cyan glow overlay)
+        ctx.globalCompositeOperation = "screen";
+        ctx.fillStyle = "rgba(0, 242, 255, 0.2)"; 
+        ctx.fillRect(0, 0, 600, 600);
+        
+        // Add subtle edge glow effect
+        ctx.strokeStyle = "rgba(0, 242, 255, 0.5)";
+        ctx.lineWidth = 2;
+        ctx.strokeRect(5, 5, 590, 590);
+
+        resolve(canvas.toDataURL("image/jpeg", 0.9));
+      };
+      img.src = rawData;
+    });
+  };
 
   useEffect(() => {
     async function startCamera() {
@@ -62,7 +108,7 @@ export default function ScanPage() {
         } else {
           clearInterval(logInterval);
         }
-      }, 700); // More deliberate pace for trust
+      }, 800); // More deliberate pace for trust
       return () => clearInterval(logInterval);
     } else {
       setScanLogs([]);
@@ -88,7 +134,7 @@ export default function ScanPage() {
     }
   };
 
-  const capturePhoto = () => {
+  const capturePhoto = async () => {
     if (videoRef.current && canvasRef.current) {
       const video = videoRef.current;
       const canvas = canvasRef.current;
@@ -102,15 +148,16 @@ export default function ScanPage() {
         context.filter = "contrast(1.1) brightness(1.05)";
         context.drawImage(video, 0, 0, canvas.width, canvas.height);
         
-        const imageData = canvas.toDataURL("image/jpeg", 0.85); // High quality for RL
-        setPreviewImage(imageData);
-        setIsScanning(true);
+        const rawData = canvas.toDataURL("image/jpeg", 0.85);
+        const processed = await processHandImage(rawData);
         
-        sessionStorage.setItem("capturedPalm", imageData);
+        setPreviewImage(processed);
+        setIsScanning(true);
+        sessionStorage.setItem("capturedPalm", processed);
         
         setTimeout(() => {
           router.push("/result");
-        }, 6500); // Optimized for "Labor Illusion" trust (6.5s)
+        }, 6500); 
       }
     }
   };
@@ -122,12 +169,14 @@ export default function ScanPage() {
     if (file) {
       console.log("File selected:", file.name);
       const reader = new FileReader();
-      reader.onload = (event) => {
-        const imageData = event.target?.result as string;
-        setPreviewImage(imageData);
-        sessionStorage.setItem("capturedPalm", imageData);
+      reader.onload = async (event) => {
+        const rawData = event.target?.result as string;
+        const processed = await processHandImage(rawData);
+        
+        setPreviewImage(processed);
+        sessionStorage.setItem("capturedPalm", processed);
         setIsScanning(true);
-        // Simulate a longer delay for "Trust" analysis
+        
         setTimeout(() => {
           router.push("/result");
         }, 6500); // Optimized for "Labor Illusion" trust (6.5s)
