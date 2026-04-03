@@ -19,7 +19,10 @@
 }
 
 html {
-  background-color: #020205; /* Deep backdrop for desktop */
+  background-color: #020205;
+  background-image: 
+    radial-gradient(circle at 2px 2px, rgba(255, 255, 255, 0.05) 1px, transparent 0);
+  background-size: 40px 40px; /* Subtle grid for desktop context */
 }
 
 body {
@@ -28,20 +31,59 @@ body {
   min-height: 100vh;
   display: flex;
   justify-content: center;
-  background: radial-gradient(circle at 50% -20%, #1a1b3a 0%, #020205 70%);
+  align-items: center; /* Center vertically on desktop */
+  background: radial-gradient(circle at 50% 50%, rgba(26, 27, 58, 0.4) 0%, #020205 100%);
+}
+
+/* Desktop labels to fill empty space */
+body::before {
+  content: "AI PALM READER";
+  position: fixed;
+  left: 5%;
+  top: 50%;
+  transform: translateY(-50%) rotate(-90deg);
+  font-family: 'Cinzel', serif;
+  font-size: 2rem;
+  color: rgba(255, 255, 255, 0.03);
+  letter-spacing: 15px;
+  pointer-events: none;
+}
+
+body::after {
+  content: "REINFORCEMENT LEARNING v3.0";
+  position: fixed;
+  right: 5%;
+  top: 50%;
+  transform: translateY(-50%) rotate(90deg);
+  font-family: 'Inter', sans-serif;
+  font-size: 1rem;
+  color: rgba(0, 242, 255, 0.05);
+  letter-spacing: 5px;
+  pointer-events: none;
 }
 
 .app-container {
   width: 100%;
-  max-width: 480px; /* Standard mobile width */
-  min-height: 100vh;
+  max-width: 480px;
+  height: 90vh; /* Don't take full height on desktop to look like a device */
+  max-height: 850px;
   background-color: var(--background);
   color: var(--foreground);
   position: relative;
-  box-shadow: 0 0 100px rgba(0, 0, 0, 0.5);
-  overflow-x: hidden;
+  box-shadow: 0 0 0 12px #151520, 0 0 50px rgba(0, 0, 0, 0.8); /* Phone border look */
+  border-radius: 40px; /* Rounded device corners */
+  overflow: hidden;
   display: flex;
   flex-direction: column;
+}
+
+@media (max-width: 480px) {
+  .app-container {
+    height: 100vh;
+    max-height: none;
+    border-radius: 0;
+    box-shadow: none;
+  }
 }
 
 h1, h2, h3, .mystical-font {
