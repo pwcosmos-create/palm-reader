@@ -127,6 +127,24 @@ h1, h2, h3, .mystical-font {
   box-shadow: 0 5px 15px rgba(0, 242, 255, 0.3);
 }
 
+.btn-secondary {
+  background: transparent;
+  color: var(--foreground);
+  border: 1px solid var(--glass-border);
+  padding: 12px 24px;
+  border-radius: 30px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: transform 0.2s, border-color 0.2s;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+.btn-secondary:hover {
+  border-color: var(--primary);
+  color: var(--primary);
+}
+
 .pulsing-line {
   height: 2px;
   width: 100%;

@@ -1,8 +1,10 @@
 .container {
-  min-height: 100vh;
+  grid-row: 1 / -1;   /* span all rows of app-container grid — same fix as scan page */
+  height: 100%;
   background: var(--background);
   display: flex;
   flex-direction: column;
+  overflow-y: auto;
 }
 
 .imageHeader {
