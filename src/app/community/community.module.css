@@ -1,0 +1,101 @@
+.container {
+  min-height: 100vh;
+  background: var(--background);
+  padding-bottom: 4rem;
+}
+
+.header {
+  padding: 2rem;
+  text-align: center;
+}
+
+.feed {
+  padding: 1.5rem;
+  display: flex;
+  flex-direction: column;
+}
+
+.cardImage {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 4/3;
+  overflow: hidden;
+}
+
+.palmImg {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  opacity: 0.6;
+  transition: transform 0.3s;
+}
+
+.cardImage:hover .palmImg {
+  transform: scale(1.05);
+}
+
+.overlayText {
+  position: absolute;
+  top: 1rem;
+  right: 1rem;
+  background: rgba(0, 0, 0, 0.6);
+  padding: 0.3rem 0.8rem;
+  border-radius: 20px;
+  font-size: 0.7rem;
+  backdrop-filter: blur(5px);
+}
+
+.cardFooter {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 1rem;
+  padding-top: 1rem;
+  border-top: 1px solid var(--glass-border);
+}
+
+.likeBtn, .shareBtn {
+  background: none;
+  border: none;
+  color: var(--primary);
+  font-size: 0.8rem;
+  cursor: pointer;
+  opacity: 0.7;
+}
+
+.likeBtn:hover { opacity: 1; text-shadow: var(--glow-teal); }
+
+.bottomNav {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  height: 4rem;
+  background: rgba(5, 5, 16, 0.95);
+  backdrop-filter: blur(10px);
+  border-top: 1px solid var(--glass-border);
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  z-index: 100;
+}
+
+.navItem {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  font-size: 0.8rem;
+  color: var(--foreground);
+  opacity: 0.5;
+  text-decoration: none;
+  transition: 0.2s;
+}
+
+.navItem.active {
+  opacity: 1;
+  color: var(--primary);
+  text-shadow: var(--glow-teal);
+}
+
+@media (max-width: 480px) {
+  .header { padding: 1.5rem; }
+  .feed { padding: 1rem; }
+}
