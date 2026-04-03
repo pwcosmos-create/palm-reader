@@ -31,7 +31,7 @@ export default function ResultPage() {
     console.log("RL Calibrated Prompt:", rlPrompt);
 
     // Simulate AI Analysis process
-    setTimeout(() => {
+    const timer = setTimeout(() => {
       setResults([
         { name: "생명선 (Life)", reading: "강한 활력과 에너지가 느껴집니다. 장수와 건강한 신체 구조를 타고나셨네요.", rating: 0 },
         { name: "두뇌선 (Head)", reading: "매우 창의적이고 예술적인 사고를 하시는군요. 상상력이 풍부합니다.", rating: 0 },
@@ -39,12 +39,13 @@ export default function ResultPage() {
         { name: "운명선 (Fate)", reading: "스스로 개척해나가는 운명입니다. 노력에 따른 성취가 뚜렷할 것입니다.", rating: 0 }
       ]);
       setAnalyzing(false);
-      drawOverlays();
-    }, 3000);
-  }, []);
+    }, 2500);
 
-  const drawOverlays = () => {
-    if (canvasRef.current && image) {
+    return () => clearTimeout(timer);
+  }, [router]);
+
+  useEffect(() => {
+    if (!analyzing && image && canvasRef.current) {
       const canvas = canvasRef.current;
       const ctx = canvas.getContext("2d");
       const img = new Image();
@@ -76,7 +77,7 @@ export default function ResultPage() {
       };
       img.src = image;
     }
-  };
+  }, [analyzing, image]);
 
   const handleRating = (index: number, rating: number) => {
     const newResults = [...results];
