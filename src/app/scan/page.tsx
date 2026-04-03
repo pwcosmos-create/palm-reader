@@ -83,20 +83,32 @@ export default function ScanPage() {
     }
   };
 
+  const fileInputRef = useRef<HTMLInputElement>(null);
+
   const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
+      console.log("File selected:", file.name);
       const reader = new FileReader();
       reader.onload = (event) => {
         const imageData = event.target?.result as string;
         sessionStorage.setItem("capturedPalm", imageData);
         setIsScanning(true);
+        // Simulate a slight delay for mystical effect
         setTimeout(() => {
           router.push("/result");
-        }, 2000);
+        }, 1500);
+      };
+      reader.onerror = (err) => {
+        console.error("FileReader error:", err);
+        alert("사진을 읽어오는데 실패했습니다.");
       };
       reader.readAsDataURL(file);
     }
+  };
+
+  const triggerUpload = () => {
+    fileInputRef.current?.click();
   };
 
   return (
@@ -127,7 +139,7 @@ export default function ScanPage() {
         </div>
 
         <div className={styles.bottomControls}>
-          <h2 className="mystical-font text-center mb-4">손바닥을 가이드에 맞춰 촬영하거나 사진을 업로드하세요</h2>
+          <h2 className="mystical-font text-center mb-4">운명을 스캔하거나 사진을 불러오세요</h2>
           
           <div className={styles.btnGroup}>
             <button 
@@ -138,15 +150,20 @@ export default function ScanPage() {
               {isScanning ? "AI 분석 중..." : "운명 스캔하기"}
             </button>
 
-            <label className={styles.uploadBtn}>
-              <input 
-                type="file" 
-                accept="image/*" 
-                onChange={handleFileUpload} 
-                style={{ display: 'none' }} 
-              />
-              🖼️ 사진 불러오기
-            </label>
+            <button 
+              onClick={triggerUpload} 
+              className={styles.uploadBtn}
+              disabled={isScanning}
+            >
+              🖼️ 갤러리에서 사진 선택
+            </button>
+            <input 
+              ref={fileInputRef}
+              type="file" 
+              accept="image/*" 
+              onChange={handleFileUpload} 
+              style={{ display: 'none' }} 
+            />
           </div>
         </div>
       </div>

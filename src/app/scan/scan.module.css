@@ -132,7 +132,14 @@
   cursor: pointer;
   transition: all 0.3s ease;
   font-size: 0.9rem;
+  font-family: inherit;
   backdrop-filter: blur(5px);
+  width: 100%;
+}
+
+.uploadBtn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
 }
 
 .uploadBtn:hover {
