@@ -11,7 +11,18 @@ export default function ScanPage() {
   const [isScanning, setIsScanning] = useState(false);
   const [previewImage, setPreviewImage] = useState<string | null>(null);
   const [torch, setTorch] = useState(false);
+  const [scanLogs, setScanLogs] = useState<string[]>([]);
   const router = useRouter();
+
+  const analysisSteps = [
+    "장치 수평 확인 중...",
+    "손바닥 영역 감지 완료",
+    "지문 및 주요선 추출 시작",
+    "생명선 곡률 분석 중 (Reward: 0.92)",
+    "RL 모델 가중치 동기화 중...",
+    "개인화 분석 톤 설정 완료",
+    "운명의 연결 고리 생성 중..."
+  ];
 
   useEffect(() => {
     async function startCamera() {
@@ -38,6 +49,23 @@ export default function ScanPage() {
       stream?.getTracks().forEach(track => track.stop());
     };
   }, []);
+
+  useEffect(() => {
+    if (isScanning) {
+      let step = 0;
+      const logInterval = setInterval(() => {
+        if (step < analysisSteps.length) {
+          setScanLogs(prev => [...prev.slice(-2), analysisSteps[step]]);
+          step++;
+        } else {
+          clearInterval(logInterval);
+        }
+      }, 500);
+      return () => clearInterval(logInterval);
+    } else {
+      setScanLogs([]);
+    }
+  }, [isScanning]);
 
   const toggleTorch = async () => {
     if (!stream) return;
@@ -80,7 +108,7 @@ export default function ScanPage() {
         
         setTimeout(() => {
           router.push("/result");
-        }, 3000); // Mystical scanning delay
+        }, 4000); // Extended for trust & analysis feel
       }
     }
   };
@@ -97,10 +125,10 @@ export default function ScanPage() {
         setPreviewImage(imageData);
         sessionStorage.setItem("capturedPalm", imageData);
         setIsScanning(true);
-        // Simulate a slight delay for mystical effect
+        // Simulate a longer delay for "Trust" analysis
         setTimeout(() => {
           router.push("/result");
-        }, 2000);
+        }, 3500);
       };
       reader.onerror = (err) => {
         console.error("FileReader error:", err);
@@ -125,7 +153,27 @@ export default function ScanPage() {
         />
         
         {isScanning && previewImage && (
-          <img src={previewImage} alt="Scan Preview" className={styles.preview} />
+          <>
+            <img src={previewImage} alt="Scan Preview" className={styles.preview} />
+            <div className={styles.dataPointsOverlay}>
+              {[...Array(6)].map((_, i) => (
+                <div 
+                  key={i} 
+                  className={styles.dataPoint} 
+                  style={{ 
+                    top: `${30 + Math.random() * 40}%`, 
+                    left: `${25 + Math.random() * 50}%`,
+                    animationDelay: `${i * 0.4}s`
+                  }} 
+                />
+              ))}
+            </div>
+            <div className={styles.logOverlay}>
+              {scanLogs.map((log, i) => (
+                <div key={i} className={styles.logLine}>{log}</div>
+              ))}
+            </div>
+          </>
         )}
         
         <div className={styles.overlay}>
@@ -149,7 +197,7 @@ export default function ScanPage() {
 
         <div className={styles.bottomControls}>
           <h2 className="mystical-font text-center mb-4">
-            {isScanning ? "AI가 운명의 선을 읽는 중..." : "운명을 스캔하거나 사진을 불러오세요"}
+            {isScanning ? "AI 운명 엔진 정밀 분석 중..." : "운명을 스캔하거나 사진을 불러오세요"}
           </h2>
           
           <div className={styles.btnGroup}>
@@ -172,7 +220,7 @@ export default function ScanPage() {
             )}
             
             {isScanning && (
-              <div className={styles.scanningBadge}>RL 분석 엔진 가동 중</div>
+              <div className={styles.scanningBadge}>RL Self-Learning Active</div>
             )}
 
             <input 
