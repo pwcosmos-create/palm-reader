@@ -60,16 +60,43 @@
   margin-bottom: 2rem;
 }
 
+.titleGroup {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.maturityBox {
+  display: flex;
+  align-items: center;
+  gap: 0.8rem;
+}
+
+.progressBar {
+  width: 100px;
+  height: 4px;
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 2px;
+  overflow: hidden;
+}
+
+.progressFill {
+  height: 100%;
+  background: linear-gradient(to right, var(--primary), var(--secondary));
+  box-shadow: 0 0 10px var(--primary);
+  transition: width 1s ease-out;
+}
+
 .badgeRL {
-  background: var(--primary);
-  color: #000;
+  background: rgba(0, 242, 255, 0.1);
+  color: var(--primary);
+  border: 1px solid var(--primary);
   font-size: 0.65rem;
   padding: 0.3rem 0.8rem;
   border-radius: 20px;
   font-weight: bold;
   text-transform: uppercase;
   letter-spacing: 1px;
-  box-shadow: 0 0 10px var(--primary);
 }
 
 .ratingBox {

@@ -15,6 +15,7 @@ export default function ResultPage() {
   const [image, setImage] = useState<string | null>(null);
   const [analyzing, setAnalyzing] = useState(true);
   const [results, setResults] = useState<LineAnalysis[]>([]);
+  const [personalizationLevel, setPersonalizationLevel] = useState(0);
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const router = useRouter();
 
@@ -26,9 +27,8 @@ export default function ResultPage() {
     }
     setImage(data);
 
-    // Apply RL-calibrated prompt concept
-    const rlPrompt = RLEngine.getCalibratedPrompt();
-    console.log("RL Calibrated Prompt:", rlPrompt);
+    // Get current RL maturity
+    setPersonalizationLevel(RLEngine.getPersonalizationLevel());
 
     // Simulate AI Analysis process
     const timer = setTimeout(() => {
@@ -86,6 +86,7 @@ export default function ResultPage() {
     
     // RL Reward Storage
     RLEngine.saveReward(newResults[index].name, rating);
+    setPersonalizationLevel(RLEngine.getPersonalizationLevel()); // Update maturity
     console.log(`RL REWARD SAVED: ${newResults[index].name} -> ${rating}`);
   };
 
@@ -98,8 +99,20 @@ export default function ResultPage() {
 
       <div className={styles.resultsList}>
         <div className={styles.headerRow}>
-          <h2 className="mystical-font glow-text-secondary">AI 분석 리포트</h2>
-          <div className={styles.badgeRL}>RL 가중치 적용됨</div>
+          <div className={styles.titleGroup}>
+            <h2 className="mystical-font glow-text-secondary">AI 분석 리포트</h2>
+            <div className={styles.maturityBox}>
+              <span className="text-[10px] opacity-70">AI 학습 성숙도</span>
+              <div className={styles.progressBar}>
+                <div 
+                  className={styles.progressFill} 
+                  style={{ width: `${personalizationLevel}%` }}
+                ></div>
+              </div>
+              <span className="text-[10px] font-bold text-primary">{personalizationLevel}%</span>
+            </div>
+          </div>
+          <div className={styles.badgeRL}>Autonomous RL</div>
         </div>
         
         {results.map((res, i) => (
