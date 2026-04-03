@@ -1,5 +1,7 @@
 /* ── Layout ─────────────────────────────────────────────── */
 .container {
+  /* span all 3 rows of app-container grid */
+  grid-row: 1 / -1;
   height: 100%;
   display: flex;
   flex-direction: column;
@@ -95,13 +97,14 @@
   justify-content: center;
   z-index: 10;
   pointer-events: none;
-  padding-top: 3rem;
+  padding: 4rem 1rem 1rem;
 }
 
 .handGuide {
   position: relative;
-  width: 220px;
-  height: 290px;
+  width: min(68%, 340px);
+  aspect-ratio: 220 / 290;
+  height: auto;
 }
 
 .guideSvg {
