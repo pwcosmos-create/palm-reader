@@ -27,13 +27,27 @@
   width: 100%;
   height: 100%;
   object-fit: cover;
-  animation: pulse-preview 2s infinite ease-in-out;
+  filter: contrast(1.3) brightness(0.9) saturate(0.5) hue-rotate(180deg) grayscale(0.5); /* Tech X-ray look */
+  animation: scan-flicker 0.2s infinite alternate;
 }
 
-@keyframes pulse-preview {
-  0% { filter: brightness(1) contrast(1); }
-  50% { filter: brightness(1.2) contrast(1.1); }
-  100% { filter: brightness(1) contrast(1); }
+@keyframes scan-flicker {
+  from { opacity: 0.92; }
+  to { opacity: 1; }
+}
+
+.handHighlightMask {
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(circle at center, transparent 30%, rgba(5, 5, 16, 0.85) 75%);
+  z-index: 5;
+  pointer-events: none;
+  animation: focus-zoom 4s ease-out forwards;
+}
+
+@keyframes focus-zoom {
+  from { transform: scale(1.15); }
+  to { transform: scale(1); }
 }
 
 .overlay {

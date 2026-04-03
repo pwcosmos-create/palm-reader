@@ -17,8 +17,8 @@ export default function ScanPage() {
   const analysisSteps = [
     "장치 수평 확인 중...",
     "손바닥 영역 감지 완료",
-    "지문 및 주요선 추출 시작",
-    "생명선 곡률 분석 중 (Reward: 0.92)",
+    "배경 노이즈 제거 및 손 모양 추출 중",
+    "지문 및 주요선 추출 (Confidence: 98%)",
     "RL 모델 가중치 동기화 중...",
     "개인화 분석 톤 설정 완료",
     "운명의 연결 고리 생성 중..."
@@ -155,6 +155,7 @@ export default function ScanPage() {
         {isScanning && previewImage && (
           <>
             <img src={previewImage} alt="Scan Preview" className={styles.preview} />
+            <div className={styles.handHighlightMask}></div>
             <div className={styles.dataPointsOverlay}>
               {[...Array(6)].map((_, i) => (
                 <div 
