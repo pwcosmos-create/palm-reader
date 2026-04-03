@@ -198,14 +198,72 @@
   gap: 0.5rem;
 }
 
-.maturityBox {
+.maturityBox, .globalBox {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  background: rgba(255, 255, 255, 0.03);
+  padding: 10px 14px;
+  border-radius: 12px;
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  min-width: 170px;
+}
+
+.labelRow {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.scoreValue, .globalValue {
+  font-family: 'Cinzel', serif;
+  font-weight: bold;
+  font-size: 0.8rem;
+  color: var(--primary);
+  text-shadow: 0 0 8px rgba(0, 242, 255, 0.4);
+}
+
+.globalValue {
+  color: var(--secondary);
+  text-shadow: 0 0 8px rgba(112, 0, 255, 0.4);
+}
+
+.scoreGroup {
   display: flex;
   align-items: center;
-  gap: 0.8rem;
+  gap: 8px;
+}
+
+.pulseDot {
+  width: 6px;
+  height: 6px;
+  background: var(--secondary);
+  border-radius: 50%;
+  box-shadow: 0 0 8px var(--secondary);
+  animation: pulse-dot 1.5s infinite ease-in-out;
+}
+
+@keyframes pulse-dot {
+  0%, 100% { transform: scale(1); opacity: 0.5; }
+  50% { transform: scale(1.4); opacity: 1; }
+}
+
+.syncingBadge {
+  font-size: 9px;
+  background: rgba(255, 255, 255, 0.1);
+  padding: 2px 6px;
+  border-radius: 4px;
+  color: var(--primary);
+  animation: blink 1s infinite alternate;
+}
+
+@keyframes blink {
+  from { opacity: 0.4; }
+  to { opacity: 1; }
 }
 
 .progressBar {
-  width: 100px;
+  width: 100%;
   height: 4px;
   background: rgba(255, 255, 255, 0.1);
   border-radius: 2px;
@@ -214,9 +272,8 @@
 
 .progressFill {
   height: 100%;
-  background: linear-gradient(to right, var(--primary), var(--secondary));
-  box-shadow: 0 0 10px var(--primary);
-  transition: width 1s ease-out;
+  background: linear-gradient(90deg, var(--primary), var(--secondary));
+  transition: width 1s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 .badgeRL {
@@ -229,6 +286,38 @@
   font-weight: bold;
   text-transform: uppercase;
   letter-spacing: 1px;
+}
+
+.collaborativeBadge, .archiveBadge {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: rgba(112, 0, 255, 0.1);
+  border: 1px solid rgba(112, 0, 255, 0.3);
+  padding: 6px 14px;
+  border-radius: 30px;
+  font-size: 0.75rem;
+  font-weight: bold;
+  color: var(--secondary);
+  text-shadow: 0 0 10px rgba(112, 0, 255, 0.1);
+  backdrop-filter: blur(5px);
+  animation: fadeIn 0.8s ease forwards;
+}
+
+.archiveBadge {
+  background: rgba(255, 215, 0, 0.1);
+  border-color: rgba(255, 215, 0, 0.3);
+  color: #ffd700;
+  text-shadow: 0 0 10px rgba(255, 215, 0, 0.2);
+}
+
+.badgeIcon {
+  font-size: 0.9rem;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
 }
 
 /* Summary / Advice card variants */
@@ -364,6 +453,111 @@
 
 :global(.fade-in-up) {
   animation: fadeInUp 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+/* ── Line Detection RL confidence box ───────────────────────────────── */
+.detectionBox {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  background: rgba(255, 255, 255, 0.03);
+  padding: 10px 14px;
+  border-radius: 12px;
+  border: 1px solid rgba(74, 222, 128, 0.1);
+  min-width: 170px;
+}
+
+.detectionValue {
+  font-family: 'Cinzel', serif;
+  font-weight: bold;
+  font-size: 0.8rem;
+  color: #4ade80;
+  text-shadow: 0 0 8px rgba(74, 222, 128, 0.4);
+}
+
+.detectionFill {
+  height: 100%;
+  background: linear-gradient(90deg, #4ade80, #00F2FF);
+  transition: width 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* ── Per-line position RL adjustment UI ─────────────────────────────── */
+.lineAdjust {
+  display: flex;
+  flex-direction: column;
+  gap: 0.45rem;
+  padding: 0.7rem 0.9rem;
+  border-radius: 10px;
+  background: rgba(255, 255, 255, 0.025);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  margin-bottom: 0.75rem;
+}
+
+.adjustHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.adjustLabel {
+  font-size: 0.6rem;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: rgba(255, 255, 255, 0.4);
+}
+
+.confPill {
+  font-size: 0.6rem;
+  font-weight: 700;
+  padding: 2px 8px;
+  border-radius: 10px;
+  border: 1px solid;
+  letter-spacing: 0.04em;
+}
+
+.adjustBtns {
+  display: flex;
+  gap: 0.45rem;
+  align-items: center;
+}
+
+.adjustBtn {
+  flex: 1;
+  padding: 5px 0;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid;
+  border-radius: 7px;
+  color: rgba(255, 255, 255, 0.65);
+  font-size: 0.72rem;
+  cursor: pointer;
+  transition: background 0.15s, transform 0.1s;
+  font-family: inherit;
+}
+
+.adjustBtn:hover  { background: rgba(255,255,255,0.1); color: #fff; transform: scale(1.04); }
+.adjustBtn:active { transform: scale(0.94); }
+
+.adjustConfirm {
+  flex: 1.4;
+  padding: 5px 0;
+  background: transparent;
+  border: 1px solid;
+  border-radius: 7px;
+  font-size: 0.72rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.15s, transform 0.1s;
+  font-family: inherit;
+}
+
+.adjustConfirm:hover  { background: rgba(255,255,255,0.06); transform: scale(1.04); }
+.adjustConfirm:active { transform: scale(0.94); }
+
+.rlFeedback {
+  font-size: 0.62rem;
+  font-family: monospace;
+  letter-spacing: 0.04em;
+  animation: fadeInUp 0.3s ease;
 }
 
 @media (max-width: 480px) {
