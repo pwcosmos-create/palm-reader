@@ -64,17 +64,18 @@ body::after {
 
 .app-container {
   width: 100%;
-  max-width: 480px;
-  height: min(90vh, 800px); /* Slightly shorter to fit all UI elements */
-  max-height: 800px;
+  max-width: 500px;
+  height: 98vh; 
   background-color: var(--background);
   color: var(--foreground);
   position: relative;
-  box-shadow: 0 0 0 12px #151520, 0 0 50px rgba(0, 0, 0, 0.8); /* Phone border look */
-  border-radius: 40px; /* Rounded device corners */
+  box-shadow: 0 20px 80px rgba(0, 0, 0, 0.9);
+  border: 1px solid var(--glass-border);
+  border-radius: 24px; 
   overflow: hidden;
-  display: flex;
-  flex-direction: column;
+  display: grid;
+  grid-template-rows: auto 1fr auto; /* THE FIX: Bottom is ALWAYS visible */
+  margin: auto;
 }
 
 @media (max-width: 480px) {

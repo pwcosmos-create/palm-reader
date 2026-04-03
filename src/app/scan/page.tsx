@@ -247,44 +247,46 @@ export default function ScanPage() {
           )}
         </div>
 
-        <div className={styles.bottomControls}>
-          <h2 className="mystical-font text-center mb-4">
-            {isScanning ? "AI 운명 엔진 정밀 분석 중..." : "운명을 스캔하거나 사진을 불러오세요"}
-          </h2>
+      </div>
+
+      <div className={styles.bottomControls}>
+        <h2 className="mystical-font text-center mb-4">
+          {isScanning ? "AI 운명 엔진 정밀 분석 중..." : "운명을 스캔하거나 사진을 불러오세요"}
+        </h2>
+        
+        <div className={styles.btnGroup}>
+          {!isScanning && (
+            <>
+              <button 
+                onClick={capturePhoto} 
+                className="btn-primary"
+              >
+                운명 스캔하기
+              </button>
+
+              <button 
+                onClick={triggerUpload} 
+                className={styles.uploadBtn}
+              >
+                🖼️ 갤러리에서 사진 선택
+              </button>
+            </>
+          )}
           
-          <div className={styles.btnGroup}>
-            {!isScanning && (
-              <>
-                <button 
-                  onClick={capturePhoto} 
-                  className="btn-primary"
-                >
-                  운명 스캔하기
-                </button>
+          {isScanning && (
+            <div className={styles.scanningBadge}>RL Self-Learning Active</div>
+          )}
 
-                <button 
-                  onClick={triggerUpload} 
-                  className={styles.uploadBtn}
-                >
-                  🖼️ 갤러리에서 사진 선택
-                </button>
-              </>
-            )}
-            
-            {isScanning && (
-              <div className={styles.scanningBadge}>RL Self-Learning Active</div>
-            )}
-
-            <input 
-              ref={fileInputRef}
-              type="file" 
-              accept="image/*" 
-              onChange={handleFileUpload} 
-              style={{ display: 'none' }} 
-            />
-          </div>
+          <input 
+            ref={fileInputRef}
+            type="file" 
+            accept="image/*" 
+            onChange={handleFileUpload} 
+            style={{ display: 'none' }} 
+          />
         </div>
       </div>
+
       <canvas ref={canvasRef} style={{ display: 'none' }} />
     </main>
   );
