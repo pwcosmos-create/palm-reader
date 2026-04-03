@@ -1,22 +1,19 @@
 /* ── Layout ─────────────────────────────────────────────── */
 .container {
-  /* span all 3 rows of app-container grid */
   grid-row: 1 / -1;
   height: 100%;
+  position: relative;
+  background: #000;
+  overflow: hidden;
   display: flex;
   flex-direction: column;
-  background: #000;
-  position: relative;
-  overflow: hidden;
 }
 
-/* ── Camera area ─────────────────────────────────────────── */
+/* ── Camera fills everything ─────────────────────────────── */
 .cameraArea {
-  flex: 1;
-  position: relative;
-  overflow: hidden;
+  position: absolute;
+  inset: 0;
   background: #000;
-  min-height: 0;
 }
 
 .video {
@@ -33,8 +30,7 @@
 .preview {
   width: 100%;
   height: 100%;
-  object-fit: contain;
-  background: #020205;
+  object-fit: cover;
   display: block;
 }
 
@@ -49,14 +45,14 @@
   align-items: center;
   justify-content: space-between;
   z-index: 20;
-  background: linear-gradient(to bottom, rgba(0,0,0,0.55) 0%, transparent 100%);
+  background: linear-gradient(to bottom, rgba(0,0,0,0.6) 0%, transparent 100%);
 }
 
 .topTitle {
   font-family: 'Cinzel', serif;
-  font-size: 0.9rem;
-  color: rgba(255,255,255,0.85);
-  letter-spacing: 3px;
+  font-size: 0.85rem;
+  color: rgba(255,255,255,0.9);
+  letter-spacing: 4px;
   text-transform: uppercase;
 }
 
@@ -64,9 +60,10 @@
   width: 44px;
   height: 44px;
   border-radius: 50%;
-  background: rgba(255,255,255,0.08);
-  border: 1px solid rgba(255,255,255,0.15);
+  background: rgba(0,0,0,0.35);
+  border: 1px solid rgba(255,255,255,0.18);
   backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
   color: white;
   display: flex;
   align-items: center;
@@ -97,12 +94,12 @@
   justify-content: center;
   z-index: 10;
   pointer-events: none;
-  padding: 4rem 1rem 1rem;
+  padding: 5rem 1rem 8rem;   /* top: clear topBar, bottom: clear bottomOverlay */
 }
 
 .handGuide {
   position: relative;
-  width: min(68%, 340px);
+  width: min(68%, 320px);
   aspect-ratio: 220 / 290;
   height: auto;
 }
@@ -119,58 +116,162 @@
 }
 
 @keyframes guide-pulse {
-  0%, 100% { opacity: 0.55; stroke: var(--primary); }
-  50% { opacity: 1; stroke: #ffffff; filter: drop-shadow(0 0 10px rgba(0,242,255,0.9)); }
+  0%, 100% { opacity: 0.5; stroke: var(--primary); }
+  50%       { opacity: 1;   stroke: #ffffff; filter: drop-shadow(0 0 12px rgba(0,242,255,1)); }
 }
 
 /* Corner accents */
 .cornerTL, .cornerTR, .cornerBL, .cornerBR {
   position: absolute;
-  width: 20px;
-  height: 20px;
+  width: 22px;
+  height: 22px;
   border: 2px solid var(--primary);
   box-shadow: 0 0 8px rgba(0,242,255,0.5);
 }
-.cornerTL { top: -6px; left: -6px; border-right: none; border-bottom: none; border-radius: 6px 0 0 0; }
-.cornerTR { top: -6px; right: -6px; border-left: none; border-bottom: none; border-radius: 0 6px 0 0; }
-.cornerBL { bottom: -6px; left: -6px; border-right: none; border-top: none; border-radius: 0 0 0 6px; }
-.cornerBR { bottom: -6px; right: -6px; border-left: none; border-top: none; border-radius: 0 0 6px 0; }
+.cornerTL { top: -6px;    left: -6px;  border-right: none; border-bottom: none; border-radius: 6px 0 0 0; }
+.cornerTR { top: -6px;    right: -6px; border-left:  none; border-bottom: none; border-radius: 0 6px 0 0; }
+.cornerBL { bottom: -6px; left: -6px;  border-right: none; border-top:    none; border-radius: 0 0 0 6px; }
+.cornerBR { bottom: -6px; right: -6px; border-left:  none; border-top:    none; border-radius: 0 0 6px 0; }
 
 .guideHint {
-  margin-top: 1.4rem;
+  margin-top: 1.6rem;
   font-size: 0.78rem;
-  color: rgba(255,255,255,0.55);
+  color: rgba(255,255,255,0.6);
   letter-spacing: 0.5px;
   text-align: center;
+  text-shadow: 0 1px 6px rgba(0,0,0,0.8);
+}
+
+/* ── Bottom overlay (floats over camera) ─────────────────── */
+.bottomOverlay {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  z-index: 20;
+  padding: 1.2rem 1.5rem 2rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1rem;
+  background: linear-gradient(to top, rgba(0,0,0,0.75) 0%, rgba(0,0,0,0.3) 60%, transparent 100%);
+  backdrop-filter: blur(0px);
+}
+
+.hint {
+  font-size: 0.75rem;
+  color: rgba(255,255,255,0.55);
+  text-align: center;
+  letter-spacing: 0.3px;
+  text-shadow: 0 1px 4px rgba(0,0,0,0.9);
+}
+
+/* Action row: gallery | shutter | spacer */
+.actionRow {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 2.5rem;
+  width: 100%;
+}
+
+.sideBtn {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 5px;
+  background: rgba(0,0,0,0.35);
+  border: 1px solid rgba(255,255,255,0.18);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  color: rgba(255,255,255,0.8);
+  padding: 0.7rem 1rem;
+  border-radius: 14px;
+  cursor: pointer;
+  transition: background 0.2s, color 0.2s;
+  font-size: 0.65rem;
+  letter-spacing: 0.5px;
+  font-family: inherit;
+  width: 68px;
+}
+
+.sideBtn:hover {
+  background: rgba(255,255,255,0.15);
+  color: white;
+}
+
+.sideBtnPlaceholder {
+  width: 68px;
+}
+
+/* Shutter */
+.shutterBtn {
+  width: 80px;
+  height: 80px;
+  border-radius: 50%;
+  background: transparent;
+  border: 3px solid rgba(255,255,255,0.4);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: border-color 0.2s, box-shadow 0.2s;
+  flex-shrink: 0;
+}
+
+.shutterBtn:hover:not(:disabled) {
+  border-color: var(--primary);
+  box-shadow: 0 0 24px rgba(0,242,255,0.4);
+}
+
+.shutterBtn:disabled {
+  opacity: 0.35;
+  cursor: not-allowed;
+}
+
+.shutterInner {
+  width: 64px;
+  height: 64px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, var(--primary), var(--accent));
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 0 24px rgba(0,242,255,0.45);
+  transition: transform 0.1s;
+}
+
+.shutterBtn:active:not(:disabled) .shutterInner {
+  transform: scale(0.91);
 }
 
 /* ── Scan overlay ────────────────────────────────────────── */
 .scanOverlay {
   position: absolute;
   inset: 0;
-  background: rgba(2, 2, 10, 0.78);
-  backdrop-filter: blur(4px);
+  background: rgba(2, 2, 12, 0.82);
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
   z-index: 15;
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
   gap: 2rem;
-  padding: 2rem;
-  padding-top: 5rem;
+  padding: 5rem 2rem 10rem;
 }
 
 /* Progress ring */
 .progressRingWrap {
   position: relative;
-  width: 120px;
-  height: 120px;
+  width: 130px;
+  height: 130px;
   flex-shrink: 0;
 }
 
 .progressRing {
-  width: 120px;
-  height: 120px;
+  width: 130px;
+  height: 130px;
 }
 
 .progressCenter {
@@ -185,17 +286,17 @@
 
 .progressPct {
   font-family: 'Cinzel', serif;
-  font-size: 1.4rem;
+  font-size: 1.6rem;
   font-weight: 700;
   color: var(--primary);
   line-height: 1;
-  text-shadow: 0 0 12px rgba(0,242,255,0.7);
+  text-shadow: 0 0 16px rgba(0,242,255,0.8);
 }
 
 .progressLabel {
-  font-size: 0.65rem;
+  font-size: 0.6rem;
   color: rgba(255,255,255,0.4);
-  letter-spacing: 2px;
+  letter-spacing: 2.5px;
   text-transform: uppercase;
 }
 
@@ -203,7 +304,7 @@
 .stepList {
   display: flex;
   flex-direction: column;
-  gap: 0.55rem;
+  gap: 0.6rem;
   width: 100%;
   max-width: 280px;
 }
@@ -211,33 +312,25 @@
 .stepItem {
   display: flex;
   align-items: flex-start;
-  gap: 0.7rem;
-  opacity: 0.25;
+  gap: 0.75rem;
+  opacity: 0.2;
   transition: opacity 0.4s ease;
 }
 
-.stepItem.done {
-  opacity: 0.45;
-}
-
-.stepItem.active {
-  opacity: 1;
-}
+.stepItem.done   { opacity: 0.4; }
+.stepItem.active { opacity: 1; }
 
 .stepDot {
   width: 8px;
   height: 8px;
   border-radius: 50%;
   background: rgba(255,255,255,0.2);
-  margin-top: 3px;
+  margin-top: 4px;
   flex-shrink: 0;
   transition: background 0.3s, box-shadow 0.3s;
 }
 
-.stepItem.done .stepDot {
-  background: var(--primary);
-}
-
+.stepItem.done .stepDot   { background: var(--primary); }
 .stepItem.active .stepDot {
   background: var(--primary);
   box-shadow: 0 0 8px var(--primary);
@@ -246,33 +339,16 @@
 
 @keyframes dot-pulse {
   0%, 100% { transform: scale(1); }
-  50% { transform: scale(1.4); }
+  50%       { transform: scale(1.5); }
 }
 
-.stepText {
-  display: flex;
-  flex-direction: column;
-  gap: 1px;
-}
+.stepText { display: flex; flex-direction: column; gap: 1px; }
 
-.stepLabel {
-  font-size: 0.8rem;
-  color: rgba(255,255,255,0.9);
-  font-weight: 500;
-}
+.stepLabel  { font-size: 0.8rem; color: rgba(255,255,255,0.9); font-weight: 500; }
+.stepItem.done .stepLabel { color: var(--primary); }
+.stepDetail { font-size: 0.63rem; color: rgba(0,242,255,0.4); font-family: monospace; letter-spacing: 0.5px; }
 
-.stepItem.done .stepLabel {
-  color: var(--primary);
-}
-
-.stepDetail {
-  font-size: 0.65rem;
-  color: rgba(0,242,255,0.4);
-  font-family: monospace;
-  letter-spacing: 0.5px;
-}
-
-/* Scanner sweep line */
+/* Scanner sweep */
 .scanLine {
   position: absolute;
   left: 0;
@@ -285,122 +361,24 @@
 }
 
 @keyframes sweep {
-  0% { top: 5%; opacity: 0; }
-  8% { opacity: 1; }
-  92% { opacity: 1; }
+  0%   { top: 5%;  opacity: 0; }
+  8%   { opacity: 1; }
+  92%  { opacity: 1; }
   100% { top: 95%; opacity: 0; }
 }
 
-/* ── Bottom panel ────────────────────────────────────────── */
-.bottomPanel {
-  flex: none;
-  background: #050510;
-  border-top: 1px solid rgba(255,255,255,0.06);
-  padding: 1.1rem 1.5rem 1.6rem;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 0.9rem;
-  z-index: 10;
-}
-
-.hint {
-  font-size: 0.75rem;
-  color: rgba(255,255,255,0.4);
-  text-align: center;
-  letter-spacing: 0.3px;
-}
-
-/* Action row: gallery | shutter | (spacer) */
-.actionRow {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 2rem;
-  width: 100%;
-}
-
-/* Side button (gallery) */
-.sideBtn {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 5px;
-  background: rgba(255,255,255,0.06);
-  border: 1px solid rgba(255,255,255,0.12);
-  color: rgba(255,255,255,0.7);
-  padding: 0.7rem 1rem;
-  border-radius: 14px;
-  cursor: pointer;
-  transition: background 0.2s, color 0.2s;
-  font-size: 0.65rem;
-  letter-spacing: 0.5px;
-  font-family: inherit;
-  width: 72px;
-}
-
-.sideBtn:hover {
-  background: rgba(255,255,255,0.12);
-  color: white;
-}
-
-.sideBtnPlaceholder {
-  width: 72px;
-}
-
-/* Shutter button */
-.shutterBtn {
-  width: 76px;
-  height: 76px;
-  border-radius: 50%;
-  background: transparent;
-  border: 3px solid rgba(255,255,255,0.3);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  cursor: pointer;
-  position: relative;
-  transition: border-color 0.2s, box-shadow 0.2s;
-  flex-shrink: 0;
-}
-
-.shutterBtn:hover:not(:disabled) {
-  border-color: var(--primary);
-  box-shadow: 0 0 20px rgba(0,242,255,0.35);
-}
-
-.shutterBtn:disabled {
-  opacity: 0.4;
-  cursor: not-allowed;
-}
-
-.shutterInner {
-  width: 60px;
-  height: 60px;
-  border-radius: 50%;
-  background: linear-gradient(135deg, var(--primary), var(--accent));
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  box-shadow: 0 0 20px rgba(0,242,255,0.4);
-  transition: transform 0.1s;
-}
-
-.shutterBtn:active:not(:disabled) .shutterInner {
-  transform: scale(0.93);
-}
-
-/* Scanning status */
+/* Scanning status in bottom overlay */
 .scanningStatus {
   display: flex;
   align-items: center;
   gap: 0.7rem;
   color: var(--primary);
-  font-size: 0.8rem;
-  letter-spacing: 1.5px;
+  font-size: 0.78rem;
+  letter-spacing: 2px;
   text-transform: uppercase;
   font-family: 'Cinzel', serif;
-  padding: 0.8rem 0;
+  padding: 1rem 0 0.5rem;
+  text-shadow: 0 0 10px rgba(0,242,255,0.5);
 }
 
 .scanningDot {
@@ -414,22 +392,14 @@
 
 /* ── Mobile ──────────────────────────────────────────────── */
 @media (max-width: 480px) {
-  .handGuide {
-    width: 190px;
-    height: 250px;
+  .guideOverlay {
+    padding-bottom: 7rem;
   }
 
-  .shutterBtn {
-    width: 68px;
-    height: 68px;
-  }
-
-  .shutterInner {
-    width: 54px;
-    height: 54px;
-  }
-
-  .stepLabel {
-    font-size: 0.75rem;
-  }
+  .shutterBtn  { width: 72px; height: 72px; }
+  .shutterInner { width: 58px; height: 58px; }
+  .stepLabel   { font-size: 0.75rem; }
+  .progressRingWrap { width: 110px; height: 110px; }
+  .progressRing     { width: 110px; height: 110px; }
+  .progressPct { font-size: 1.3rem; }
 }

@@ -271,8 +271,8 @@ export default function ScanPage() {
         </div>
       </div>
 
-      {/* ── Bottom panel ── */}
-      <div className={styles.bottomPanel}>
+      {/* ── Bottom overlay ── */}
+      <div className={styles.bottomOverlay}>
         {!isScanning ? (
           <>
             <p className={styles.hint}>손바닥을 펴고 카메라에 가까이 대세요</p>
