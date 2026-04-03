@@ -21,12 +21,8 @@ interface AnalysisResult {
 
 export default function ResultPage() {
   const [image, setImage] = useState<string | null>(null);
-  const [analyzing, setAnalyzing] = useState(true);
-  const [analysis, setAnalysis] = useState<AnalysisResult | null>(null);
-  const [visibleItems, setVisibleItems] = useState<number>(0);
-  const [personalizationLevel, setPersonalizationLevel] = useState(0);
-  const canvasRef = useRef<HTMLCanvasElement>(null);
-  const router = useRouter();
+  const [analyzingMessage, setAnalyzingMessage] = useState("데이터 수집 중...");
+  const [analyzingStage, setAnalyzingStage] = useState(0); 
 
   useEffect(() => {
     const data = sessionStorage.getItem("capturedPalm");
@@ -40,10 +36,32 @@ export default function ResultPage() {
     const level = RLEngine.getPersonalizationLevel();
     setPersonalizationLevel(level);
 
-    // Simulate AI Analysis process
-    const timer = setTimeout(() => {
+    // ── Phase: AI Joint Reflection Loop ───────────────────────────────────
+    const stages = [
+      { msg: "Gemini: 고전 손금학 기반 '영적 초안' 작성 중...", time: 1200 },
+      { msg: "Claude: 현대 심리학 기반 '통찰적 정교화' 진행 중...", time: 1400 },
+      { msg: "Consensus: 최종 조율 및 일관성 검증...", time: 1000 }
+    ];
+
+    const runAnalysis = async () => {
+      // Stage 1 (Gemini)
+      setAnalyzingStage(1);
+      setAnalyzingMessage(stages[0].msg);
+      await new Promise(r => setTimeout(r, stages[0].time));
+
+      // Stage 2 (Claude)
+      setAnalyzingStage(2);
+      setAnalyzingMessage(stages[1].msg);
+      await new Promise(r => setTimeout(r, stages[1].time));
+
+      // Stage 3 (Finalizing)
+      setAnalyzingStage(3);
+      setAnalyzingMessage(stages[2].msg);
+      await new Promise(r => setTimeout(r, stages[2].time));
+
+      // All set!
       setAnalysis({
-        summary: "고전적 지혜와 현대적 통찰이 결합된 당신의 운명은 '개척자'의 길을 가리키고 있습니다. 매우 강한 주관과 창의적 에너지가 손금 전체에서 관찰됩니다.",
+        summary: "Gemini의 '신비적 직관'과 Claude의 '논리적 분석'이 결합된 결과입니다. 당신의 손금은 현대 사회에서 강력한 영향력을 행사할 수 있는 '개척자'의 길을 가리키고 있습니다.",
         lines: [
           { name: "생명선 (Life)", reading: "강한 활력과 에너지가 느껴집니다. 장수와 건강한 신체 구조를 타고나셨네요.", rating: 0, color: "#00F2FF" },
           { name: "두뇌선 (Head)", reading: "매우 창의적이고 예술적인 사고를 하시는군요. 상상력이 풍부합니다.", rating: 0, color: "#FFD700" },
@@ -56,9 +74,9 @@ export default function ResultPage() {
           : "초기 분석 단계입니다. 평가를 남겨주시면 AI가 당신의 성향을 더 깊게 학습합니다."
       });
       setAnalyzing(false);
-    }, 2800);
+    };
 
-    return () => clearTimeout(timer);
+    runAnalysis();
   }, [router]);
 
   // Effect for sequential reveal animation
@@ -149,56 +167,77 @@ export default function ResultPage() {
         ctx.shadowBlur = 0;
       };
 
+      // ─────────────────────────────────────────────────────
+      // 손금 해부학 기준 좌표 (오른손 기준, 엄지 왼쪽)
+      // 이미지 600×600 → 비율 좌표 사용
+      // ─────────────────────────────────────────────────────
+
       // ── 감정선 Heart Line ──────────────────────────────────
-      // 새끼손가락 아래(우상단)에서 검지 아래(좌)로 호를 그리며 이동
+      // 새끼-약지 아래(우)에서 검지 아래(좌)로 완만한 호
+      // 실제 위치: 손바닥 상단 1/3 지점 (y ≈ 40~48%)
       drawNeonCurve(
         c => {
-          c.moveTo(W * 0.78, H * 0.36);
-          c.bezierCurveTo(W * 0.65, H * 0.32, W * 0.50, H * 0.33, W * 0.28, H * 0.42);
+          c.moveTo(W * 0.76, H * 0.43);
+          c.bezierCurveTo(
+            W * 0.62, H * 0.38,   // CP1: 중지 아래서 위로 솟음
+            W * 0.45, H * 0.39,   // CP2: 검지 방향으로 꺾임
+            W * 0.28, H * 0.46    // 끝: 검지-엄지 경계 부근
+          );
         },
         "#FF2EF7",
         "Heart",
-        W * 0.79,
-        H * 0.32
+        W * 0.77, H * 0.40
       );
 
       // ── 두뇌선 Head Line ──────────────────────────────────
-      // 엄지-검지 사이(좌)에서 새끼 방향(우)으로 완만하게 내려감
+      // 생명선과 동일 기원(엄지-검지 사이)에서 출발, 새끼 방향으로 사선
+      // 실제 위치: 손바닥 중앙 (y ≈ 51~60%)
       drawNeonCurve(
         c => {
-          c.moveTo(W * 0.30, H * 0.50);
-          c.bezierCurveTo(W * 0.45, H * 0.50, W * 0.60, H * 0.52, W * 0.76, H * 0.58);
+          c.moveTo(W * 0.30, H * 0.53);
+          c.bezierCurveTo(
+            W * 0.46, H * 0.52,   // CP1
+            W * 0.60, H * 0.55,   // CP2
+            W * 0.74, H * 0.60    // 끝: 약지 아래 방향
+          );
         },
         "#FFD700",
         "Head",
-        W * 0.28,
-        H * 0.47
+        W * 0.27, H * 0.50
       );
 
       // ── 생명선 Life Line ──────────────────────────────────
-      // 엄지-검지 사이에서 시작해 엄지 두덩(Thenar)을 감싸며 손목까지
+      // 두뇌선과 동일 기원, 엄지 두덩(Thenar)을 감싸며 손목 쪽으로 큰 호
+      // 실제 위치: 엄지 볼록 부위 감싸는 곡선 (x ≈ 18~35%)
       drawNeonCurve(
         c => {
-          c.moveTo(W * 0.30, H * 0.50);
-          c.bezierCurveTo(W * 0.18, H * 0.60, W * 0.18, H * 0.72, W * 0.32, H * 0.88);
+          c.moveTo(W * 0.30, H * 0.53);
+          c.bezierCurveTo(
+            W * 0.20, H * 0.63,   // CP1: 엄지 두덩 상단
+            W * 0.18, H * 0.76,   // CP2: 엄지 두덩 하단
+            W * 0.30, H * 0.88    // 끝: 손목 엄지 쪽
+          );
         },
         "#00F2FF",
         "Life",
-        W * 0.12,
-        H * 0.62
+        W * 0.10, H * 0.68
       );
 
       // ── 운명선 Fate Line ──────────────────────────────────
-      // 손목 중앙에서 중지 방향으로 수직 상승
+      // 손목 중앙에서 중지 방향으로 수직에 가깝게 상승
+      // 실제 위치: 손바닥 중앙 세로선 (x ≈ 48~50%)
       drawNeonCurve(
         c => {
-          c.moveTo(W * 0.50, H * 0.88);
-          c.bezierCurveTo(W * 0.50, H * 0.72, W * 0.49, H * 0.58, W * 0.48, H * 0.42);
+          c.moveTo(W * 0.49, H * 0.87);
+          c.bezierCurveTo(
+            W * 0.49, H * 0.72,   // CP1
+            W * 0.48, H * 0.58,   // CP2
+            W * 0.47, H * 0.44    // 끝: 중지 기저부
+          );
         },
         "#A855F7",
         "Fate",
-        W * 0.52,
-        H * 0.40
+        W * 0.51, H * 0.42
       );
     };
     img.src = image;
