@@ -89,63 +89,117 @@ export default function ResultPage() {
       canvas.height = img.height;
       ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-      const drawGlowLine = (points: {x: number, y: number}[], color: string, name: string) => {
+      const W = canvas.width;
+      const H = canvas.height;
+
+      // Helper: draw a bezier curve with neon glow effect
+      const drawNeonCurve = (
+        path: (ctx: CanvasRenderingContext2D) => void,
+        color: string,
+        labelText: string,
+        labelX: number,
+        labelY: number
+      ) => {
         ctx.lineCap = "round";
         ctx.lineJoin = "round";
-
-        // Outer glow
-        ctx.shadowBlur = 50;
         ctx.shadowColor = color;
-        ctx.strokeStyle = color;
-        ctx.lineWidth = canvas.width * 0.03;
-        ctx.globalAlpha = 0.45;
-        ctx.beginPath();
-        ctx.moveTo(points[0].x, points[0].y);
-        points.slice(1).forEach(p => ctx.lineTo(p.x, p.y));
-        ctx.stroke();
 
-        // White core
-        ctx.shadowBlur = 15;
-        ctx.globalAlpha = 1.0;
-        ctx.lineWidth = canvas.width * 0.012;
-        ctx.strokeStyle = "#FFFFFF";
-        ctx.stroke();
-
-        // Colored edge
-        ctx.globalAlpha = 0.85;
-        ctx.lineWidth = canvas.width * 0.016;
+        // Wide outer glow
+        ctx.globalAlpha = 0.35;
+        ctx.shadowBlur = 40;
+        ctx.lineWidth = W * 0.028;
         ctx.strokeStyle = color;
-        ctx.stroke();
+        ctx.beginPath(); path(ctx); ctx.stroke();
+
+        // Mid glow
+        ctx.globalAlpha = 0.6;
+        ctx.shadowBlur = 20;
+        ctx.lineWidth = W * 0.016;
+        ctx.beginPath(); path(ctx); ctx.stroke();
+
+        // Bright white core
+        ctx.globalAlpha = 1;
+        ctx.shadowBlur = 8;
+        ctx.lineWidth = W * 0.007;
+        ctx.strokeStyle = "#ffffff";
+        ctx.beginPath(); path(ctx); ctx.stroke();
+
+        // Colored thin top layer
+        ctx.globalAlpha = 0.9;
+        ctx.lineWidth = W * 0.009;
+        ctx.strokeStyle = color;
+        ctx.beginPath(); path(ctx); ctx.stroke();
 
         // Label
         ctx.globalAlpha = 1;
+        ctx.shadowBlur = 6;
+        ctx.shadowColor = color;
         ctx.fillStyle = color;
-        ctx.shadowBlur = 5;
-        ctx.font = `bold ${Math.floor(canvas.width * 0.032)}px Cinzel, serif`;
-        ctx.fillText(name.split(" ")[0], points[0].x + 10, points[0].y - 14);
+        ctx.font = `bold ${Math.floor(W * 0.028)}px Cinzel, serif`;
+        ctx.fillText(labelText, labelX, labelY);
 
-        // Node dot
+        // Start dot
+        ctx.shadowBlur = 10;
+        ctx.fillStyle = "#ffffff";
         ctx.beginPath();
-        ctx.arc(points[0].x, points[0].y, 5, 0, Math.PI * 2);
+        ctx.arc(labelX - W * 0.01, labelY + W * 0.012, W * 0.008, 0, Math.PI * 2);
         ctx.fill();
+
+        ctx.globalAlpha = 1;
+        ctx.shadowBlur = 0;
       };
 
-      drawGlowLine([
-        {x: canvas.width * 0.45, y: canvas.height * 0.55},
-        {x: canvas.width * 0.4,  y: canvas.height * 0.75},
-        {x: canvas.width * 0.5,  y: canvas.height * 0.9}
-      ], "#00F2FF", "Life");
+      // ── 감정선 Heart Line ──────────────────────────────────
+      // 새끼손가락 아래(우상단)에서 검지 아래(좌)로 호를 그리며 이동
+      drawNeonCurve(
+        c => {
+          c.moveTo(W * 0.78, H * 0.36);
+          c.bezierCurveTo(W * 0.65, H * 0.32, W * 0.50, H * 0.33, W * 0.28, H * 0.42);
+        },
+        "#FF2EF7",
+        "Heart",
+        W * 0.79,
+        H * 0.32
+      );
 
-      drawGlowLine([
-        {x: canvas.width * 0.45, y: canvas.height * 0.55},
-        {x: canvas.width * 0.75, y: canvas.height * 0.65}
-      ], "#FFD700", "Head");
+      // ── 두뇌선 Head Line ──────────────────────────────────
+      // 엄지-검지 사이(좌)에서 새끼 방향(우)으로 완만하게 내려감
+      drawNeonCurve(
+        c => {
+          c.moveTo(W * 0.30, H * 0.50);
+          c.bezierCurveTo(W * 0.45, H * 0.50, W * 0.60, H * 0.52, W * 0.76, H * 0.58);
+        },
+        "#FFD700",
+        "Head",
+        W * 0.28,
+        H * 0.47
+      );
 
-      drawGlowLine([
-        {x: canvas.width * 0.8,  y: canvas.height * 0.45},
-        {x: canvas.width * 0.5,  y: canvas.height * 0.45},
-        {x: canvas.width * 0.3,  y: canvas.height * 0.5}
-      ], "#FF00E5", "Heart");
+      // ── 생명선 Life Line ──────────────────────────────────
+      // 엄지-검지 사이에서 시작해 엄지 두덩(Thenar)을 감싸며 손목까지
+      drawNeonCurve(
+        c => {
+          c.moveTo(W * 0.30, H * 0.50);
+          c.bezierCurveTo(W * 0.18, H * 0.60, W * 0.18, H * 0.72, W * 0.32, H * 0.88);
+        },
+        "#00F2FF",
+        "Life",
+        W * 0.12,
+        H * 0.62
+      );
+
+      // ── 운명선 Fate Line ──────────────────────────────────
+      // 손목 중앙에서 중지 방향으로 수직 상승
+      drawNeonCurve(
+        c => {
+          c.moveTo(W * 0.50, H * 0.88);
+          c.bezierCurveTo(W * 0.50, H * 0.72, W * 0.49, H * 0.58, W * 0.48, H * 0.42);
+        },
+        "#A855F7",
+        "Fate",
+        W * 0.52,
+        H * 0.40
+      );
     };
     img.src = image;
   }, [image, analysis]);
