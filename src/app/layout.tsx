@@ -14,8 +14,10 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="ko">
-      <body>
-        {children}
+      <body className="antialiased">
+        <div className="app-container">
+          {children}
+        </div>
         <script
           dangerouslySetInnerHTML={{
             __html: `

@@ -18,19 +18,30 @@
   margin: 0;
 }
 
-html, body {
-  height: 100%;
-  width: 100%;
-  overflow-x: hidden;
-  background-color: var(--background);
-  color: var(--foreground);
-  font-family: 'Inter', sans-serif;
-  -webkit-font-smoothing: antialiased;
+html {
+  background-color: #020205; /* Deep backdrop for desktop */
 }
 
 body {
-  background: radial-gradient(circle at 50% -20%, #1a1b3a 0%, #050510 70%);
-  background-attachment: fixed;
+  margin: 0;
+  padding: 0;
+  min-height: 100vh;
+  display: flex;
+  justify-content: center;
+  background: radial-gradient(circle at 50% -20%, #1a1b3a 0%, #020205 70%);
+}
+
+.app-container {
+  width: 100%;
+  max-width: 480px; /* Standard mobile width */
+  min-height: 100vh;
+  background-color: var(--background);
+  color: var(--foreground);
+  position: relative;
+  box-shadow: 0 0 100px rgba(0, 0, 0, 0.5);
+  overflow-x: hidden;
+  display: flex;
+  flex-direction: column;
 }
 
 h1, h2, h3, .mystical-font {
