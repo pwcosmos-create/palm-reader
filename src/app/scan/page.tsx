@@ -9,6 +9,7 @@ export default function ScanPage() {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const [stream, setStream] = useState<MediaStream | null>(null);
   const [isScanning, setIsScanning] = useState(false);
+  const [previewImage, setPreviewImage] = useState<string | null>(null);
   const [torch, setTorch] = useState(false);
   const router = useRouter();
 
@@ -71,14 +72,15 @@ export default function ScanPage() {
         context.filter = "contrast(1.1) brightness(1.05)";
         context.drawImage(video, 0, 0, canvas.width, canvas.height);
         
-        setIsScanning(true);
         const imageData = canvas.toDataURL("image/jpeg", 0.85); // High quality for RL
+        setPreviewImage(imageData);
+        setIsScanning(true);
         
         sessionStorage.setItem("capturedPalm", imageData);
         
         setTimeout(() => {
           router.push("/result");
-        }, 2500); // Mystical scanning delay
+        }, 3000); // Mystical scanning delay
       }
     }
   };
@@ -92,12 +94,13 @@ export default function ScanPage() {
       const reader = new FileReader();
       reader.onload = (event) => {
         const imageData = event.target?.result as string;
+        setPreviewImage(imageData);
         sessionStorage.setItem("capturedPalm", imageData);
         setIsScanning(true);
         // Simulate a slight delay for mystical effect
         setTimeout(() => {
           router.push("/result");
-        }, 1500);
+        }, 2000);
       };
       reader.onerror = (err) => {
         console.error("FileReader error:", err);
@@ -118,8 +121,12 @@ export default function ScanPage() {
           ref={videoRef} 
           autoPlay 
           playsInline 
-          className={styles.video}
+          className={`${styles.video} ${isScanning ? styles.hidden : ""}`}
         />
+        
+        {isScanning && previewImage && (
+          <img src={previewImage} alt="Scan Preview" className={styles.preview} />
+        )}
         
         <div className={styles.overlay}>
           <div className={styles.handGuide}>
@@ -133,30 +140,41 @@ export default function ScanPage() {
 
         <div className={styles.topControls}>
           <button onClick={() => router.back()} className={styles.iconBtn}>✕</button>
-          <button onClick={toggleTorch} className={`${styles.iconBtn} ${torch ? styles.active : ""}`}>
-            {torch ? "🔦" : "💡"}
-          </button>
+          {!isScanning && (
+            <button onClick={toggleTorch} className={`${styles.iconBtn} ${torch ? styles.active : ""}`}>
+              {torch ? "🔦" : "💡"}
+            </button>
+          )}
         </div>
 
         <div className={styles.bottomControls}>
-          <h2 className="mystical-font text-center mb-4">운명을 스캔하거나 사진을 불러오세요</h2>
+          <h2 className="mystical-font text-center mb-4">
+            {isScanning ? "AI가 운명의 선을 읽는 중..." : "운명을 스캔하거나 사진을 불러오세요"}
+          </h2>
           
           <div className={styles.btnGroup}>
-            <button 
-              onClick={capturePhoto} 
-              className="btn-primary"
-              disabled={isScanning}
-            >
-              {isScanning ? "AI 분석 중..." : "운명 스캔하기"}
-            </button>
+            {!isScanning && (
+              <>
+                <button 
+                  onClick={capturePhoto} 
+                  className="btn-primary"
+                >
+                  운명 스캔하기
+                </button>
 
-            <button 
-              onClick={triggerUpload} 
-              className={styles.uploadBtn}
-              disabled={isScanning}
-            >
-              🖼️ 갤러리에서 사진 선택
-            </button>
+                <button 
+                  onClick={triggerUpload} 
+                  className={styles.uploadBtn}
+                >
+                  🖼️ 갤러리에서 사진 선택
+                </button>
+              </>
+            )}
+            
+            {isScanning && (
+              <div className={styles.scanningBadge}>RL 분석 엔진 가동 중</div>
+            )}
+
             <input 
               ref={fileInputRef}
               type="file" 
