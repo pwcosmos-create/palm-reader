@@ -449,6 +449,25 @@ export default function ResultPage() {
             <div className={styles.cardAccent} />
             <h3 className="mystical-font text-xl mb-3">Overall Destiny</h3>
             <p className={styles.summaryText}>{analysis.summary}</p>
+            
+            {/* 💰 [NEW] Wealth & Love Luck Dashboard 💖 */}
+            <div className={styles.luckDashboard}>
+              <div className={styles.luckItem}>
+                <div className={styles.luckLabel}>💰 재물운 (Wealth)</div>
+                <div className={styles.luckScoreBar}>
+                  <div className={styles.luckFill} style={{ width: `${analysis.lines[0].detailedReading?.wealthLuck.score ?? 85}%`, backgroundColor: '#FFD700' }} />
+                </div>
+                <div className={styles.luckScoreValue}>{analysis.lines[0].detailedReading?.wealthLuck.score ?? 85}%</div>
+              </div>
+              <div className={styles.luckItem}>
+                <div className={styles.luckLabel}>💖 연애운 (Love)</div>
+                <div className={styles.luckScoreBar}>
+                  <div className={styles.luckFill} style={{ width: `${analysis.lines[0].detailedReading?.loveLuck.score ?? 88}%`, backgroundColor: '#FF2EF7' }} />
+                </div>
+                <div className={styles.luckScoreValue}>{analysis.lines[0].detailedReading?.loveLuck.score ?? 88}%</div>
+              </div>
+            </div>
+
             <div className={styles.personalizationMsg}>{analysis.personalizationMsg}</div>
           </div>
         )}

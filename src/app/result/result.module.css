@@ -709,3 +709,55 @@
  transform: perspective(500px) rotateX(60deg) translateY(0);
  animation: gridMove 20s linear infinite;
 }
+.luckDashboard {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1rem;
+  margin: 1.5rem 0;
+  padding: 1.2rem;
+  background: rgba(255, 255, 255, 0.03);
+  border-radius: 16px;
+  border: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.luckItem {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.luckLabel {
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: rgba(255, 255, 255, 0.7);
+  letter-spacing: 0.02em;
+}
+
+.luckScoreBar {
+  width: 100%;
+  height: 6px;
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 3px;
+  overflow: hidden;
+}
+
+.luckFill {
+  height: 100%;
+  border-radius: 3px;
+  box-shadow: 0 0 10px currentColor;
+  transition: width 1.5s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.luckScoreValue {
+  font-family: 'Cinzel', serif;
+  font-size: 0.85rem;
+  font-weight: 800;
+  text-align: right;
+  opacity: 0.9;
+}
+
+@media (max-width: 480px) {
+  .luckDashboard {
+    grid-template-columns: 1fr;
+  }
+}
