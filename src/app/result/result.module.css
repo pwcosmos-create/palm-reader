@@ -48,7 +48,8 @@
   position: sticky;
   top: 0;
   width: 100%;
-  aspect-ratio: 4/3;
+  aspect-ratio: 16/9;
+  max-height: 260px;
   z-index: 5;
   background: #000;
   overflow: hidden;
