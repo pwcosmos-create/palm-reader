@@ -128,8 +128,34 @@ export default function ResultPage() {
         "운명선 (Fate)":  fateRL.style,
       };
 
-      // ── Gemini Vision API 호출 ──────────────────────────────────────
-      setAnalyzingMessage("Gemini Vision: 손금 이미지 분석 중...");
+      // ── RL 컨텍스트 수집 → Gemini에 전달 ─────────────────────────────
+      const history = RLEngine.getHistory();
+      const getLineStats = (name: string) => {
+        const entries = history.filter(h => h.lineName === name);
+        const avg = entries.length > 0
+          ? Math.round(entries.reduce((s, h) => s + h.rating, 0) / entries.length * 10) / 10
+          : 0;
+        return { avg, count: entries.length };
+      };
+      const lifeStats  = getLineStats("생명선 (Life)");
+      const headStats  = getLineStats("두뇌선 (Head)");
+      const heartStats = getLineStats("감정선 (Heart)");
+      const fateStats  = getLineStats("운명선 (Fate)");
+
+      const rlContext = {
+        personalizationLevel: level,
+        preferredStyle: lifeRL.style, // 가장 많이 선택된 스타일
+        totalSessions: history.length,
+        lineRatings: {
+          life:       lifeStats.avg,  lifeCount:  lifeStats.count,
+          head:       headStats.avg,  headCount:  headStats.count,
+          heart:      heartStats.avg, heartCount: heartStats.count,
+          fate:       fateStats.avg,  fateCount:  fateStats.count,
+        },
+      };
+
+      // ── Gemini Vision API 호출 (RL 컨텍스트 포함) ────────────────────
+      setAnalyzingMessage("Gemini Vision: 개인화 손금 분석 중...");
       const palmImage = sessionStorage.getItem("capturedPalm");
       let geminiData: any = null;
 
@@ -138,7 +164,7 @@ export default function ResultPage() {
           const res = await fetch("/api/analyze", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ image: palmImage }),
+            body: JSON.stringify({ image: palmImage, rlContext }),
           });
           const json = await res.json();
           if (json.ok) geminiData = json.data;
@@ -177,7 +203,9 @@ export default function ResultPage() {
         ],
         advice: geminiData?.advice ?? "오늘은 새로운 시작을 위한 최적의 날입니다.",
         personalizationMsg: geminiData
-          ? "Gemini Vision AI가 직접 손금 이미지를 분석한 결과입니다."
+          ? (level > 10
+            ? `Gemini Vision + ${level}% 개인화 RL이 결합된 맞춤형 분석입니다.`
+            : "Gemini Vision AI가 직접 손금 이미지를 분석한 결과입니다.")
           : (level > 10
             ? `당신의 ${level}% 학습된 성향을 분석하여 맞춤형 통찰을 도출했습니다.`
             : "초기 분석 단계입니다. 평가를 남겨주시면 AI가 당신의 성향을 더 깊게 학습합니다.")
