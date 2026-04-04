@@ -4,37 +4,36 @@ import { useRef, useState, useEffect, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import styles from "./scan.module.css";
 
-// ── Palm skin-tone validation ──────────────────────────────────────────────
+// ── Palm skin-tone & texture validation ───────────────────────────────────
 function isSkinPixel(r: number, g: number, b: number): boolean {
   const max = Math.max(r, g, b);
   const min = Math.min(r, g, b);
   const diff = max - min;
   const sat = max === 0 ? 0 : diff / max;
+  
+  // Tighten RGB/HSL range to filter out yellowish/reddish objects
   return (
-    r > 60 && g > 30 && b > 15 &&
-    r > b && r >= g &&
-    diff >= 15 &&
-    sat >= 0.1 && sat <= 0.75 &&
-    r - g >= -10 && r - g <= 80
+    r > 80 && g > 40 && b > 25 &&
+    r > b && r > g &&
+    diff >= 20 &&
+    sat >= 0.15 && sat <= 0.65 &&
+    r - g >= 5 && r - g <= 60
   );
 }
 
 /**
- * Palm validation via 3×3 grid skin distribution.
- * A real palm fills the frame uniformly — random photos / faces don't.
+ * Palm validation via 3×3 grid skin distribution AND Edge Density (Sobel).
+ * A real palm has distinct line textures — smooth skin/objects fail.
  *
- * Pass conditions (all must hold):
- *   1. Overall skin ratio ≥ 32 %
- *   2. At least 6 of 9 grid cells have ≥ 28 % skin pixels
- *   3. Center cell (cell[4]) has ≥ 40 % skin pixels
+ * Returned result: { ok: boolean, reason?: string }
  */
-async function validatePalm(dataUrl: string): Promise<boolean> {
+async function validatePalmStrict(dataUrl: string): Promise<{ ok: boolean; reason?: "NO_SKIN" | "NO_TEXTURE" | "LOW_COVERAGE" }> {
   return new Promise((resolve) => {
     const img = new Image();
     img.onload = () => {
       const SIZE = 90;
       const GRID = 3;
-      const CELL = SIZE / GRID; // 30 px per cell
+      const CELL = SIZE / GRID;
       const c = document.createElement("canvas");
       c.width = SIZE; c.height = SIZE;
       const ctx = c.getContext("2d")!;
@@ -42,25 +41,62 @@ async function validatePalm(dataUrl: string): Promise<boolean> {
       const { data } = ctx.getImageData(0, 0, SIZE, SIZE);
 
       const cellSkin = new Array(GRID * GRID).fill(0);
-      const cellTotal = CELL * CELL;
+      const totalSkinPixels = new Array(SIZE * SIZE).fill(false);
+      let skinCount = 0;
 
+      // 1. Skin & Coverage analysis
       for (let py = 0; py < SIZE; py++) {
         for (let px = 0; px < SIZE; px++) {
           const i = (py * SIZE + px) * 4;
           if (data[i + 3] < 128) continue;
           const ci = Math.floor(py / CELL) * GRID + Math.floor(px / CELL);
-          if (isSkinPixel(data[i], data[i + 1], data[i + 2])) cellSkin[ci]++;
+          if (isSkinPixel(data[i], data[i + 1], data[i + 2])) {
+            cellSkin[ci]++;
+            totalSkinPixels[py * SIZE + px] = true;
+            skinCount++;
+          }
         }
       }
 
-      const ratios = cellSkin.map((s) => s / cellTotal);
-      const overallRatio = cellSkin.reduce((a, b) => a + b, 0) / (SIZE * SIZE);
-      const highCells = ratios.filter((r) => r >= 0.28).length;
-      const centerRatio = ratios[4]; // center cell
+      const overallRatio = skinCount / (SIZE * SIZE);
+      if (overallRatio < 0.35) return resolve({ ok: false, reason: "NO_SKIN" });
 
-      resolve(overallRatio >= 0.32 && highCells >= 6 && centerRatio >= 0.40);
+      const ratios = cellSkin.map((s) => s / (CELL * CELL));
+      const highCells = ratios.filter((r) => r >= 0.30).length;
+      if (highCells < 6 || ratios[4] < 0.45) return resolve({ ok: false, reason: "LOW_COVERAGE" });
+
+      // 2. Texture/Edge density analysis (Sobel)
+      // Only check edges ON skin area to avoid background noise
+      let edgeEnergy = 0;
+      for (let y = 1; y < SIZE - 1; y++) {
+        for (let x = 1; x < SIZE - 1; x++) {
+          if (!totalSkinPixels[y * SIZE + x]) continue;
+          
+          const getG = (ox: number, oy: number) => {
+            const i = ((y + oy) * SIZE + (x + ox)) * 4;
+            return (data[i] + data[i + 1] + data[i + 2]) / 3;
+          };
+
+          const gx = -1 * getG(-1, -1) + 1 * getG(1, -1)
+                   - 2 * getG(-1, 0)  + 2 * getG(1, 0)
+                   - 1 * getG(-1, 1)  + 1 * getG(1, 1);
+          
+          const gy = -1 * getG(-1, -1) - 2 * getG(0, -1) - 1 * getG(1, -1)
+                   + 1 * getG(-1, 1)  + 2 * getG(0, 1)  + 1 * getG(1, 1);
+          
+          const mag = Math.sqrt(gx * gx + gy * gy);
+          if (mag > 25) edgeEnergy++; // threshold for 'significant' line detail
+        }
+      }
+
+      // Density = significant edges / skin area
+      const density = edgeEnergy / skinCount;
+      // Palm lines are usually dense. Smooth things (face, leg) have density < 0.05
+      if (density < 0.08) return resolve({ ok: false, reason: "NO_TEXTURE" });
+
+      resolve({ ok: true });
     };
-    img.onerror = () => resolve(false);
+    img.onerror = () => resolve({ ok: false });
     img.src = dataUrl;
   });
 }
@@ -251,8 +287,15 @@ export default function ScanPage() {
     canvas.height = video.videoHeight;
     ctx.drawImage(video, 0, 0);
     const dataUrl = canvas.toDataURL("image/jpeg", 0.85);
-    if (!(await validatePalm(dataUrl))) {
-      setValidationError("손바닥을 카메라에 바르게 대고 다시 촬영해주세요.");
+    const validation = await validatePalmStrict(dataUrl);
+    if (!validation.ok) {
+      if (validation.reason === "NO_TEXTURE") {
+        setValidationError("손바닥의 선이 선명하게 보이지 않습니다. 밝은 곳에서 다시 촬영해주세요.");
+      } else if (validation.reason === "NO_SKIN") {
+        setValidationError("손바닥이 감지되지 않았습니다. 손을 가이드에 맞춰주세요.");
+      } else {
+        setValidationError("손바닥을 카메라에 바르게 대고 다시 촬영해주세요.");
+      }
       return;
     }
     setValidationError(null);
@@ -268,8 +311,13 @@ export default function ScanPage() {
     const reader = new FileReader();
     reader.onload = async (ev) => {
       const dataUrl = ev.target?.result as string;
-      if (!(await validatePalm(dataUrl))) {
-        setValidationError("손바닥 사진만 업로드할 수 있습니다. 손을 펼친 사진을 사용해주세요.");
+      const validation = await validatePalmStrict(dataUrl);
+      if (!validation.ok) {
+        if (validation.reason === "NO_TEXTURE") {
+          setValidationError("업로드한 사진에서 손금의 질감이 느껴지지 않습니다. 고화질 사진을 사용해주세요.");
+        } else {
+          setValidationError("손바닥 사진만 업로드할 수 있습니다. 손을 펼친 사진을 사용해주세요.");
+        }
         return;
       }
       setValidationError(null);

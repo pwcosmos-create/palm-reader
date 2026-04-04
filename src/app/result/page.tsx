@@ -48,6 +48,8 @@ export default function ResultPage() {
   const [syncing, setSyncing] = useState(false);
   const [analyzingMessage, setAnalyzingMessage] = useState("데이터 수집 중...");
   const [analyzingStage, setAnalyzingStage] = useState(0);
+  const [penaltyActive, setPenaltyActive] = useState(false);
+  const [recalibrating, setRecalibrating] = useState(false);
 
   // ── RL Line Detector state ──────────────────────────────────────────────
   const [biases, setBiases] = useState<AllBiases>(() => RLLineDetector.getBiases());
@@ -392,6 +394,12 @@ export default function ResultPage() {
     const updatedAnalysis = { ...analysis, lines: newLines };
     setAnalysis(updatedAnalysis);
     
+    if (rating <= 2) {
+      setPenaltyActive(true);
+      setRecalibrating(true);
+      setTimeout(() => setRecalibrating(false), 3000);
+    }
+
     RLEngine.saveReward(newLines[index].name, rating);
 
     // ε-greedy bandit reward: update the style that was shown for this line
@@ -405,6 +413,17 @@ export default function ResultPage() {
     
     // 🏺 Sync full state to GitHub Archive
     syncResultToServer(updatedAnalysis, biases, detectionConf);
+  };
+
+  const handleReportError = () => {
+    if (confirm("손바닥 인식이 잘못되었나요? 벌점을 부여하고 AI를 재학습시킵니다.")) {
+      RLEngine.recordGlobalPenalty("user_report_incorrect_recognition");
+      setPenaltyActive(true);
+      setRecalibrating(true);
+      setGlobalScore(RLEngine.getGlobalIntelligenceScore());
+      setTimeout(() => setRecalibrating(false), 3000);
+      alert("벌점이 부여되었습니다. AI 엔진이 해당 패턴을 기피하도록 재학습됩니다.");
+    }
   };
 
   const toggleExpand = (idx: number) => {
@@ -506,7 +525,7 @@ export default function ResultPage() {
               </div>
             </div>
             {/* Line Detection RL confidence */}
-            <div className={styles.detectionBox}>
+            <div className={`${styles.detectionBox} ${recalibrating ? styles.penaltyFlash : ""}`}>
               <div className={styles.labelRow}>
                 <span className="text-[10px] opacity-70">선 감지 정확도 (위치 RL)</span>
                 <span className={styles.detectionValue}>{detectionConf}%</span>
@@ -516,7 +535,10 @@ export default function ResultPage() {
               </div>
             </div>
           </div>
-          <div className={styles.badgeRL}>Autonomous RL</div>
+          <div className={styles.rightHeader}>
+            <div className={styles.badgeRL}>Autonomous RL</div>
+            {penaltyActive && <div className={styles.penaltyBadge}>Recalibrating...</div>}
+          </div>
         </div>
 
         {analysis && visibleItems >= 1 && (
@@ -526,6 +548,12 @@ export default function ResultPage() {
             <div className={styles.summaryBox}>
               <div className={styles.aiBadge}>GEMINI-CLAUDE HYBRID ENGINE</div>
               <p className={styles.summaryText}>{analysis.summary}</p>
+              <button 
+                className={styles.reportBtn}
+                onClick={handleReportError}
+              >
+                ⚠️ 손바닥 인식 오류 신고 (AI 벌점 부여)
+              </button>
             </div>
             <div className={styles.personalizationMsg}>{analysis.personalizationMsg}</div>
           </div>

@@ -97,16 +97,43 @@ export class RLEngine {
 
   /**
    * Update bandit reward after user rates a line.
-   * rating 1-5 → normalized 0-1 reward.
+   * rating 1-5 → normalized -1.0 to +1.0 reward (Penalty RL).
+   * 1: -1.0, 2: -0.5, 3: 0, 4: +0.5, 5: +1.0
    */
   static updateStyleReward(lineName: string, style: OracleStyle, rating: number) {
     if (typeof window === "undefined") return;
+    
+    // ── Penalty Reward Logic ───────────────────────────────────────────────
+    // (rating - 3) / 2 creates a symmetric penalty/reward around 3 stars.
+    const reward = (rating - 3) / 2;
+    
     const bandits = this.getBandits();
     if (!bandits[lineName]) bandits[lineName] = {};
     if (!bandits[lineName][style]) bandits[lineName][style] = { count: 0, totalRating: 0 };
+    
     bandits[lineName][style].count++;
-    bandits[lineName][style].totalRating += (rating - 1) / 4; // normalize to 0-1
+    bandits[lineName][style].totalRating += reward;
     this.saveBandits(bandits);
+
+    // If extremely poor rating, record a global penalty
+    if (rating <= 2) {
+      this.recordGlobalPenalty("user_dissatisfaction");
+    }
+  }
+
+  // ── Global Penalty & Recalibration ─────────────────────────────────────
+  private static PENALTY_KEY = "palm_reader_global_penalties";
+
+  static recordGlobalPenalty(reason: string) {
+    if (typeof window === "undefined") return;
+    const penalties = parseInt(localStorage.getItem(this.PENALTY_KEY) || "0");
+    localStorage.setItem(this.PENALTY_KEY, (penalties + 1).toString());
+    console.log(`[RL PENALTY] System recalibrated due to: ${reason}`);
+  }
+
+  static getGlobalPenaltyCount(): number {
+    if (typeof window === "undefined") return 0;
+    return parseInt(localStorage.getItem(this.PENALTY_KEY) || "0");
   }
 
   /** Returns per-style average ratings for a line (for debug/display). */
@@ -133,7 +160,12 @@ export class RLEngine {
   static getGlobalIntelligenceScore(): number {
     const history = this.getHistory();
     const collabBonus = history.filter((h) => h.synergyId).length * 500;
-    return 128400 + history.length * 25 + collabBonus;
+    const base = 128400 + history.length * 25 + collabBonus;
+    
+    // Each penalty subtracts 1,000 points (Max 5,000 loss per session to avoid negative spiral)
+    const penaltyLoss = this.getGlobalPenaltyCount() * 1000;
+    
+    return Math.max(98000, base - penaltyLoss);
   }
 
   static async syncWithGlobal(_lineName: string, _rating: number) {
