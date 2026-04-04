@@ -332,6 +332,149 @@
   letter-spacing: 1px;
 }
 
+/* ═══════════════════════════════════════
+   Edit Mode
+═══════════════════════════════════════ */
+
+.editToolbar {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 9999;
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.65rem 1.5rem;
+  background: rgba(5, 5, 16, 0.92);
+  backdrop-filter: blur(20px);
+  border-bottom: 1px solid rgba(0, 242, 255, 0.35);
+  box-shadow: 0 4px 30px rgba(0, 0, 0, 0.5);
+}
+
+.editToolbarTitle {
+  flex: 1;
+  font-size: 0.75rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.15em;
+  color: #00F2FF;
+}
+
+.editBtn {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 0.45rem 1rem;
+  border-radius: 20px;
+  font-size: 0.78rem;
+  font-weight: 700;
+  cursor: pointer;
+  border: none;
+  transition: opacity 0.2s, transform 0.2s;
+  letter-spacing: 0.03em;
+}
+
+.editBtn:hover {
+  opacity: 0.85;
+  transform: translateY(-1px);
+}
+
+.editBtnSave {
+  background: #00F2FF;
+  color: #000;
+}
+
+.editBtnReset {
+  background: rgba(255, 80, 80, 0.15);
+  border: 1px solid rgba(255, 80, 80, 0.4);
+  color: #ff6b6b;
+}
+
+.editBtnCancel {
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  color: rgba(255, 255, 255, 0.7);
+}
+
+.editFab {
+  position: fixed;
+  bottom: 2rem;
+  right: 2rem;
+  z-index: 9999;
+  width: 46px;
+  height: 46px;
+  border-radius: 50%;
+  background: rgba(0, 242, 255, 0.1);
+  border: 1px solid rgba(0, 242, 255, 0.35);
+  color: #00F2FF;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: background 0.3s, transform 0.3s, box-shadow 0.3s;
+  backdrop-filter: blur(12px);
+}
+
+.editFab:hover {
+  background: rgba(0, 242, 255, 0.22);
+  transform: scale(1.1);
+  box-shadow: 0 0 20px rgba(0, 242, 255, 0.4);
+}
+
+.editingMode {
+  padding-top: 5rem; /* make room for toolbar */
+}
+
+/* Inline editable inputs */
+.editInput {
+  background: rgba(0, 242, 255, 0.06);
+  border: 1px dashed rgba(0, 242, 255, 0.5);
+  border-radius: 4px;
+  color: inherit;
+  font: inherit;
+  letter-spacing: inherit;
+  text-align: inherit;
+  width: 100%;
+  resize: none;
+  outline: none;
+  padding: 2px 6px;
+  transition: background 0.2s, border-color 0.2s;
+  box-sizing: border-box;
+}
+
+.editInput:focus {
+  background: rgba(0, 242, 255, 0.12);
+  border-color: #00F2FF;
+  border-style: solid;
+}
+
+/* CTA edit wrapper */
+.ctaEditWrapper {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.5rem;
+  width: 100%;
+  max-width: 360px;
+}
+
+.ctaEditInput {
+  font-size: 1.1rem;
+  font-weight: 800;
+  text-align: center;
+  padding: 1rem 2rem;
+  border-radius: 50px;
+  border-style: dashed;
+}
+
+.ctaEditHint {
+  font-size: 0.7rem;
+  opacity: 0.5;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+}
+
 /* Animations */
 .fade-in-up {
   opacity: 0;

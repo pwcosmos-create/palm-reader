@@ -166,6 +166,21 @@
   text-shadow: 0 1px 4px rgba(0,0,0,0.9);
 }
 
+.validationError {
+  font-size: var(--text-xs);
+  color: #ff6b6b;
+  text-align: center;
+  letter-spacing: 0.3px;
+  text-shadow: 0 1px 6px rgba(255, 80, 80, 0.4);
+  animation: shake 0.35s ease;
+}
+
+@keyframes shake {
+  0%, 100% { transform: translateX(0); }
+  25%       { transform: translateX(-6px); }
+  75%       { transform: translateX(6px); }
+}
+
 /* Action row: gallery | shutter | spacer */
 .actionRow {
   display: flex;

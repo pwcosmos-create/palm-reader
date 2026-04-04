@@ -4,6 +4,39 @@ import { useRef, useState, useEffect, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import styles from "./scan.module.css";
 
+// ── Palm skin-tone validation ──────────────────────────────────────────────
+function isSkinPixel(r: number, g: number, b: number): boolean {
+  // Covers light to dark skin tones via RGB heuristic
+  return (
+    r > 60 && g > 30 && b > 15 &&
+    r > b && r >= g &&
+    Math.max(r, g, b) - Math.min(r, g, b) >= 12 &&
+    r - g >= -5 && r - g <= 70
+  );
+}
+
+async function validatePalm(dataUrl: string): Promise<boolean> {
+  return new Promise((resolve) => {
+    const img = new Image();
+    img.onload = () => {
+      const size = 80; // sample at low-res for speed
+      const c = document.createElement("canvas");
+      c.width = size; c.height = size;
+      const ctx = c.getContext("2d")!;
+      ctx.drawImage(img, 0, 0, size, size);
+      const { data } = ctx.getImageData(0, 0, size, size);
+      let skin = 0;
+      for (let i = 0; i < data.length; i += 4) {
+        if (data[i + 3] < 128) continue;
+        if (isSkinPixel(data[i], data[i + 1], data[i + 2])) skin++;
+      }
+      resolve(skin / (size * size) >= 0.18);
+    };
+    img.onerror = () => resolve(false);
+    img.src = dataUrl;
+  });
+}
+
 const ANALYSIS_STEPS = [
   { label: "손바닥 형상 인식", detail: "Palm geometry mapped" },
   { label: "주요 선 추출 중", detail: "Extracting major lines" },
@@ -27,6 +60,7 @@ export default function ScanPage() {
   const [previewImage, setPreviewImage] = useState<string | null>(null);
   const [stepIndex, setStepIndex] = useState(0);
   const [progress, setProgress] = useState(0);
+  const [validationError, setValidationError] = useState<string | null>(null);
 
   const router = useRouter();
 
@@ -132,13 +166,20 @@ export default function ScanPage() {
   }, [processImage, router]);
 
   // ── Capture from camera ───────────────────────────────────
-  const capturePhoto = () => {
+  const capturePhoto = async () => {
     const video = videoRef.current;
     const canvas = canvasRef.current;
     if (!video || !canvas) return;
     const ctx = canvas.getContext("2d")!;
     canvas.width = video.videoWidth;
     canvas.height = video.videoHeight;
+    ctx.drawImage(video, 0, 0);
+    const dataUrl = canvas.toDataURL("image/jpeg", 0.85);
+    if (!(await validatePalm(dataUrl))) {
+      setValidationError("손바닥을 카메라에 바르게 대고 다시 촬영해주세요.");
+      return;
+    }
+    setValidationError(null);
     ctx.filter = "contrast(1.1) brightness(1.05)";
     ctx.drawImage(video, 0, 0);
     beginScan(canvas.toDataURL("image/jpeg", 0.85));
@@ -149,7 +190,15 @@ export default function ScanPage() {
     const file = e.target.files?.[0];
     if (!file) return;
     const reader = new FileReader();
-    reader.onload = ev => beginScan(ev.target?.result as string);
+    reader.onload = async (ev) => {
+      const dataUrl = ev.target?.result as string;
+      if (!(await validatePalm(dataUrl))) {
+        setValidationError("손바닥 사진만 업로드할 수 있습니다. 손을 펼친 사진을 사용해주세요.");
+        return;
+      }
+      setValidationError(null);
+      beginScan(dataUrl);
+    };
     reader.onerror = () => alert("사진을 읽어오는데 실패했습니다.");
     reader.readAsDataURL(file);
   };
@@ -273,7 +322,11 @@ export default function ScanPage() {
       <div className={styles.bottomOverlay}>
         {!isScanning ? (
           <>
-            <p className={styles.hint}>손바닥을 펴고 카메라에 가까이 대세요</p>
+            {validationError ? (
+              <p className={styles.validationError}>{validationError}</p>
+            ) : (
+              <p className={styles.hint}>손바닥을 펴고 카메라에 가까이 대세요</p>
+            )}
 
             <div className={styles.actionRow}>
               {/* Upload button */}
