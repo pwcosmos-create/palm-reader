@@ -332,15 +332,6 @@ export default function ScanPage() {
     const reader = new FileReader();
     reader.onload = async (ev) => {
       const dataUrl = ev.target?.result as string;
-      const validation = await validatePalmStrict(dataUrl);
-      if (!validation.ok) {
-        if (validation.reason === "NO_TEXTURE") {
-          setValidationError("업로드한 사진에서 손금의 질감이 느껴지지 않습니다. 고화질 사진을 사용해주세요.");
-        } else {
-          setValidationError("손바닥 사진만 업로드할 수 있습니다. 손을 펼친 사진을 사용해주세요.");
-        }
-        return;
-      }
       setValidationError(null);
       beginScan(dataUrl);
     };
