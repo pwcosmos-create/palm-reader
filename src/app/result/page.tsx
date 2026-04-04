@@ -586,7 +586,7 @@ export default function ResultPage() {
                   Master Evolution Badge: Now visible by default to showcase Stage 13 intelligence, 
                   even if globalScore is low during initial web test.
               */}
-              {(globalScore > 150000 || true) && (
+              {true && (
                 <div className={styles.masterBadge} title="Global Neural Consolidation Stage 13 Active">
                   <ShieldCheck size={16} />
                   <span>Master Evolution</span>

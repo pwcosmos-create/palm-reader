@@ -61,13 +61,28 @@ JSON만 응답하고 다른 텍스트는 포함하지 마세요.`;
 
     const text = result.response.text().trim();
 
-    // Extract JSON from response (sometimes wrapped in ```json blocks)
+    // Extract JSON — handle ```json blocks, thinking tags, or raw JSON
     const jsonMatch = text.match(/\{[\s\S]*\}/);
     if (!jsonMatch) {
+      console.error("Gemini raw response:", text.slice(0, 300));
       return NextResponse.json({ error: "Invalid response from Gemini" }, { status: 500 });
     }
 
-    const parsed = JSON.parse(jsonMatch[0]);
+    let parsed: any;
+    try {
+      parsed = JSON.parse(jsonMatch[0]);
+    } catch {
+      console.error("JSON parse failed:", jsonMatch[0].slice(0, 300));
+      return NextResponse.json({ error: "JSON parse failed" }, { status: 500 });
+    }
+
+    // Normalize score fields (0-100 숫자 보장)
+    const clamp = (v: any) => Math.min(100, Math.max(0, Number(v) || 50));
+    if (parsed.life) parsed.life.score = clamp(parsed.life.score);
+    if (parsed.head) parsed.head.score = clamp(parsed.head.score);
+    if (parsed.heart) parsed.heart.score = clamp(parsed.heart.score);
+    if (parsed.fate) parsed.fate.score = clamp(parsed.fate.score);
+
     return NextResponse.json({ ok: true, data: parsed });
   } catch (e) {
     console.error("Gemini API error:", e);
