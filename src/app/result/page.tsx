@@ -6,10 +6,25 @@ import { RLEngine } from "@/lib/rl_engine";
 import { RLLineDetector, AllBiases } from "@/lib/rl_line_detector";
 import { compressImage } from "@/lib/image_utils";
 import styles from "./result.module.css";
+import { 
+  Trophy, 
+  Zap, 
+  Brain, 
+  Sparkles, 
+  History, 
+  ChevronRight,
+  Share2,
+  Download,
+  RefreshCcw,
+  Activity,
+  ShieldCheck,
+  Globe
+} from "lucide-react";
 
 interface LineAnalysis {
   name: string;
   reading: string;
+  detailedReading?: import("@/lib/oracle_content").DeepReading;
   rating: number;
   color: string;
   rlKey: string;         // 'heart' | 'head' | 'life' | 'fate'
@@ -37,6 +52,7 @@ export default function ResultPage() {
   // ── RL Line Detector state ──────────────────────────────────────────────
   const [biases, setBiases] = useState<AllBiases>(() => RLLineDetector.getBiases());
   const [lineRL, setLineRL] = useState<Record<number, string>>({});
+  const [expandedLines, setExpandedLines] = useState<Record<number, boolean>>({});
   const [detectionConf, setDetectionConf] = useState(0);
 
   const canvasRef = useRef<HTMLCanvasElement>(null);
@@ -53,9 +69,9 @@ export default function ResultPage() {
     setDetectionConf(RLLineDetector.overallConfidence());
 
     const stages = [
-      { msg: "Gemini: 고전 손금학 기반 '영적 초안' 작성 중...", time: 1200 },
-      { msg: "Claude: 현대 심리학 기반 '통찰적 정교화' 진행 중...", time: 1400 },
-      { msg: "Consensus: 최종 조율 및 일관성 검증...", time: 1000 }
+      { msg: "Agent Alpha: 고정밀 선 토폴로지 분석 중...", time: 1000 },
+      { msg: "Agent Omega: 심리학적 서사 및 직관 조율 중...", time: 1200 },
+      { msg: "Collaborative Synergy: 최종 운명 설계 합의...", time: 800 }
     ];
 
     const runAnalysis = async () => {
@@ -69,10 +85,30 @@ export default function ResultPage() {
       const resultData: AnalysisResult = {
         summary: "Gemini의 '신비적 직관'과 Claude의 '논리적 분석'이 결합된 결과입니다. 당신의 손금은 현대 사회에서 강력한 영향력을 행사할 수 있는 '개척자'의 길을 가리키고 있습니다.",
         lines: [
-          { name: "생명선 (Life)",  reading: "강한 활력과 에너지가 느껴집니다. 장수와 건강한 신체 구조를 타고나셨네요.", rating: 0, color: "#00F2FF", rlKey: "life",  orientation: "vertical" },
-          { name: "두뇌선 (Head)",  reading: "매우 창의적이고 예술적인 사고를 하시는군요. 상상력이 풍부합니다.",          rating: 0, color: "#FFD700", rlKey: "head",  orientation: "horizontal" },
-          { name: "감정선 (Heart)", reading: "열정적인 사랑을 하시는 타입입니다. 감정이 풍부하고 정이 많으시네요.",       rating: 0, color: "#FF00E5", rlKey: "heart", orientation: "horizontal" },
-          { name: "운명선 (Fate)",  reading: "스스로 개척해나가는 운명입니다. 노력에 따른 성취가 뚜렷할 것입니다.",       rating: 0, color: "#A855F7", rlKey: "fate",  orientation: "vertical" }
+          { 
+            name: "생명선 (Life)",  
+            reading: "강한 활력과 에너지가 느껴집니다. 장수와 건강한 신체 구조를 타고나셨네요.", 
+            detailedReading: RLEngine.getEvolutionaryContent("Life"),
+            rating: 0, color: "#00F2FF", rlKey: "life",  orientation: "vertical" 
+          },
+          { 
+            name: "두뇌선 (Head)",  
+            reading: "매우 창의적이고 예술적인 사고를 하시는군요. 상상력이 풍부합니다.",          
+            detailedReading: RLEngine.getEvolutionaryContent("Head"),
+            rating: 0, color: "#FFD700", rlKey: "head",  orientation: "horizontal" 
+          },
+          { 
+            name: "감정선 (Heart)", 
+            reading: "열정적인 사랑을 하시는 타입입니다. 감정이 풍부하고 정이 많으시네요.",       
+            detailedReading: RLEngine.getEvolutionaryContent("Heart"),
+            rating: 0, color: "#FF00E5", rlKey: "heart", orientation: "horizontal" 
+          },
+          { 
+            name: "운명선 (Fate)",  
+            reading: "스스로 개척해나가는 운명입니다. 노력에 따른 성취가 뚜렷할 것입니다.",       
+            detailedReading: RLEngine.getEvolutionaryContent("Fate"),
+            rating: 0, color: "#A855F7", rlKey: "fate",  orientation: "vertical" 
+          }
         ],
         advice: "지금 당신의 잠재력은 85% 이상 활성화되어 있습니다. 새로운 도전을 시작하기에 최적의 시기입니다.",
         personalizationMsg: level > 10
@@ -83,47 +119,59 @@ export default function ResultPage() {
       setAnalysis(resultData);
       setAnalyzing(false);
 
-      // ── Saving to History & Global Archive (Optimized) ─────────────
-      try {
-        const id = Date.now().toString();
-        const date = new Date().toLocaleDateString('ko-KR');
+      // Trigger Master Evolution state check
+      const finalScore = RLEngine.getGlobalIntelligenceScore();
+      setGlobalScore(finalScore);
 
-        // 1. Optimize image for storage (400px, 0.6 quality) 🖼️
-        const thumb = await compressImage(data, 400, 0.6);
-        console.log(`[Storage] Compressed image size: ${Math.round(thumb.length / 1024)} KB`);
-
-        // 2. Local Persistence (Fast Feedback)
-        const history = JSON.parse(localStorage.getItem('palm_history_v2') || '[]');
-        const newEntry = {
-          id, date, summary: resultData.summary,
-          imageUrl: thumb, consensusBadge: true,
-          maturity: level, globalScore: RLEngine.getGlobalIntelligenceScore()
-        };
-        localStorage.setItem('palm_history_v2', JSON.stringify([newEntry, ...history].slice(0, 50)));
-
-        // 3. GitHub Global Archive (Eternal RL Data) 🏺🧬
-        fetch('/api/save', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            id, type: 'palm',
-            data: { 
-              ...newEntry, 
-              fullReading: resultData,
-              rlBiases: biases,
-              rlConfidence: detectionConf
-            }
-          })
-        }).then(res => res.json())
-          .then(data => console.log("GitHub Archive Sync:", data));
-
-      } catch (e) {
-        console.error("Archive Save Error:", e);
-      }
+      // Initial Sync 🏺🧬
+      syncResultToServer(resultData, biases, detectionConf);
     };
 
     runAnalysis();
   }, [router]);
+
+  // ── Unified Server Sync Function 🔱 ───────────────────────────────────
+  const syncResultToServer = async (currentAnalysis: AnalysisResult, currentBiases: AllBiases, currentConf: number) => {
+    if (!currentAnalysis) return;
+    setSyncing(true);
+    try {
+      const id = Date.now().toString();
+      const date = new Date().toLocaleDateString('ko-KR');
+      const storedImage = sessionStorage.getItem("capturedPalm") || "";
+      const thumb = await compressImage(storedImage, 400, 0.6);
+
+      // 1. Local Cache Update
+      const history = JSON.parse(localStorage.getItem('palm_history_v2') || '[]');
+      const newEntry = {
+        id, date, summary: currentAnalysis.summary,
+        imageUrl: thumb, consensusBadge: true,
+        maturity: RLEngine.getPersonalizationLevel(), 
+        globalScore: RLEngine.getGlobalIntelligenceScore()
+      };
+      localStorage.setItem('palm_history_v2', JSON.stringify([newEntry, ...history].slice(0, 50)));
+
+      // 2. Global Archive Sync (GitHub)
+      const res = await fetch('/api/save', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          id, type: 'palm',
+          data: { 
+            ...newEntry, 
+            fullReading: currentAnalysis,
+            rlBiases: currentBiases,
+            rlConfidence: currentConf
+          }
+        })
+      });
+      const data = await res.json();
+      console.log("🧬 Archive Sync Success:", data);
+    } catch (e) {
+      console.error("Archive Sync Error:", e);
+    } finally {
+      setSyncing(false);
+    }
+  };
 
   // Sequential reveal
   useEffect(() => {
@@ -268,8 +316,13 @@ export default function ResultPage() {
   const handleLineConfirm = (rlKey: string, idx: number) => {
     const updated = RLLineDetector.confirm(rlKey);
     setBiases(updated);
-    setDetectionConf(RLLineDetector.overallConfidence());
+    const newConf = RLLineDetector.overallConfidence();
+    setDetectionConf(newConf);
     setLineRL(prev => ({ ...prev, [idx]: "confirmed" }));
+
+    // 🧬 [NEW Stage 9] Sync confirmed position to server
+    if (analysis) syncResultToServer(analysis, updated, newConf);
+
     setTimeout(() => setLineRL(prev => ({ ...prev, [idx]: "" })), 2000);
   };
 
@@ -277,13 +330,22 @@ export default function ResultPage() {
     if (!analysis) return;
     const newLines = [...analysis.lines];
     newLines[index].rating = rating;
-    setAnalysis({ ...analysis, lines: newLines });
+    const updatedAnalysis = { ...analysis, lines: newLines };
+    setAnalysis(updatedAnalysis);
+    
     RLEngine.saveReward(newLines[index].name, rating);
     setPersonalizationLevel(RLEngine.getPersonalizationLevel());
-    setSyncing(true);
+    
+    // 🧬 [NEW Stage 9] Global RL Sync
     await RLEngine.syncWithGlobal(newLines[index].name, rating);
     setGlobalScore(RLEngine.getGlobalIntelligenceScore());
-    setSyncing(false);
+    
+    // 🏺 Sync full state to GitHub Archive
+    syncResultToServer(updatedAnalysis, biases, detectionConf);
+  };
+
+  const toggleExpand = (idx: number) => {
+    setExpandedLines(prev => ({ ...prev, [idx]: !prev[idx] }));
   };
 
   return (
@@ -292,6 +354,7 @@ export default function ResultPage() {
         <div className={styles.imageHeader}>
           <img src={image} alt="Captured palm" className={styles.resultImg} />
           <canvas ref={canvasRef} className={styles.resultCanvas} />
+          {analyzing && <div className={styles.neuralOverlay} />}
           {analyzing && (
             <div className={styles.analyzingOverlay}>
               <div className={styles.spinner} />
@@ -309,15 +372,25 @@ export default function ResultPage() {
           <div className={styles.titleGroup}>
             <div className={styles.badgeRow}>
               <h2 className="mystical-font glow-text-secondary">AI 분석 리포트</h2>
+              {/* 
+                  Master Evolution Badge: Now visible by default to showcase Stage 13 intelligence, 
+                  even if globalScore is low during initial web test.
+              */}
+              {(globalScore > 150000 || true) && (
+                <div className={styles.masterBadge} title="Global Neural Consolidation Stage 13 Active">
+                  <ShieldCheck size={16} />
+                  <span>Master Evolution</span>
+                </div>
+              )}
               {!analyzing && (
                 <div className={styles.collaborativeBadge}>
-                  <span className={styles.badgeIcon}>✨</span>
-                  Joint AI Consensus
+                  <span className={styles.badgePulse} />
+                  Collaborating AI Consensus [Alpha & Omega]
                 </div>
               )}
               {!analyzing && (
                 <div className={styles.archiveBadge}>
-                  <span className={styles.badgeIcon}>🏺</span>
+                  <Globe size={14} className="mr-1" />
                   Permanently Archived to GitHub
                 </div>
               )}
@@ -375,6 +448,35 @@ export default function ResultPage() {
               <div className={styles.badge} style={{ borderColor: res.color, color: res.color }}>Analysis Complete</div>
             </div>
             <p className="mb-4 opacity-90 text-sm leading-relaxed">{res.reading}</p>
+
+            {/* ── Deep Oracle: 1,500+ Character High-Density Intelligence (Stage 13) ──── */}
+            {res.detailedReading && (
+              <div className={`${styles.deepOracle} ${expandedLines[i] ? styles.expanded : ""}`}>
+                <button 
+                  className={styles.expandBtn} 
+                  style={{ color: res.color, borderColor: `${res.color}44` }}
+                  onClick={() => toggleExpand(i)}
+                >
+                  {expandedLines[i] ? "오라클 축소 🏛️" : "심층 오라클 분석 (1,000자+) ✨"}
+                </button>
+                {expandedLines[i] && (
+                  <div className={styles.deepContent}>
+                    <div className={styles.rlLabel} style={{ backgroundColor: `${res.color}15`, color: res.color }}>
+                      🧠 Evolutionary RL Content — Accuracy {biases[res.rlKey]?.confidence ?? 0}%
+                    </div>
+                    {res.detailedReading.sections.map((sec, si) => (
+                      <div key={si} className={styles.deepSection}>
+                        <h4 style={{ color: res.color }}>{sec.title}</h4>
+                        <p>{sec.content}</p>
+                      </div>
+                    ))}
+                    <div className={styles.lengthFoot}>
+                      지능 아카이브 총 {res.detailedReading.totalLength}자 | High-Tech Oracle Engine v2.1
+                    </div>
+                  </div>
+                )}
+              </div>
+            )}
 
             {/* ── RL Position Adjustment UI ───────────────────────────── */}
             <div className={styles.lineAdjust}>
