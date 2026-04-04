@@ -132,28 +132,76 @@ export default function ScanPage() {
     return new Promise(resolve => {
       const img = new Image();
       img.onload = () => {
+        const S = 480; // reduced from 600 — saves ~35% file size
         const canvas = document.createElement("canvas");
-        canvas.width = 600;
-        canvas.height = 600;
+        canvas.width = S; canvas.height = S;
         const ctx = canvas.getContext("2d")!;
 
-        const size = Math.min(img.width, img.height) * 0.65;
-        const sx = (img.width - size) / 2;
-        const sy = (img.height - size) / 2;
+        const crop = Math.min(img.width, img.height) * 0.65;
+        const sx = (img.width - crop) / 2;
+        const sy = (img.height - crop) / 2;
 
+        // 1. Dark base + high-contrast grayscale
         ctx.fillStyle = "#020205";
-        ctx.fillRect(0, 0, 600, 600);
-        // Normalized grayscale 1.0 and higher contrast for peak line visibility
-        ctx.filter = "contrast(1.5) brightness(1.05) grayscale(1.0)";
-        ctx.drawImage(img, sx, sy, size, size, 0, 0, 600, 600);
+        ctx.fillRect(0, 0, S, S);
+        ctx.filter = "contrast(1.65) brightness(1.05) grayscale(1.0)";
+        ctx.drawImage(img, sx, sy, crop, crop, 0, 0, S, S);
+        ctx.filter = "none";
 
+        // 2. Sobel edge detection on the grayscale pixels
+        const id = ctx.getImageData(0, 0, S, S);
+        const px = id.data;
+        const gray = new Float32Array(S * S);
+        for (let i = 0; i < gray.length; i++) gray[i] = px[i * 4]; // R = G = B (grayscale)
+
+        const edges = new Float32Array(S * S);
+        let maxE = 1;
+        for (let y = 1; y < S - 1; y++) {
+          for (let x = 1; x < S - 1; x++) {
+            const gx =
+              -gray[(y-1)*S+(x-1)] - 2*gray[y*S+(x-1)] - gray[(y+1)*S+(x-1)]
+              +gray[(y-1)*S+(x+1)] + 2*gray[y*S+(x+1)] + gray[(y+1)*S+(x+1)];
+            const gy =
+              -gray[(y-1)*S+(x-1)] - 2*gray[(y-1)*S+x] - gray[(y-1)*S+(x+1)]
+              +gray[(y+1)*S+(x-1)] + 2*gray[(y+1)*S+x] + gray[(y+1)*S+(x+1)];
+            const m = Math.sqrt(gx * gx + gy * gy);
+            edges[y * S + x] = m;
+            if (m > maxE) maxE = m;
+          }
+        }
+
+        // 3. Build neon edge image (cyan #00F2FF)
+        const ec = document.createElement("canvas");
+        ec.width = S; ec.height = S;
+        const eCtx = ec.getContext("2d")!;
+        const eId = eCtx.createImageData(S, S);
+        const thr = maxE * 0.18; // keep stronger edges
+        for (let i = 0; i < edges.length; i++) {
+          const e = edges[i];
+          if (e > thr) {
+            const a = Math.round(Math.min(255, ((e - thr) / (maxE - thr)) * 255));
+            eId.data[i*4]   = 0;
+            eId.data[i*4+1] = 242; // neon cyan
+            eId.data[i*4+2] = 255;
+            eId.data[i*4+3] = a;
+          }
+        }
+        eCtx.putImageData(eId, 0, 0);
+
+        // 4. Composite neon glow (3 layers: wide→mid→crisp)
         ctx.globalCompositeOperation = "source-over";
-        ctx.strokeStyle = "rgba(0, 242, 255, 0.4)";
-        ctx.lineWidth = 2;
-        ctx.strokeRect(4, 4, 592, 592);
+        ctx.filter = "blur(6px)";  ctx.globalAlpha = 0.45; ctx.drawImage(ec, 0, 0);
+        ctx.filter = "blur(2px)";  ctx.globalAlpha = 0.60; ctx.drawImage(ec, 0, 0);
+        ctx.filter = "none";       ctx.globalAlpha = 0.88; ctx.drawImage(ec, 0, 0);
+        ctx.globalAlpha = 1;
 
-        // Lowered quality to 0.75 for smaller capacity as requested
-        resolve(canvas.toDataURL("image/jpeg", 0.75));
+        // 5. Border
+        ctx.strokeStyle = "rgba(0, 242, 255, 0.35)";
+        ctx.lineWidth = 2;
+        ctx.strokeRect(3, 3, S - 6, S - 6);
+
+        // 6. Export — smaller canvas + lower quality = ~50% less than before
+        resolve(canvas.toDataURL("image/jpeg", 0.65));
       };
       img.src = raw;
     });
