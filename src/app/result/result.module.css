@@ -77,16 +77,16 @@
 }
 
 .analyzingOverlay {
-  position: fixed;
+  position: absolute;
   inset: 0;
   display: flex;
-  flex-direction: column;
+  flex-direction: column; /* Center contents vertically */
   justify-content: center;
   align-items: center;
-  background: rgba(5, 5, 16, 0.85);
+  background: rgba(5, 5, 16, 0.7);
   backdrop-filter: blur(8px);
   color: #fff;
-  z-index: 100;
+  z-index: 30;
   padding: 2rem;
   text-align: center;
 }
