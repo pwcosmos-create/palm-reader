@@ -130,8 +130,6 @@ export default function ResultPage() {
         "__visual_color__": visualRL.color as any // Hack to store color
       };
 
-      const neonColor = visualRL.color;
-
       const resultData: AnalysisResult = {
         summary: "Gemini의 '신비적 직관'과 Claude의 '논리적 분석'이 결합된 결과입니다. 당신의 손금은 현대 사회에서 강력한 영향력을 행사할 수 있는 '개척자'의 길을 가리키고 있습니다.",
         lines: [
@@ -139,25 +137,25 @@ export default function ResultPage() {
             name: "생명선 (Life)",
             reading: "",
             detailedReading: RLEngine.getEvolutionaryContent("Life", lifeRL.style),
-            rating: 0, color: neonColor, rlKey: "life", orientation: "vertical",
+            rating: 0, color: "#00FF7F", rlKey: "life", orientation: "vertical",
           },
           {
             name: "두뇌선 (Head)",
             reading: "",
             detailedReading: RLEngine.getEvolutionaryContent("Head", headRL.style),
-            rating: 0, color: neonColor, rlKey: "head", orientation: "horizontal",
+            rating: 0, color: "#00F2FF", rlKey: "head", orientation: "horizontal",
           },
           {
             name: "감정선 (Heart)",
             reading: "",
             detailedReading: RLEngine.getEvolutionaryContent("Heart", heartRL.style),
-            rating: 0, color: neonColor, rlKey: "heart", orientation: "horizontal",
+            rating: 0, color: "#FF2EF7", rlKey: "heart", orientation: "horizontal",
           },
           {
             name: "운명선 (Fate)",
             reading: "",
             detailedReading: RLEngine.getEvolutionaryContent("Fate", fateRL.style),
-            rating: 0, color: neonColor, rlKey: "fate", orientation: "vertical",
+            rating: 0, color: "#FFD700", rlKey: "fate", orientation: "vertical",
           },
         ],
         advice: "지금 당신의 잠재력은 85% 이상 활성화되어 있습니다. 새로운 도전을 시작하기에 최적의 시기입니다.",
