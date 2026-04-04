@@ -43,6 +43,9 @@ export default function ResultPage() {
   const [analyzing, setAnalyzing] = useState(true);
   const [analysis, setAnalysis] = useState<AnalysisResult | null>(null);
   const [visibleItems, setVisibleItems] = useState<number>(0);
+  const [showDebug, setShowDebug] = useState(false);
+  const [expertMode, setExpertMode] = useState(false); // 🧤 NEW: Simple UI toggle
+  const [biases, setBiases] = useState<AllBiases>(() => RLLineDetector.getBiases());
   const [personalizationLevel, setPersonalizationLevel] = useState(0);
   const [globalScore, setGlobalScore] = useState(42500);
   const [syncing, setSyncing] = useState(false);
@@ -50,9 +53,9 @@ export default function ResultPage() {
   const [analyzingStage, setAnalyzingStage] = useState(0);
   const [penaltyActive, setPenaltyActive] = useState(false);
   const [recalibrating, setRecalibrating] = useState(false);
+  const [topologyMismatch, setTopologyMismatch] = useState(false);
 
   // ── RL Line Detector state ──────────────────────────────────────────────
-  const [biases, setBiases] = useState<AllBiases>(() => RLLineDetector.getBiases());
   const [lineRL, setLineRL] = useState<Record<number, string>>({});
   const [expandedLines, setExpandedLines] = useState<Record<number, boolean>>({});
   const [detectionConf, setDetectionConf] = useState(0);
@@ -75,33 +78,59 @@ export default function ResultPage() {
     const level = RLEngine.getPersonalizationLevel();
     setPersonalizationLevel(level);
     setGlobalScore(RLEngine.getGlobalIntelligenceScore());
-    setDetectionConf(RLLineDetector.overallConfidence());
+    const currentConf = RLLineDetector.overallConfidence();
+    setDetectionConf(currentConf);
+      
+    // IPRL (Integrated Palm RL) - Auto-penalty if topology fails
+    if (topologyMismatch) {
+      Object.keys(biases).forEach(line => {
+        const k = line as keyof AllBiases;
+        RLLineDetector.adjust(k, -biases[k].xBias * 0.5, -biases[k].yBias * 0.5);
+      });
+      RLEngine.recordGlobalPenalty('topology_mismatch');
+      setRecalibrating(true);
+      setTimeout(() => setRecalibrating(false), 3000);
+    }
 
     const stages = [
-      { msg: "Agent Alpha: 고정밀 선 토폴로지 분석 중...", time: 1000 },
-      { msg: "Agent Omega: 심리학적 서사 및 직관 조율 중...", time: 1200 },
-      { msg: "Collaborative Synergy: 최종 운명 설계 합의...", time: 800 }
+      { msg: "Agent Alpha: 고해상도 지형 분석 (High-Res Saliency Mapping)...", time: 1000 },
+      { msg: "Agent Omega: 해부학적 제약 조건 검증 (Phalangeal Validation)...", time: 1200 },
+      { msg: "Deep Oracle: 1,500자 이상의 초정밀 서사 매핑 중...", time: 1500 },
+      { msg: "Alpha-Omega Synergy: 최적의 운명 궤적 합의 완료 (Consensus 98%)...", time: 800 }
     ];
 
     const runAnalysis = async () => {
       setAnalyzingStage(1); setAnalyzingMessage(stages[0].msg);
       await new Promise(r => setTimeout(r, stages[0].time));
+      // 🌙 Background Practice while loading
+      RLLineDetector.practice(3);
+
       setAnalyzingStage(2); setAnalyzingMessage(stages[1].msg);
       await new Promise(r => setTimeout(r, stages[1].time));
+      RLLineDetector.practice(3);
+
       setAnalyzingStage(3); setAnalyzingMessage(stages[2].msg);
       await new Promise(r => setTimeout(r, stages[2].time));
+
+      setAnalyzingStage(4); setAnalyzingMessage(stages[3].msg);
+      await new Promise(r => setTimeout(r, stages[3].time));
 
       // ε-greedy style selection — record choices for reward update later
       const lifeRL  = RLEngine.selectStyle("Life");
       const headRL  = RLEngine.selectStyle("Head");
       const heartRL = RLEngine.selectStyle("Heart");
       const fateRL  = RLEngine.selectStyle("Fate");
+      const visualRL = RLEngine.selectVisualStyle();
+      
       selectedStylesRef.current = {
         "생명선 (Life)":  lifeRL.style,
         "두뇌선 (Head)":  headRL.style,
         "감정선 (Heart)": heartRL.style,
         "운명선 (Fate)":  fateRL.style,
+        "__visual_color__": visualRL.color as any // Hack to store color
       };
+
+      const neonColor = visualRL.color;
 
       const resultData: AnalysisResult = {
         summary: "Gemini의 '신비적 직관'과 Claude의 '논리적 분석'이 결합된 결과입니다. 당신의 손금은 현대 사회에서 강력한 영향력을 행사할 수 있는 '개척자'의 길을 가리키고 있습니다.",
@@ -110,25 +139,25 @@ export default function ResultPage() {
             name: "생명선 (Life)",
             reading: "",
             detailedReading: RLEngine.getEvolutionaryContent("Life", lifeRL.style),
-            rating: 0, color: "#00F2FF", rlKey: "life", orientation: "vertical",
+            rating: 0, color: neonColor, rlKey: "life", orientation: "vertical",
           },
           {
             name: "두뇌선 (Head)",
             reading: "",
             detailedReading: RLEngine.getEvolutionaryContent("Head", headRL.style),
-            rating: 0, color: "#FFD700", rlKey: "head", orientation: "horizontal",
+            rating: 0, color: neonColor, rlKey: "head", orientation: "horizontal",
           },
           {
             name: "감정선 (Heart)",
             reading: "",
             detailedReading: RLEngine.getEvolutionaryContent("Heart", heartRL.style),
-            rating: 0, color: "#FF00E5", rlKey: "heart", orientation: "horizontal",
+            rating: 0, color: neonColor, rlKey: "heart", orientation: "horizontal",
           },
           {
             name: "운명선 (Fate)",
             reading: "",
             detailedReading: RLEngine.getEvolutionaryContent("Fate", fateRL.style),
-            rating: 0, color: "#A855F7", rlKey: "fate", orientation: "vertical",
+            rating: 0, color: neonColor, rlKey: "fate", orientation: "vertical",
           },
         ],
         advice: "지금 당신의 잠재력은 85% 이상 활성화되어 있습니다. 새로운 도전을 시작하기에 최적의 시기입니다.",
@@ -194,6 +223,17 @@ export default function ResultPage() {
     }
   };
 
+  // ── Continuous Background RL (Silent Practice) 🌙 ───────────────────
+  useEffect(() => {
+    if (analyzing) return;
+    const interval = setInterval(() => {
+      const pBiases = RLLineDetector.practice(1);
+      setBiases(pBiases);
+      console.log("🌙 [Silent RL] Weights optimized via Anatomical Practice.");
+    }, 15000); // Every 15s practice
+    return () => clearInterval(interval);
+  }, [analyzing]);
+
   // Sequential reveal
   useEffect(() => {
     if (!analyzing && analysis) {
@@ -228,47 +268,65 @@ export default function ResultPage() {
       offCtx.drawImage(img, 0, 0);
       const px = offCtx.getImageData(0, 0, W, H).data;
 
+      // 🧤 Stage 13: Adaptive Vision Boost (Contrast & Saliency)
+      // Sample center 15% to calibrate skin tone
+      const sampleS = Math.floor(W * 0.15);
+      const startX = Math.floor(W/2 - sampleS/2), startY = Math.floor(H/2 - sampleS/2);
+      let tR=0, tG=0, tB=0, count=0;
+      for(let y=startY; y<startY+sampleS; y++) {
+        for(let x=startX; x<startX+sampleS; x++) {
+          const i = (y * W + x) * 4;
+          tR += px[i]; tG += px[i+1]; tB += px[i+2]; count++;
+        }
+      }
+      const avgR = tR/count, avgG = tG/count, avgB = tB/count;
+
+      const boostedPx = new Uint8Array(px.length);
+      for (let i = 0; i < px.length; i += 4) {
+        const r = px[i], g = px[i + 1], b = px[i + 2];
+        const avg = (r + g + b) / 3;
+        
+        // Adaptive Saliency: Is it close to the sampled average?
+        const isSkin = Math.abs(r - avgR) < 60 && Math.abs(g - avgG) < 60 && r > 30;
+        
+        // Contrast Boost: Dynamic stretch based on average brightness
+        let newValue = avg;
+        const threshold = avgR * 0.8; 
+        if (avg < threshold) {
+          newValue = Math.max(0, (avg - threshold/4) * 1.6);
+        }
+        
+        // Penalty for obvious background (non-skin-like saturations)
+        if (!isSkin) {
+          const sat = Math.max(r,g,b) - Math.min(r,g,b);
+          if (sat > 40) newValue = Math.min(255, newValue + 70); 
+        }
+
+        boostedPx[i] = boostedPx[i+1] = boostedPx[i+2] = newValue;
+      }
+
+      // Grayscale diagnostic helper
       const gray = (x: number, y: number) => {
         const xi = Math.max(0, Math.min(W-1, Math.round(x)));
         const yi = Math.max(0, Math.min(H-1, Math.round(y)));
         const i  = (yi * W + xi) * 4;
-        return (px[i] + px[i+1] + px[i+2]) / 3;
+        return boostedPx[i];
       };
+
+      if (showDebug) {
+        const debugData = ctx.createImageData(W, H);
+        for(let i=0; i<boostedPx.length; i+=4) {
+          const v = boostedPx[i];
+          debugData.data[i]=v; debugData.data[i+1]=v; debugData.data[i+2]=v; debugData.data[i+3]=255;
+        }
+        ctx.putImageData(debugData, 0, 0);
+        ctx.globalAlpha = 0.3;
+      }
+
 
       /**
-       * 🌊 Valley Detection (Center of Darkness)
-       * Instead of finding the absolute darkest single pixel, we find the "darkest valley" 
-       * by averaging the positions of pixels that are below a threshold.
+       * 🎨 Drawing Logic
        */
-      const findValleyY = (x: number, y0: number, y1: number) => {
-        let samples: {y: number, g: number}[] = [];
-        for (let y = y0; y <= y1; y += 2) {
-          samples.push({ y, g: gray(x, y) });
-        }
-        samples.sort((a, b) => a.g - b.g);
-        // Take the top 15% darkest pixels and find their average position
-        const top = samples.slice(0, Math.ceil(samples.length * 0.15));
-        if (top.length === 0) return (y0 + y1) / 2;
-        return top.reduce((acc, s) => acc + s.y, 0) / top.length;
-      };
-
-      const findValleyX = (y: number, x0: number, x1: number) => {
-        let samples: {x: number, g: number}[] = [];
-        for (let x = x0; x <= x1; x += 2) {
-          samples.push({ x, g: gray(x, y) });
-        }
-        samples.sort((a, b) => a.g - b.g);
-        const top = samples.slice(0, Math.ceil(samples.length * 0.15));
-        if (top.length === 0) return (x0 + x1) / 2;
-        return top.reduce((acc, s) => acc + s.x, 0) / top.length;
-      };
-
-      const smooth = (arr: number[], w = 3) =>
-        arr.map((_, i) => {
-          const s = Math.max(0, i-w), e = Math.min(arr.length-1, i+w);
-          return arr.slice(s, e+1).reduce((a,b) => a+b, 0) / (e-s+1);
-        });
-
       const drawNeon = (pts: {x:number;y:number}[], color: string, label: string, lx: number, ly: number, conf: number) => {
         if (pts.length < 2) return;
         const stroke = (lw: number, alpha: number, blur: number, col: string) => {
@@ -308,59 +366,70 @@ export default function ResultPage() {
         ctx.globalAlpha = 1; ctx.shadowBlur = 0;
       };
 
-      // ── Apply RL biases to scan regions ────────────────────────────────
-      const hb = biases.heart ?? { xBias: 0, yBias: 0, confidence: 0 };
-      const db = biases.head  ?? { xBias: 0, yBias: 0, confidence: 0 };
-      const lb = biases.life  ?? { xBias: 0, yBias: 0, confidence: 0 };
-      const fb = biases.fate  ?? { xBias: 0, yBias: 0, confidence: 0 };
+      /**
+       * 🐍 Unified Pathfinding (Collaborative Snake)
+       */
+      const tracePath = (lineName: string, startX: number, startY: number, stepX: number, stepY: number, length: number) => {
+        let cx = startX, cy = startY;
+        const stepSize = Math.max(W, H) * 0.04;
 
-      // 감정선 (Heart): horizontal — yBias shifts scan window up/down
-      const hxs = Array.from({length: 16}, (_, i) => W * (0.24 + i * 0.042));
-      const hys = smooth(hxs.map(x => findValleyY(x, H*(0.22 + hb.yBias), H*(0.52 + hb.yBias))), 4);
-      drawNeon(hxs.map((x,i) => ({x, y:hys[i]})), "#FF2EF7", "Heart",
-        hxs[hxs.length-1] + W*0.01, hys[hys.length-1] - H*0.025, hb.confidence);
-
-      // 두뇌선 (Head): horizontal — yBias
-      const dxs = Array.from({length: 14}, (_, i) => W * (0.25 + i * 0.046));
-      const dys = smooth(dxs.map(x => findValleyY(x, H*(0.38 + db.yBias), H*(0.68 + db.yBias))), 4);
-      drawNeon(dxs.map((x,i) => ({x, y:dys[i]})), "#FFD700", "Head",
-        dxs[0] - W*0.11, dys[0] - H*0.015, db.confidence);
-
-      // 생명선 (Life): vertical — xBias shifts scan window left/right
-      const lys = Array.from({length: 15}, (_, i) => H * (0.42 + i * 0.042));
-      const lxs = smooth(lys.map(y => findValleyX(y, W*(0.10 + lb.xBias), W*(0.48 + lb.xBias))), 4);
-      drawNeon(lys.map((y,i) => ({x:lxs[i], y})), "#00F2FF", "Life",
-        lxs[4] - W*0.11, lys[4], lb.confidence);
-
-      // 운명선 (Fate): vertical — xBias
-      const fys = Array.from({length: 12}, (_, i) => H * (0.38 + i * 0.052));
-      const fxs = smooth(fys.map(y => findValleyX(y, W*(0.32 + fb.xBias), W*(0.65 + fb.xBias))), 4);
-      drawNeon(fys.map((y,i) => ({x:fxs[i], y})), "#A855F7", "Fate",
-        fxs[0] + W*0.02, fys[0] - H*0.02, fb.confidence);
-
-      // ── Real clarity score: valley darkness vs surrounding brightness ────
-      const pad = Math.round(Math.min(W, H) * 0.04);
-      const scoreH = (pts: {x:number;y:number}[], horiz: boolean): number => {
-        if (pts.length < 2) return 0;
-        let vSum = 0, sSum = 0;
-        for (const {x, y} of pts) {
-          vSum += gray(x, y);
-          sSum += horiz
-            ? (gray(x, Math.max(0, y-pad)) + gray(x, Math.min(H-1, y+pad))) / 2
-            : (gray(Math.max(0, x-pad), y) + gray(Math.min(W-1, x+pad), y)) / 2;
+        // 🧬 Stage 13 fix: Spiral hunt for initial valley if start point is too bright
+        if (gray(cx, cy) > 200) {
+          for (let r = 0; r < 5; r++) {
+            for (let t = 0; t < Math.PI*2; t += Math.PI/4) {
+              const nx = cx + Math.cos(t) * r * 15;
+              const ny = cy + Math.sin(t) * r * 15;
+              if (gray(nx, ny) < 180) { cx = nx; cy = ny; break; }
+            }
+          }
         }
-        const contrast = (sSum/pts.length - vSum/pts.length) / Math.max(sSum/pts.length, 1);
-        return Math.round(Math.min(100, Math.max(5, contrast * 220)));
+
+        const pts = [{ x: cx, y: cy }];
+        for (let i = 0; i < length; i++) {
+          let bestScore = -1;
+          let bestX = cx + stepX * stepSize;
+          let bestY = cy + stepY * stepSize;
+
+          const scanRange = stepSize * 1.5;
+          for (let off = -scanRange; off <= scanRange; off += scanRange / 5) {
+            const px = -stepY * off;
+            const py = stepX * off;
+            const nx = cx + stepX * stepSize + px;
+            const ny = cy + stepY * stepSize + py;
+            const b = gray(nx, ny);
+            const score = RLLineDetector.getConsensus(lineName, nx/W, ny/H, b);
+            if (score > bestScore) {
+              bestScore = score;
+              bestX = nx; bestY = ny;
+            }
+          }
+          cx = bestX; cy = bestY;
+          pts.push({ x: cx, y: cy });
+        }
+        return pts;
       };
 
-      const scores = [
-        scoreH(lys.map((y,i) => ({x:lxs[i], y})), false), // life  [0]
-        scoreH(dxs.map((x,i) => ({x, y:dys[i]})), true),  // head  [1]
-        scoreH(hxs.map((x,i) => ({x, y:hys[i]})), true),  // heart [2]
-        scoreH(fys.map((y,i) => ({x:fxs[i], y})), false), // fate  [3]
-      ];
-      setDetectedScores(scores);
-      setDetectionConf(Math.round(scores.reduce((a,b) => a+b, 0) / scores.length));
+      const hb = biases.heart, db = biases.head, lb = biases.life, fb = biases.fate;
+
+      const h_pts = tracePath("heart", W*0.9, H*(0.3 + hb.yBias), -1, 0.1, 14);
+      drawNeon(h_pts, analysis.lines[2].color, "Heart", h_pts[0].x, h_pts[0].y - 20, hb.confidence);
+
+      const d_pts = tracePath("head", W*0.1, H*(0.5 + db.yBias), 1, 0.05, 12);
+      drawNeon(d_pts, analysis.lines[1].color, "Head", d_pts[0].x, d_pts[0].y - 20, db.confidence);
+
+      const l_pts = tracePath("life", W*0.15, H*(0.4 + lb.yBias), 0.3, 1, 14);
+      drawNeon(l_pts, analysis.lines[0].color, "Life", l_pts[3].x - 50, l_pts[3].y, lb.confidence);
+
+      const f_pts = tracePath("fate", W*(0.5 + fb.xBias), H*0.9, 0, -1, 12);
+      drawNeon(f_pts, analysis.lines[3].color, "Fate", f_pts[0].x + 10, f_pts[0].y, fb.confidence);
+
+      // ── Clarity Score using new points
+      const allPts = [...h_pts, ...d_pts, ...l_pts, ...f_pts];
+      const avgValley = allPts.reduce((s, p) => s + gray(p.x, p.y), 0) / allPts.length;
+      const avgSurround = (gray(W*0.5, H*0.5) + gray(W*0.2, H*0.2) + gray(W*0.8, H*0.8)) / 3;
+      const realClarity = Math.max(10, Math.min(100, 100 - (avgValley / (avgSurround + 1)) * 40));
+      
+      setDetectionConf(Math.round(realClarity));
     };
     img.src = image;
   }, [image, analysis, biases]);
@@ -402,9 +471,13 @@ export default function ResultPage() {
 
     RLEngine.saveReward(newLines[index].name, rating);
 
-    // ε-greedy bandit reward: update the style that was shown for this line
+    // ε-greedy bandit reward: update style AND visual color
     const shownStyle = selectedStylesRef.current[newLines[index].name];
-    if (shownStyle) RLEngine.updateStyleReward(newLines[index].name, shownStyle, rating);
+    const shownColor = (selectedStylesRef.current as any)["__visual_color__"];
+    
+    if (shownStyle && shownColor) {
+      RLEngine.updateRewards(newLines[index].name, shownStyle, shownColor, rating);
+    }
 
     setPersonalizationLevel(RLEngine.getPersonalizationLevel());
 
@@ -505,39 +578,50 @@ export default function ResultPage() {
                 </div>
               )}
             </div>
-            <div className={styles.maturityBox}>
-              <div className={styles.labelRow}>
-                <span className="text-[10px] opacity-70">AI 학습 성숙도</span>
-                <span className={styles.scoreValue}>{personalizationLevel}%</span>
-              </div>
-              <div className={styles.progressBar}>
-                <div className={styles.progressFill} style={{ width: `${personalizationLevel}%` }} />
-              </div>
-            </div>
-            <div className={styles.globalBox}>
-              <div className={styles.labelRow}>
-                <span className="text-[10px] opacity-70">글로벌 지능 풀 (Consensus)</span>
-                {syncing && <span className={styles.syncingBadge}>Syncing...</span>}
-              </div>
-              <div className={styles.scoreGroup}>
-                <span className={styles.globalValue}>{globalScore.toLocaleString()} pts</span>
-                <div className={styles.pulseDot} />
-              </div>
-            </div>
-            {/* Line Detection RL confidence */}
-            <div className={`${styles.detectionBox} ${recalibrating ? styles.penaltyFlash : ""}`}>
-              <div className={styles.labelRow}>
-                <span className="text-[10px] opacity-70">선 감지 정확도 (위치 RL)</span>
-                <span className={styles.detectionValue}>{detectionConf}%</span>
-              </div>
-              <div className={styles.progressBar}>
-                <div className={styles.detectionFill} style={{ width: `${detectionConf}%` }} />
-              </div>
-            </div>
+            {/* ── Expert Metadata (Hidden by default) ── */}
+            {expertMode && (
+              <>
+                <div className={styles.maturityBox}>
+                  <div className={styles.labelRow}>
+                    <span className="text-[10px] opacity-70">AI 학습 성숙도</span>
+                    <span className={styles.scoreValue}>{personalizationLevel}%</span>
+                  </div>
+                  <div className={styles.progressBar}>
+                    <div className={styles.progressFill} style={{ width: `${personalizationLevel}%` }} />
+                  </div>
+                </div>
+                <div className={styles.globalBox}>
+                  <div className={styles.labelRow}>
+                    <span className="text-[10px] opacity-70">글로벌 지능 풀 (Consensus)</span>
+                    {syncing && <span className={styles.syncingBadge}>Syncing...</span>}
+                  </div>
+                  <div className={styles.scoreGroup}>
+                    <span className={styles.globalValue}>{globalScore.toLocaleString()} pts</span>
+                    <div className={styles.pulseDot} />
+                  </div>
+                </div>
+                <div className={`${styles.detectionBox} ${recalibrating ? styles.penaltyFlash : ""}`}>
+                  <div className={styles.labelRow}>
+                    <span className="text-[10px] opacity-70">선 감지 정확도 (위치 RL)</span>
+                    <span className={styles.detectionValue}>{detectionConf}%</span>
+                  </div>
+                  <div className={styles.progressBar}>
+                    <div className={styles.detectionFill} style={{ width: `${detectionConf}%` }} />
+                  </div>
+                </div>
+              </>
+            )}
           </div>
           <div className={styles.rightHeader}>
-            <div className={styles.badgeRL}>Autonomous RL</div>
+            <div className={styles.badgeRL} onClick={() => setExpertMode(!expertMode)} style={{ cursor: "pointer" }}>
+              {expertMode ? "Expert Mode Active" : "Autonomous RL"}
+            </div>
             {penaltyActive && <div className={styles.penaltyBadge}>Recalibrating...</div>}
+            {topologyMismatch && expertMode && (
+              <div className={styles.mismatchBadge}>
+                ⚠️ 위상학적 불일치 (재보정 중)
+              </div>
+            )}
           </div>
         </div>
 
@@ -701,41 +785,45 @@ export default function ResultPage() {
               </div>
             )}
 
-            {/* ── RL Position Adjustment UI ───────────────────────────── */}
-            <div className={styles.lineAdjust}>
-              <div className={styles.adjustHeader}>
-                <span className={styles.adjustLabel}>선 위치 RL 학습</span>
-                <span className={styles.confPill} style={{ borderColor: res.color, color: res.color }}>
-                  신뢰도 {biases[res.rlKey]?.confidence ?? 0}%
-                </span>
+            {/* ── RL Position Adjustment UI (Expert Mode Only) ────────── */}
+            {expertMode && (
+              <div className={styles.lineAdjust}>
+                <div className={styles.adjustHeader}>
+                  <span className={styles.adjustLabel}>선 위치 RL 학습</span>
+                  <span className={styles.confPill} style={{ borderColor: res.color, color: res.color }}>
+                    신뢰도 {biases[res.rlKey]?.confidence ?? 0}%
+                  </span>
+                </div>
+                <div className={styles.adjustBtns}>
+                  {res.orientation === "horizontal" ? (
+                    <>
+                      <button className={styles.adjustBtn} style={{ borderColor: res.color }} onClick={() => handleLineAdjust(res.rlKey, i, 0, -1)}>↑ 위</button>
+                      <button className={styles.adjustConfirm} style={{ borderColor: res.color, color: res.color }} onClick={() => handleLineConfirm(res.rlKey, i)}>✓ 정확</button>
+                      <button className={styles.adjustBtn} style={{ borderColor: res.color }} onClick={() => handleLineAdjust(res.rlKey, i, 0, 1)}>↓ 아래</button>
+                    </>
+                  ) : (
+                    <>
+                      <button className={styles.adjustBtn} style={{ borderColor: res.color }} onClick={() => handleLineAdjust(res.rlKey, i, -1, 0)}>← 좌</button>
+                      <button className={styles.adjustConfirm} style={{ borderColor: res.color, color: res.color }} onClick={() => handleLineConfirm(res.rlKey, i)}>✓ 정확</button>
+                      <button className={styles.adjustBtn} style={{ borderColor: res.color }} onClick={() => handleLineAdjust(res.rlKey, i, 1, 0)}>→ 우</button>
+                    </>
+                  )}
+                </div>
+                {lineRL[i] === "adjusted"  && <span className={styles.rlFeedback} style={{ color: res.color }}>↻ 위치 재학습 완료 — 선이 이동됐습니다</span>}
+                {lineRL[i] === "confirmed" && <span className={styles.rlFeedback} style={{ color: "#4ade80" }}>✓ 위치 정확도 학습됨 (+10%)</span>}
               </div>
-              <div className={styles.adjustBtns}>
-                {res.orientation === "horizontal" ? (
-                  <>
-                    <button className={styles.adjustBtn} style={{ borderColor: res.color }} onClick={() => handleLineAdjust(res.rlKey, i, 0, -1)}>↑ 위</button>
-                    <button className={styles.adjustConfirm} style={{ borderColor: res.color, color: res.color }} onClick={() => handleLineConfirm(res.rlKey, i)}>✓ 정확</button>
-                    <button className={styles.adjustBtn} style={{ borderColor: res.color }} onClick={() => handleLineAdjust(res.rlKey, i, 0, 1)}>↓ 아래</button>
-                  </>
-                ) : (
-                  <>
-                    <button className={styles.adjustBtn} style={{ borderColor: res.color }} onClick={() => handleLineAdjust(res.rlKey, i, -1, 0)}>← 좌</button>
-                    <button className={styles.adjustConfirm} style={{ borderColor: res.color, color: res.color }} onClick={() => handleLineConfirm(res.rlKey, i)}>✓ 정확</button>
-                    <button className={styles.adjustBtn} style={{ borderColor: res.color }} onClick={() => handleLineAdjust(res.rlKey, i, 1, 0)}>→ 우</button>
-                  </>
-                )}
-              </div>
-              {lineRL[i] === "adjusted"  && <span className={styles.rlFeedback} style={{ color: res.color }}>↻ 위치 재학습 완료 — 선이 이동됐습니다</span>}
-              {lineRL[i] === "confirmed" && <span className={styles.rlFeedback} style={{ color: "#4ade80" }}>✓ 위치 정확도 학습됨 (+10%)</span>}
-            </div>
+            )}
 
-            <div className={styles.ratingBox}>
-              <span className="text-[10px] opacity-50 uppercase tracking-widest">Teaching AI: Give Feedback</span>
-              <div className={styles.stars}>
-                {[1,2,3,4,5].map(star => (
-                  <button key={star} onClick={() => handleRating(i, star)} className={res.rating >= star ? styles.starOn : styles.starOff}>★</button>
-                ))}
+            {expertMode && (
+              <div className={styles.ratingBox}>
+                <span className="text-[10px] opacity-50 uppercase tracking-widest">Teaching AI: Give Feedback</span>
+                <div className={styles.stars}>
+                  {[1,2,3,4,5].map(star => (
+                    <button key={star} onClick={() => handleRating(i, star)} className={res.rating >= star ? styles.starOn : styles.starOff}>★</button>
+                  ))}
+                </div>
               </div>
-            </div>
+            )}
           </div>
         ))}
 

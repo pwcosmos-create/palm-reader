@@ -3,6 +3,7 @@
 import { useRef, useState, useEffect, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import styles from "./scan.module.css";
+import { compressImage } from "@/lib/image_utils";
 
 // ── Palm skin-tone & texture validation ───────────────────────────────────
 function isSkinPixel(r: number, g: number, b: number): boolean {
@@ -11,13 +12,13 @@ function isSkinPixel(r: number, g: number, b: number): boolean {
   const diff = max - min;
   const sat = max === 0 ? 0 : diff / max;
   
-  // Tighten RGB/HSL range: Palm skin is rarely extremely saturated or dark
+  // Balanced Skin Range: Relaxed for indoor lighting and shadows.
   return (
-    r > 95 && g > 55 && b > 40 &&
+    r > 85 && g > 45 && b > 35 &&  // Relaxed from 95/55/40
     r > b && r > g &&
-    diff >= 25 &&
-    sat >= 0.18 && sat <= 0.60 &&
-    r - g >= 8 && r - g <= 55
+    diff >= 22 &&                  // Relaxed from 25
+    sat >= 0.15 && sat <= 0.65 && // Relaxed from 0.18-0.60
+    r - g >= 6 && r - g <= 58
   );
 }
 
@@ -70,11 +71,11 @@ async function validatePalmStrict(dataUrl: string): Promise<{ ok: boolean; reaso
       const variance = ratios.reduce((a, b) => a + Math.pow(b - meanRatio, 2), 0) / 9;
       const stdDev = Math.sqrt(variance);
       
-      // If stdDev is too high (> 0.25), it's likely a face or messy background.
-      if (stdDev > 0.25) return resolve({ ok: false, reason: "LOW_COVERAGE" });
+      // Shadow-tolerant threshold (0.30) - Reject if terrain is too 'cluttered' like a face.
+      if (stdDev > 0.30) return resolve({ ok: false, reason: "LOW_COVERAGE" });
 
-      const highCells = ratios.filter((r) => r >= 0.35).length;
-      if (highCells < 6 || ratios[4] < 0.50) return resolve({ ok: false, reason: "LOW_COVERAGE" });
+      const highCells = ratios.filter((r) => r >= 0.30).length; // Relaxed from 0.35
+      if (highCells < 5 || ratios[4] < 0.45) return resolve({ ok: false, reason: "LOW_COVERAGE" });
 
       // 2. Texture/Edge density analysis (Sobel)
       // Only check edges ON skin area to avoid background noise
@@ -98,7 +99,7 @@ async function validatePalmStrict(dataUrl: string): Promise<{ ok: boolean; reaso
                    + 1 * getG(-1, 1)  + 2 * getG(0, 1)  + 1 * getG(1, 1);
           
           const mag = Math.sqrt(gx * gx + gy * gy);
-          if (mag > 35) { // Increased threshold to filter out facial skin noise
+          if (mag > 30) { // Tuned sensitivity (30) to capture fine lines in dim light
             edgeEnergy++;
             const ci = Math.floor(y / CELL) * GRID + Math.floor(x / CELL);
             cellEdges[ci]++;
@@ -107,15 +108,13 @@ async function validatePalmStrict(dataUrl: string): Promise<{ ok: boolean; reaso
       }
 
       // 2.1 Distributed Texture Check
-      // Palm lines are distributed across the hand.
-      // Facial features are localized (eyes/mouth).
+      // Palm lines are distributed. Facial features are localized.
       const edgyCells = cellEdges.filter((e, idx) => e > (cellSkin[idx] * 0.08)).length;
-      if (edgyCells < 4) return resolve({ ok: false, reason: "NO_TEXTURE" });
+      if (edgyCells < 3) return resolve({ ok: false, reason: "NO_TEXTURE" }); // Relaxed from 4
 
-      // Density = significant edges / skin area
+      // Density threshold (0.10) - Balanced for clear lines vs smooth skin.
       const density = edgeEnergy / skinCount;
-      // Increased density threshold to require actual palm-like markings
-      if (density < 0.12) return resolve({ ok: false, reason: "NO_TEXTURE" });
+      if (density < 0.10) return resolve({ ok: false, reason: "NO_TEXTURE" });
 
       resolve({ ok: true });
     };
@@ -259,8 +258,11 @@ export default function ScanPage() {
         ctx.lineWidth = 2;
         ctx.strokeRect(3, 3, S - 6, S - 6);
 
-        // 6. Export — smaller canvas + lower quality = ~50% less than before
-        resolve(canvas.toDataURL("image/jpeg", 0.65));
+        // 6. Export — optimized via utility (~320px, 0.5 quality)
+        (async () => {
+          const compressed = await compressImage(canvas.toDataURL("image/jpeg", 0.9), 320, 0.5);
+          resolve(compressed);
+        })();
       };
       img.src = raw;
     });

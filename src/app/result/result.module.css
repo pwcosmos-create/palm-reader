@@ -723,6 +723,41 @@
 }
 
 .masterBadge {
+  background: radial-gradient(circle at top right, #0a0a14 0%, #020205 100%);
+  color: #fff;
+  min-height: 100vh;
+  position: relative;
+  overflow-x: hidden;
+  padding-bottom: 4rem;
+}
+
+.noImage {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* 🎨 Fluorescent Neon Utilities */
+.neonText {
+  color: #fff;
+  text-shadow: 
+    0 0 7px #fff,
+    0 0 10px #fff,
+    0 0 21px var(--neon-color),
+    0 0 42px var(--neon-color),
+    0 0 82px var(--neon-color);
+}
+
+@keyframes neonFlame {
+  0%, 100% { filter: drop-shadow(0 0 5px var(--neon-color)); transform: scale(1); }
+  50% { filter: drop-shadow(0 0 20px var(--neon-color)); transform: scale(1.02); }
+}
+
+.neonFlame {
+  animation: neonFlame 2s infinite ease-in-out;
+}
+
+.masterBadge {
   background: linear-gradient(135deg, #FFD700 0%, #FFA500 50%, #B8860B 100%);
   color: #000;
   padding: 0.5rem 1.2rem;

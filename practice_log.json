@@ -1,0 +1,452 @@
+[
+  {
+    "iteration": 1,
+    "loss": "0.5250",
+    "adjustment": {
+      "dx": "0.0015",
+      "dy": "-0.0020"
+    },
+    "status": "⚠️ RECALIBRATING"
+  },
+  {
+    "iteration": 2,
+    "loss": "0.3811",
+    "adjustment": {
+      "dx": "-0.0019",
+      "dy": "-0.0027"
+    },
+    "status": "⚠️ RECALIBRATING"
+  },
+  {
+    "iteration": 3,
+    "loss": "0.2694",
+    "adjustment": {
+      "dx": "0.0003",
+      "dy": "0.0023"
+    },
+    "status": "⚠️ RECALIBRATING"
+  },
+  {
+    "iteration": 4,
+    "loss": "0.4344",
+    "adjustment": {
+      "dx": "-0.0003",
+      "dy": "0.0014"
+    },
+    "status": "⚠️ RECALIBRATING"
+  },
+  {
+    "iteration": 5,
+    "loss": "0.5757",
+    "adjustment": {
+      "dx": "0.0011",
+      "dy": "-0.0021"
+    },
+    "status": "⚠️ RECALIBRATING"
+  },
+  {
+    "iteration": 6,
+    "loss": "0.5946",
+    "adjustment": {
+      "dx": "-0.0012",
+      "dy": "0.0009"
+    },
+    "status": "⚠️ RECALIBRATING"
+  },
+  {
+    "iteration": 7,
+    "loss": "0.2932",
+    "adjustment": {
+      "dx": "-0.0030",
+      "dy": "0.0025"
+    },
+    "status": "⚠️ RECALIBRATING"
+  },
+  {
+    "iteration": 8,
+    "loss": "0.6477",
+    "adjustment": {
+      "dx": "0.0001",
+      "dy": "0.0016"
+    },
+    "status": "⚠️ RECALIBRATING"
+  },
+  {
+    "iteration": 9,
+    "loss": "0.5101",
+    "adjustment": {
+      "dx": "0.0003",
+      "dy": "0.0024"
+    },
+    "status": "⚠️ RECALIBRATING"
+  },
+  {
+    "iteration": 10,
+    "loss": "0.5032",
+    "adjustment": {
+      "dx": "0.0018",
+      "dy": "0.0013"
+    },
+    "status": "⚠️ RECALIBRATING"
+  },
+  {
+    "iteration": 11,
+    "loss": "0.6700",
+    "adjustment": {
+      "dx": "0.0004",
+      "dy": "0.0013"
+    },
+    "status": "⚠️ RECALIBRATING"
+  },
+  {
+    "iteration": 12,
+    "loss": "0.4907",
+    "adjustment": {
+      "dx": "0.0015",
+      "dy": "0.0004"
+    },
+    "status": "⚠️ RECALIBRATING"
+  },
+  {
+    "iteration": 13,
+    "loss": "0.6838",
+    "adjustment": {
+      "dx": "0.0011",
+      "dy": "0.0014"
+    },
+    "status": "⚠️ RECALIBRATING"
+  },
+  {
+    "iteration": 14,
+    "loss": "0.1651",
+    "adjustment": {
+      "dx": "0.0002",
+      "dy": "-0.0011"
+    },
+    "status": "✅ HIGH_FIDELITY"
+  },
+  {
+    "iteration": 15,
+    "loss": "0.7855",
+    "adjustment": {
+      "dx": "-0.0003",
+      "dy": "0.0007"
+    },
+    "status": "⚠️ RECALIBRATING"
+  },
+  {
+    "iteration": 16,
+    "loss": "0.5810",
+    "adjustment": {
+      "dx": "-0.0004",
+      "dy": "0.0000"
+    },
+    "status": "⚠️ RECALIBRATING"
+  },
+  {
+    "iteration": 17,
+    "loss": "0.6769",
+    "adjustment": {
+      "dx": "0.0011",
+      "dy": "-0.0011"
+    },
+    "status": "⚠️ RECALIBRATING"
+  },
+  {
+    "iteration": 18,
+    "loss": "0.3427",
+    "adjustment": {
+      "dx": "0.0031",
+      "dy": "-0.0032"
+    },
+    "status": "⚠️ RECALIBRATING"
+  },
+  {
+    "iteration": 19,
+    "loss": "0.3911",
+    "adjustment": {
+      "dx": "0.0015",
+      "dy": "-0.0022"
+    },
+    "status": "⚠️ RECALIBRATING"
+  },
+  {
+    "iteration": 20,
+    "loss": "0.2862",
+    "adjustment": {
+      "dx": "0.0027",
+      "dy": "-0.0003"
+    },
+    "status": "⚠️ RECALIBRATING"
+  },
+  {
+    "iteration": 21,
+    "loss": "0.4945",
+    "adjustment": {
+      "dx": "-0.0020",
+      "dy": "0.0017"
+    },
+    "status": "⚠️ RECALIBRATING"
+  },
+  {
+    "iteration": 22,
+    "loss": "0.5695",
+    "adjustment": {
+      "dx": "0.0008",
+      "dy": "0.0018"
+    },
+    "status": "⚠️ RECALIBRATING"
+  },
+  {
+    "iteration": 23,
+    "loss": "0.4368",
+    "adjustment": {
+      "dx": "-0.0023",
+      "dy": "0.0008"
+    },
+    "status": "⚠️ RECALIBRATING"
+  },
+  {
+    "iteration": 24,
+    "loss": "0.5534",
+    "adjustment": {
+      "dx": "-0.0004",
+      "dy": "-0.0008"
+    },
+    "status": "⚠️ RECALIBRATING"
+  },
+  {
+    "iteration": 25,
+    "loss": "0.2741",
+    "adjustment": {
+      "dx": "0.0033",
+      "dy": "-0.0034"
+    },
+    "status": "⚠️ RECALIBRATING"
+  },
+  {
+    "iteration": 26,
+    "loss": "0.2516",
+    "adjustment": {
+      "dx": "-0.0006",
+      "dy": "0.0029"
+    },
+    "status": "⚠️ RECALIBRATING"
+  },
+  {
+    "iteration": 27,
+    "loss": "0.5946",
+    "adjustment": {
+      "dx": "-0.0006",
+      "dy": "-0.0015"
+    },
+    "status": "⚠️ RECALIBRATING"
+  },
+  {
+    "iteration": 28,
+    "loss": "0.2477",
+    "adjustment": {
+      "dx": "-0.0013",
+      "dy": "-0.0017"
+    },
+    "status": "⚠️ RECALIBRATING"
+  },
+  {
+    "iteration": 29,
+    "loss": "0.5096",
+    "adjustment": {
+      "dx": "0.0004",
+      "dy": "-0.0016"
+    },
+    "status": "⚠️ RECALIBRATING"
+  },
+  {
+    "iteration": 30,
+    "loss": "0.6242",
+    "adjustment": {
+      "dx": "-0.0008",
+      "dy": "0.0004"
+    },
+    "status": "⚠️ RECALIBRATING"
+  },
+  {
+    "iteration": 31,
+    "loss": "0.4641",
+    "adjustment": {
+      "dx": "-0.0007",
+      "dy": "-0.0017"
+    },
+    "status": "⚠️ RECALIBRATING"
+  },
+  {
+    "iteration": 32,
+    "loss": "0.7199",
+    "adjustment": {
+      "dx": "0.0002",
+      "dy": "-0.0011"
+    },
+    "status": "⚠️ RECALIBRATING"
+  },
+  {
+    "iteration": 33,
+    "loss": "0.3742",
+    "adjustment": {
+      "dx": "-0.0029",
+      "dy": "-0.0017"
+    },
+    "status": "⚠️ RECALIBRATING"
+  },
+  {
+    "iteration": 34,
+    "loss": "0.3701",
+    "adjustment": {
+      "dx": "0.0003",
+      "dy": "-0.0003"
+    },
+    "status": "⚠️ RECALIBRATING"
+  },
+  {
+    "iteration": 35,
+    "loss": "0.2528",
+    "adjustment": {
+      "dx": "0.0002",
+      "dy": "-0.0029"
+    },
+    "status": "⚠️ RECALIBRATING"
+  },
+  {
+    "iteration": 36,
+    "loss": "0.3268",
+    "adjustment": {
+      "dx": "0.0009",
+      "dy": "0.0007"
+    },
+    "status": "⚠️ RECALIBRATING"
+  },
+  {
+    "iteration": 37,
+    "loss": "0.3912",
+    "adjustment": {
+      "dx": "-0.0008",
+      "dy": "0.0008"
+    },
+    "status": "⚠️ RECALIBRATING"
+  },
+  {
+    "iteration": 38,
+    "loss": "0.4387",
+    "adjustment": {
+      "dx": "-0.0015",
+      "dy": "0.0027"
+    },
+    "status": "⚠️ RECALIBRATING"
+  },
+  {
+    "iteration": 39,
+    "loss": "0.5500",
+    "adjustment": {
+      "dx": "0.0007",
+      "dy": "-0.0017"
+    },
+    "status": "⚠️ RECALIBRATING"
+  },
+  {
+    "iteration": 40,
+    "loss": "0.6826",
+    "adjustment": {
+      "dx": "0.0013",
+      "dy": "-0.0005"
+    },
+    "status": "⚠️ RECALIBRATING"
+  },
+  {
+    "iteration": 41,
+    "loss": "0.3630",
+    "adjustment": {
+      "dx": "0.0009",
+      "dy": "-0.0021"
+    },
+    "status": "⚠️ RECALIBRATING"
+  },
+  {
+    "iteration": 42,
+    "loss": "0.2780",
+    "adjustment": {
+      "dx": "0.0035",
+      "dy": "0.0003"
+    },
+    "status": "⚠️ RECALIBRATING"
+  },
+  {
+    "iteration": 43,
+    "loss": "0.3987",
+    "adjustment": {
+      "dx": "-0.0002",
+      "dy": "-0.0026"
+    },
+    "status": "⚠️ RECALIBRATING"
+  },
+  {
+    "iteration": 44,
+    "loss": "0.3828",
+    "adjustment": {
+      "dx": "-0.0007",
+      "dy": "0.0010"
+    },
+    "status": "⚠️ RECALIBRATING"
+  },
+  {
+    "iteration": 45,
+    "loss": "0.4733",
+    "adjustment": {
+      "dx": "-0.0011",
+      "dy": "-0.0022"
+    },
+    "status": "⚠️ RECALIBRATING"
+  },
+  {
+    "iteration": 46,
+    "loss": "0.3933",
+    "adjustment": {
+      "dx": "-0.0030",
+      "dy": "-0.0012"
+    },
+    "status": "⚠️ RECALIBRATING"
+  },
+  {
+    "iteration": 47,
+    "loss": "0.5463",
+    "adjustment": {
+      "dx": "-0.0017",
+      "dy": "0.0005"
+    },
+    "status": "⚠️ RECALIBRATING"
+  },
+  {
+    "iteration": 48,
+    "loss": "0.5297",
+    "adjustment": {
+      "dx": "-0.0009",
+      "dy": "-0.0011"
+    },
+    "status": "⚠️ RECALIBRATING"
+  },
+  {
+    "iteration": 49,
+    "loss": "0.6849",
+    "adjustment": {
+      "dx": "0.0010",
+      "dy": "0.0013"
+    },
+    "status": "⚠️ RECALIBRATING"
+  },
+  {
+    "iteration": 50,
+    "loss": "0.4708",
+    "adjustment": {
+      "dx": "0.0009",
+      "dy": "-0.0017"
+    },
+    "status": "⚠️ RECALIBRATING"
+  }
+]

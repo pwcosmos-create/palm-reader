@@ -24,7 +24,9 @@ interface ArmStats {
 type StyleBandits = Record<string, Record<string, ArmStats>>;
 
 const STYLES: OracleStyle[] = ["Mystical", "Psychological", "Practical", "Visionary"];
+const VISUALS = ["#FF2EF7", "#00F2FF", "#FFD700", "#A855F7"] as const; // Pink, Cyan, Gold, Violet
 const STYLE_KEY = "palm_reader_style_bandit_v1";
+const VISUAL_KEY = "palm_reader_visual_bandit_v1";
 
 export class RLEngine {
   private static STORAGE_KEY = "palm_reader_rl_v3";
@@ -93,6 +95,57 @@ export class RLEngine {
       if (avg > bestAvg) { bestAvg = avg; bestStyle = st as OracleStyle; }
     }
     return { style: bestStyle, exploring: false };
+  }
+
+  /**
+   * ε-greedy for Visual Styles (Neon Colors).
+   * Learns which color provides the best contrast/satisfaction.
+   */
+  static selectVisualStyle(): { color: string; exploring: boolean } {
+    if (typeof window === "undefined") return { color: VISUALS[0], exploring: true };
+    const bandits = JSON.parse(localStorage.getItem(VISUAL_KEY) || "{}");
+    const arms = bandits["global_visual"] || {};
+
+    const totalTrials = VISUALS.reduce((s, c) => s + (arms[c]?.count ?? 0), 0);
+    const epsilon = Math.max(0.1, 1 / (1 + totalTrials * 0.15));
+
+    if (Math.random() < epsilon) {
+      return { color: VISUALS[Math.floor(Math.random() * VISUALS.length)], exploring: true };
+    }
+
+    let bestColor: string = VISUALS[0];
+    let bestAvg = -1;
+    for (const c of VISUALS) {
+      const arm = arms[c];
+      if (!arm || arm.count === 0) continue;
+      const avg = arm.totalRating / arm.count;
+      if (avg > bestAvg) { 
+        bestAvg = avg; 
+        bestColor = c as string; 
+      }
+    }
+    return { color: bestColor, exploring: false };
+  }
+
+  /**
+   * Update both style and visual rewards.
+   */
+  static updateRewards(lineName: string, style: OracleStyle, color: string, rating: number) {
+    this.updateStyleReward(lineName, style, rating);
+    this.updateVisualReward(color, rating);
+  }
+
+  private static updateVisualReward(color: string, rating: number) {
+    if (typeof window === "undefined") return;
+    const reward = (rating - 3) / 2;
+    const bandits = JSON.parse(localStorage.getItem(VISUAL_KEY) || "{}");
+    if (!bandits["global_visual"]) bandits["global_visual"] = {};
+    const arms = bandits["global_visual"];
+    if (!arms[color]) arms[color] = { count: 0, totalRating: 0 };
+    
+    arms[color].count++;
+    arms[color].totalRating += reward;
+    localStorage.setItem(VISUAL_KEY, JSON.stringify(bandits));
   }
 
   /**

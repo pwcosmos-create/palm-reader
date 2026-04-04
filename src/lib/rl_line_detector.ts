@@ -20,6 +20,17 @@ const DEFAULT_BIAS: LineBias = {
   lastDx: 0, lastDy: 0, streakX: 0, streakY: 0,
 };
 
+/**
+ * 🏥 Anatomical Landmark Regions (Omega's Intuition)
+ * These normalized [x0, y0, x1, y1] boxes define where lines MUST be.
+ */
+const LANDMARKS: Record<string, [number, number, number, number]> = {
+  heart: [0.15, 0.15, 0.95, 0.45], // Top horizontal
+  head:  [0.15, 0.35, 0.95, 0.65], // Middle horizontal
+  life:  [0.05, 0.35, 0.55, 0.95], // Curve around thumb
+  fate:  [0.30, 0.30, 0.75, 0.95], // Vertical center
+};
+
 const DEFAULTS: AllBiases = {
   heart: { ...DEFAULT_BIAS },
   head:  { ...DEFAULT_BIAS },
@@ -107,4 +118,87 @@ export const RLLineDetector = {
     const vals = Object.values(this.getBiases());
     return Math.round(vals.reduce((s, b) => s + b.confidence, 0) / vals.length);
   },
+
+  /**
+   * 🤖 Agent Alpha: Pure Pixel Logic
+   * Higher weight to absolute darkness (valley floor).
+   */
+  evaluateAlpha(brightness: number): number {
+    // Inverse sigmoid: 0 (black) -> 1.0, 255 (white) -> 0.0
+    return Math.pow(1 - brightness / 255, 2.5);
+  },
+
+  /**
+   * 🧘 Agent Omega: Anatomical Intuition
+   * Penalizes paths that wander outside the expected landmark box.
+   */
+  evaluateOmega(line: string, nx: number, ny: number): number {
+    const box = LANDMARKS[line];
+    if (!box) return 1.0;
+    const [x0, y0, x1, y1] = box;
+    
+    // Smooth falloff if outside box
+    let dist = 0;
+    if (nx < x0) dist = x0 - nx;
+    else if (nx > x1) dist = nx - x1;
+    if (ny < y0) dist = Math.max(dist, y0 - ny);
+    else if (ny > y1) dist = Math.max(dist, ny - y1);
+
+    return Math.exp(-dist * 12); // Sharp decay outside the 'Veda' zone
+  },
+
+  /**
+   * ⚖️ Collaborative Consensus
+   * Combines Alpha's physical detection with Omega's structural guardrails.
+   */
+  getConsensus(line: string, nx: number, ny: number, brightness: number): number {
+    const alpha = this.evaluateAlpha(brightness);
+    const omega = this.evaluateOmega(line, nx, ny);
+    
+    // If Omega is highly skeptical (outside box), it overrides Alpha's local darkness
+    return alpha * (0.4 + 0.6 * omega);
+  },
+
+  /**
+   * 🌙 Silent Practice Engine (Stage 13)
+   * Simulates line detection on 'ideal' anatomical paths to refine weights.
+   * This runs in the background to fulfill "Continuous Background RL".
+   */
+  practice(iterations = 5): AllBiases {
+    const all = this.getBiases();
+    let updated = false;
+
+    for (const [line, box] of Object.entries(LANDMARKS)) {
+      const b = all[line];
+      if (!b) continue;
+
+      // Ideal center of the landmark box
+      const idealX = (box[0] + box[2]) / 2;
+      const idealY = (box[1] + box[3]) / 2;
+
+      // Current biased "center" (assuming 0.5 is base)
+      const currentX = 0.5 + b.xBias;
+      const currentY = 0.5 + b.yBias;
+
+      // Distance to ideal
+      const dx = idealX - currentX;
+      const dy = idealY - currentY;
+
+      // Practice step: move 10% towards ideal anatomical center
+      // This ensures the AI doesn't drift too far into "Noise" over time.
+      if (Math.abs(dx) > 0.01 || Math.abs(dy) > 0.01) {
+        const pRate = 0.005; 
+        b.xBias += dx * pRate;
+        b.yBias += dy * pRate;
+        // Confidence slowly rises during successful practice
+        b.confidence = Math.min(100, b.confidence + 0.1);
+        updated = true;
+      }
+    }
+
+    if (updated) {
+      localStorage.setItem(KEY, JSON.stringify(all));
+    }
+    return all;
+  }
 };
