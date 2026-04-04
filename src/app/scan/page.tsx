@@ -11,14 +11,14 @@ function isSkinPixel(r: number, g: number, b: number): boolean {
   const min = Math.min(r, g, b);
   const diff = max - min;
   const sat = max === 0 ? 0 : diff / max;
-  
-  // Balanced Skin Range: Relaxed for indoor lighting and shadows.
+
+  // Wide skin range: covers light to dark skin tones, various lighting conditions
   return (
-    r > 85 && g > 45 && b > 35 &&  // Relaxed from 95/55/40
+    r > 60 && g > 35 && b > 20 &&
     r > b && r > g &&
-    diff >= 22 &&                  // Relaxed from 25
-    sat >= 0.15 && sat <= 0.65 && // Relaxed from 0.18-0.60
-    r - g >= 6 && r - g <= 58
+    diff >= 10 &&
+    sat >= 0.06 && sat <= 0.80 &&
+    r - g >= 2 && r - g <= 70
   );
 }
 
@@ -60,22 +60,19 @@ async function validatePalmStrict(dataUrl: string): Promise<{ ok: boolean; reaso
       }
 
       const overallRatio = skinCount / (SIZE * SIZE);
-      if (overallRatio < 0.35) return resolve({ ok: false, reason: "NO_SKIN" });
+      if (overallRatio < 0.18) return resolve({ ok: false, reason: "NO_SKIN" });
 
       const ratios = cellSkin.map((s) => s / (CELL * CELL));
-      
+
       // 1.1 Skin Uniformity Check (Anti-Face)
-      // Faces have high variance in skin coverage due to hair, eyes, and complex features.
-      // Palms are relatively consistent across the 3x3 grid.
       const meanRatio = ratios.reduce((a, b) => a + b, 0) / 9;
       const variance = ratios.reduce((a, b) => a + Math.pow(b - meanRatio, 2), 0) / 9;
       const stdDev = Math.sqrt(variance);
-      
-      // Shadow-tolerant threshold (0.30) - Reject if terrain is too 'cluttered' like a face.
-      if (stdDev > 0.30) return resolve({ ok: false, reason: "LOW_COVERAGE" });
 
-      const highCells = ratios.filter((r) => r >= 0.30).length; // Relaxed from 0.35
-      if (highCells < 5 || ratios[4] < 0.45) return resolve({ ok: false, reason: "LOW_COVERAGE" });
+      if (stdDev > 0.40) return resolve({ ok: false, reason: "LOW_COVERAGE" });
+
+      const highCells = ratios.filter((r) => r >= 0.20).length;
+      if (highCells < 4 || ratios[4] < 0.28) return resolve({ ok: false, reason: "LOW_COVERAGE" });
 
       // 2. Texture/Edge density analysis (Sobel)
       // Only check edges ON skin area to avoid background noise
@@ -108,13 +105,12 @@ async function validatePalmStrict(dataUrl: string): Promise<{ ok: boolean; reaso
       }
 
       // 2.1 Distributed Texture Check
-      // Palm lines are distributed. Facial features are localized.
-      const edgyCells = cellEdges.filter((e, idx) => e > (cellSkin[idx] * 0.08)).length;
-      if (edgyCells < 3) return resolve({ ok: false, reason: "NO_TEXTURE" }); // Relaxed from 4
+      const edgyCells = cellEdges.filter((e, idx) => e > (cellSkin[idx] * 0.05)).length;
+      if (edgyCells < 2) return resolve({ ok: false, reason: "NO_TEXTURE" });
 
-      // Density threshold (0.10) - Balanced for clear lines vs smooth skin.
+      // Density threshold - lenient for dim lighting
       const density = edgeEnergy / skinCount;
-      if (density < 0.10) return resolve({ ok: false, reason: "NO_TEXTURE" });
+      if (density < 0.05) return resolve({ ok: false, reason: "NO_TEXTURE" });
 
       resolve({ ok: true });
     };
