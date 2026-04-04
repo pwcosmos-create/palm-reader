@@ -144,6 +144,13 @@ export default function ScanPage() {
   const [progress, setProgress] = useState(0);
   const [validationError, setValidationError] = useState<string | null>(null);
 
+  // 자동 인식 상태
+  const [autoDetected, setAutoDetected] = useState(false);
+  const [countdown, setCountdown] = useState(0); // 3→2→1→0
+  const autoDetectRef = useRef(false);           // 중복 실행 방지
+  const countdownTimerRef = useRef<ReturnType<typeof setInterval> | null>(null);
+  const beginScanRef = useRef<((raw: string) => void) | null>(null);
+
   const router = useRouter();
 
   // ── Camera ────────────────────────────────────────────────
@@ -167,6 +174,82 @@ export default function ScanPage() {
     startCamera();
     return () => { mounted = false; stream?.getTracks().forEach(t => t.stop()); };
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
+
+  // ── 자동 손바닥 인식 ──────────────────────────────────────
+  useEffect(() => {
+    if (!cameraReady || phase !== "idle") return;
+
+    const CHECK_INTERVAL = 600; // ms
+    let stopped = false;
+
+    const checkFrame = async () => {
+      if (stopped || phase !== "idle") return;
+      const video = videoRef.current;
+      const canvas = canvasRef.current;
+      if (!video || !canvas || video.readyState < 2) return;
+
+      // 저해상도 스냅샷으로 빠르게 검사
+      const tmpCanvas = document.createElement("canvas");
+      tmpCanvas.width = 320; tmpCanvas.height = 240;
+      const tmpCtx = tmpCanvas.getContext("2d")!;
+      tmpCtx.drawImage(video, 0, 0, 320, 240);
+      const dataUrl = tmpCanvas.toDataURL("image/jpeg", 0.6);
+
+      const result = await validatePalmStrict(dataUrl);
+
+      if (stopped) return;
+
+      if (result.ok) {
+        if (!autoDetectRef.current) {
+          // 처음 감지 → 카운트다운 시작
+          autoDetectRef.current = true;
+          setAutoDetected(true);
+          setValidationError(null);
+          let count = 3;
+          setCountdown(count);
+          countdownTimerRef.current = setInterval(() => {
+            count--;
+            setCountdown(count);
+            if (count <= 0) {
+              clearInterval(countdownTimerRef.current!);
+              countdownTimerRef.current = null;
+              autoDetectRef.current = false;
+              setAutoDetected(false);
+              setCountdown(0);
+              // 실제 촬영
+              const v = videoRef.current;
+              const c = canvasRef.current;
+              if (!v || !c || !beginScanRef.current) return;
+              const ctx = c.getContext("2d")!;
+              c.width = v.videoWidth; c.height = v.videoHeight;
+              ctx.filter = "contrast(1.1) brightness(1.05)";
+              ctx.drawImage(v, 0, 0);
+              beginScanRef.current(c.toDataURL("image/jpeg", 0.85));
+            }
+          }, 1000);
+        }
+      } else {
+        // 손 빠져나감 → 카운트다운 리셋
+        if (autoDetectRef.current) {
+          autoDetectRef.current = false;
+          setAutoDetected(false);
+          setCountdown(0);
+          if (countdownTimerRef.current) {
+            clearInterval(countdownTimerRef.current);
+            countdownTimerRef.current = null;
+          }
+        }
+      }
+    };
+
+    const intervalId = setInterval(checkFrame, CHECK_INTERVAL);
+    return () => {
+      stopped = true;
+      clearInterval(intervalId);
+      if (countdownTimerRef.current) clearInterval(countdownTimerRef.current);
+      autoDetectRef.current = false;
+    };
+  }, [cameraReady, phase]); // eslint-disable-line react-hooks/exhaustive-deps
 
   // ── Torch ─────────────────────────────────────────────────
   const toggleTorch = async () => {
@@ -298,6 +381,9 @@ export default function ScanPage() {
     }, totalDuration + 400);
   }, [processImage, router]);
 
+  // beginScan ref 동기화 (useEffect 클로저에서 최신 함수 참조)
+  useEffect(() => { beginScanRef.current = beginScan; }, [beginScan]);
+
   // ── Capture from camera ───────────────────────────────────
   const capturePhoto = async () => {
     const video = videoRef.current;
@@ -396,7 +482,13 @@ export default function ScanPage() {
               <div className={styles.cornerBL} />
               <div className={styles.cornerBR} />
             </div>
-            <p className={styles.guideHint}>손바닥을 가이드 안에 맞춰주세요</p>
+            {autoDetected && countdown > 0 ? (
+              <p className={styles.guideHint} style={{ color: "#00FF7F", fontWeight: 700, fontSize: "1.1rem" }}>
+                ✋ 손바닥 감지됨 — {countdown}초 후 자동 촬영
+              </p>
+            ) : (
+              <p className={styles.guideHint}>손바닥을 가이드 안에 맞춰주세요 — 자동 인식</p>
+            )}
           </div>
         )}
 
