@@ -14,7 +14,7 @@ export async function POST(req: Request) {
     // Strip "data:image/...;base64," prefix
     const base64 = image.replace(/^data:image\/\w+;base64,/, "");
 
-    const model = genAI.getGenerativeModel({ model: "gemini-2.0-flash" });
+    const model = genAI.getGenerativeModel({ model: "gemini-2.5-flash-preview-04-17" });
 
     const prompt = `당신은 전문 손금 분석가입니다. 이 손바닥 이미지를 분석하여 아래 JSON 형식으로 응답하세요. 한국어로 작성하세요.
 
