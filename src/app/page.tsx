@@ -15,7 +15,6 @@ import {
   Camera,
   Layers,
   Flame,
-  Pencil,
   Check,
   RotateCcw,
   X,
@@ -90,6 +89,7 @@ export default function Home() {
     setIsEditing(true);
     setSaveStatus("idle");
   }
+  void startEditing; // editing disabled — kept for future use
 
   async function handleSave() {
     setSaveStatus("saving");
@@ -180,12 +180,7 @@ export default function Home() {
         </div>
       )}
 
-      {/* Floating Edit Button */}
-      {!isEditing && (
-        <button className={styles.editFab} onClick={startEditing} title="홈페이지 편집">
-          <Pencil size={18} />
-        </button>
-      )}
+      {/* Floating Edit Button — hidden */}
 
       {/* 🌌 Animated Cosmic Background */}
       <div className={styles.auroraBg} />
