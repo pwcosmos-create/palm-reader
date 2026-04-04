@@ -533,20 +533,17 @@ export default function ResultPage() {
 
   return (
     <main className={`${styles.container} ${!image ? styles.noImage : ""}`}>
-      {image && (
-        <div className={styles.imageHeader}>
-          <img src={image} alt="Captured palm" className={styles.resultImg} />
-          <canvas ref={canvasRef} className={styles.resultCanvas} />
-          {analyzing && <div className={styles.neuralOverlay} />}
-          {analyzing && (
-            <div className={styles.analyzingOverlay}>
-              <div className={styles.spinner} />
-              <span className={styles.analyzingText}>{analyzingMessage}</span>
-              <div className={styles.stageBar}>
-                <div className={styles.stageProgress} style={{ width: `${(analyzingStage / 3) * 100}%` }} />
-              </div>
-            </div>
-          )}
+      {/* Hidden canvas kept for pixel analysis only */}
+      <canvas ref={canvasRef} style={{ display: "none" }} />
+
+      {/* Analyzing overlay shown full-screen while processing */}
+      {analyzing && (
+        <div className={styles.analyzingOverlay}>
+          <div className={styles.spinner} />
+          <span className={styles.analyzingText}>{analyzingMessage}</span>
+          <div className={styles.stageBar}>
+            <div className={styles.stageProgress} style={{ width: `${(analyzingStage / 3) * 100}%` }} />
+          </div>
         </div>
       )}
 
