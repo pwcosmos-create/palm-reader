@@ -115,54 +115,83 @@ export default function ResultPage() {
       setAnalyzingStage(4); setAnalyzingMessage(stages[3].msg);
       await new Promise(r => setTimeout(r, stages[3].time));
 
-      // ε-greedy style selection — record choices for reward update later
+      // ε-greedy style selection
       const lifeRL  = RLEngine.selectStyle("Life");
       const headRL  = RLEngine.selectStyle("Head");
       const heartRL = RLEngine.selectStyle("Heart");
       const fateRL  = RLEngine.selectStyle("Fate");
-      const visualRL = RLEngine.selectVisualStyle();
-      
+
       selectedStylesRef.current = {
         "생명선 (Life)":  lifeRL.style,
         "두뇌선 (Head)":  headRL.style,
         "감정선 (Heart)": heartRL.style,
         "운명선 (Fate)":  fateRL.style,
-        "__visual_color__": visualRL.color as any // Hack to store color
       };
 
+      // ── Gemini Vision API 호출 ──────────────────────────────────────
+      setAnalyzingMessage("Gemini Vision: 손금 이미지 분석 중...");
+      const palmImage = sessionStorage.getItem("capturedPalm");
+      let geminiData: any = null;
+
+      if (palmImage) {
+        try {
+          const res = await fetch("/api/analyze", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ image: palmImage }),
+          });
+          const json = await res.json();
+          if (json.ok) geminiData = json.data;
+        } catch (e) {
+          console.warn("Gemini API fallback:", e);
+        }
+      }
+
       const resultData: AnalysisResult = {
-        summary: "Gemini의 '신비적 직관'과 Claude의 '논리적 분석'이 결합된 결과입니다. 당신의 손금은 현대 사회에서 강력한 영향력을 행사할 수 있는 '개척자'의 길을 가리키고 있습니다.",
+        summary: geminiData?.summary ?? "AI가 당신의 손금을 분석했습니다. 당신의 손금은 강한 의지와 풍부한 감성을 동시에 지닌 복합적인 성격을 나타냅니다.",
         lines: [
           {
             name: "생명선 (Life)",
-            reading: "",
+            reading: geminiData?.life?.reading ?? "",
             detailedReading: RLEngine.getEvolutionaryContent("Life", lifeRL.style),
             rating: 0, color: "#00FF7F", rlKey: "life", orientation: "vertical",
           },
           {
             name: "두뇌선 (Head)",
-            reading: "",
+            reading: geminiData?.head?.reading ?? "",
             detailedReading: RLEngine.getEvolutionaryContent("Head", headRL.style),
             rating: 0, color: "#00F2FF", rlKey: "head", orientation: "horizontal",
           },
           {
             name: "감정선 (Heart)",
-            reading: "",
+            reading: geminiData?.heart?.reading ?? "",
             detailedReading: RLEngine.getEvolutionaryContent("Heart", heartRL.style),
             rating: 0, color: "#FF2EF7", rlKey: "heart", orientation: "horizontal",
           },
           {
             name: "운명선 (Fate)",
-            reading: "",
+            reading: geminiData?.fate?.reading ?? "",
             detailedReading: RLEngine.getEvolutionaryContent("Fate", fateRL.style),
             rating: 0, color: "#FFD700", rlKey: "fate", orientation: "vertical",
           },
         ],
-        advice: "지금 당신의 잠재력은 85% 이상 활성화되어 있습니다. 새로운 도전을 시작하기에 최적의 시기입니다.",
-        personalizationMsg: level > 10
-          ? `당신의 ${level}% 학습된 성향을 분석하여 맞춤형 통찰을 도출했습니다.`
-          : "초기 분석 단계입니다. 평가를 남겨주시면 AI가 당신의 성향을 더 깊게 학습합니다."
+        advice: geminiData?.advice ?? "오늘은 새로운 시작을 위한 최적의 날입니다.",
+        personalizationMsg: geminiData
+          ? "Gemini Vision AI가 직접 손금 이미지를 분석한 결과입니다."
+          : (level > 10
+            ? `당신의 ${level}% 학습된 성향을 분석하여 맞춤형 통찰을 도출했습니다.`
+            : "초기 분석 단계입니다. 평가를 남겨주시면 AI가 당신의 성향을 더 깊게 학습합니다.")
       };
+
+      // Gemini 점수를 detectedScores에 반영
+      if (geminiData) {
+        setDetectedScores([
+          geminiData.life?.score ?? 50,
+          geminiData.head?.score ?? 50,
+          geminiData.heart?.score ?? 50,
+          geminiData.fate?.score ?? 50,
+        ]);
+      }
 
       setAnalysis(resultData);
       setAnalyzing(false);
@@ -750,9 +779,15 @@ export default function ResultPage() {
                 {detectedScores[i]}%
               </span>
             </div>
-            <p className="mb-4 opacity-90 text-sm leading-relaxed font-semibold" style={{ color: `${res.color}dd` }}>
-              [Pixel Analysis]: {getLineReading(res.name, detectedScores[i])}
-            </p>
+            {res.reading ? (
+              <p className="mb-4 opacity-95 text-sm leading-relaxed" style={{ color: `${res.color}ee` }}>
+                {res.reading}
+              </p>
+            ) : (
+              <p className="mb-4 opacity-90 text-sm leading-relaxed font-semibold" style={{ color: `${res.color}dd` }}>
+                [Pixel Analysis]: {getLineReading(res.name, detectedScores[i])}
+              </p>
+            )}
 
             {/* ── Deep Oracle: 1,500+ Character High-Density Intelligence (Stage 13) ──── */}
             {res.detailedReading && (
