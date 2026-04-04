@@ -139,7 +139,7 @@ export class OracleContent {
 
     return {
       title: base.title,
-      content: `${base.content} ${styleNote} 1,200자 이상의 초정밀 연대기를 통해 당신의 에너지가 흐르는 장대한 궤적을 탐구해 보겠습니다.`
+      content: `${base.content} ${styleNote} 초정밀 연대기 아카이브를 통해 당신의 에너지가 흐르는 장대한 궤적을 탐구해 보겠습니다.`
     };
   }
 

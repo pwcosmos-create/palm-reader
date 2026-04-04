@@ -457,7 +457,7 @@ export default function ResultPage() {
                   style={{ color: res.color, borderColor: `${res.color}44` }}
                   onClick={() => toggleExpand(i)}
                 >
-                  {expandedLines[i] ? "오라클 축소 🏛️" : "심층 오라클 분석 (1,000자+) ✨"}
+                  {expandedLines[i] ? "오라클 축소 🏛️" : "심층 오라클 분석 ✨"}
                 </button>
                 {expandedLines[i] && (
                   <div className={styles.deepContent}>
@@ -471,7 +471,7 @@ export default function ResultPage() {
                       </div>
                     ))}
                     <div className={styles.lengthFoot}>
-                      지능 아카이브 총 {res.detailedReading.totalLength}자 | High-Tech Oracle Engine v2.1
+                      글로벌 지능 아카이브 모드 | High-Tech Oracle Engine v2.1
                     </div>
                   </div>
                 )}
