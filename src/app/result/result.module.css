@@ -709,6 +709,109 @@
  transform: perspective(500px) rotateX(60deg) translateY(0);
  animation: gridMove 20s linear infinite;
 }
+
+/* ── 재물운 & 연애운 독립 카드 ─────────────────────────────────── */
+.luckCard {
+  border-color: rgba(255, 215, 0, 0.2) !important;
+}
+
+.luckCardAccent {
+  position: absolute;
+  top: 0; left: 0; bottom: 0;
+  width: 4px;
+  background: linear-gradient(to bottom, #FFD700, #FF2EF7);
+}
+
+.luckCardTitle {
+  font-size: 1.15rem;
+  margin-bottom: 1.5rem;
+  background: linear-gradient(90deg, #FFD700, #FF2EF7);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.luckBlock {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.luckBlockHeader {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  flex-wrap: wrap;
+}
+
+.luckIcon { font-size: 1.3rem; }
+
+.luckName {
+  font-size: 1rem;
+  font-weight: 800;
+  letter-spacing: 0.05em;
+  color: rgba(255, 255, 255, 0.9);
+}
+
+.luckScore {
+  font-family: 'Cinzel', serif;
+  font-size: 1.4rem;
+  font-weight: 900;
+  margin-left: auto;
+  text-shadow: 0 0 20px currentColor;
+}
+
+.luckBar {
+  width: 100%;
+  height: 8px;
+  background: rgba(255, 255, 255, 0.08);
+  border-radius: 4px;
+  overflow: hidden;
+}
+
+.luckBarFill {
+  height: 100%;
+  border-radius: 4px;
+  transition: width 1.2s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.luckText {
+  font-size: 0.88rem;
+  line-height: 1.65;
+  color: rgba(255, 255, 255, 0.8);
+}
+
+.luckDivider {
+  height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.08), transparent);
+  margin: 1.2rem 0;
+}
+
+.spouseBox {
+  margin-top: 0.5rem;
+  padding: 0.9rem 1rem;
+  background: rgba(255, 46, 247, 0.06);
+  border-left: 3px solid #FF2EF7;
+  border-radius: 0 10px 10px 0;
+}
+
+.spouseTag {
+  display: inline-block;
+  font-size: 0.65rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: #FF2EF7;
+  margin-bottom: 0.4rem;
+}
+
+.spouseText {
+  font-size: 0.82rem;
+  line-height: 1.6;
+  color: rgba(255, 255, 255, 0.8);
+}
+
+/* (legacy, kept for compatibility) */
 .luckDashboard {
   display: grid;
   grid-template-columns: 1fr 1fr;

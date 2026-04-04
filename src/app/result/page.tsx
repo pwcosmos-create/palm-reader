@@ -527,38 +527,77 @@ export default function ResultPage() {
               <div className={styles.aiBadge}>GEMINI-CLAUDE HYBRID ENGINE</div>
               <p className={styles.summaryText}>{analysis.summary}</p>
             </div>
-            
-            {/* 💰 [NEW] Wealth & Love Luck Dashboard 💖 */}
-            <div className={styles.luckDashboard}>
-              <div className={styles.luckItem}>
-                <div className={styles.luckLabel}>
-                  💰 재물운 (Wealth)
-                  {analysis.lines[0].detailedReading?.wealthLuck.rareMark && (
-                    <span className={styles.rareMarkBadge}>★ {analysis.lines[0].detailedReading.wealthLuck.rareMark}</span>
-                  )}
-                </div>
-                <div className={styles.luckScoreBar}>
-                  <div className={styles.luckFill} style={{ width: `${analysis.lines[0].detailedReading?.wealthLuck.score ?? 85}%`, backgroundColor: '#FFD700' }} />
-                </div>
-                <div className={styles.luckScoreValue}>{analysis.lines[0].detailedReading?.wealthLuck.score ?? 85}%</div>
+            <div className={styles.personalizationMsg}>{analysis.personalizationMsg}</div>
+          </div>
+        )}
+
+        {/* ── 재물운 & 연애운 독립 카드 ── */}
+        {analysis && visibleItems >= 2 && (
+          <div className={`${styles.premiumCard} ${styles.luckCard} fade-in-up`}>
+            <div className={styles.luckCardAccent} />
+            <h3 className={`mystical-font ${styles.luckCardTitle}`}>✦ 오늘의 운세</h3>
+
+            {/* 재물운 */}
+            <div className={styles.luckBlock}>
+              <div className={styles.luckBlockHeader}>
+                <span className={styles.luckIcon}>💰</span>
+                <span className={styles.luckName}>재물운</span>
+                <span className={styles.luckScore} style={{ color: "#FFD700" }}>
+                  {analysis.lines[0].detailedReading?.wealthLuck.score ?? 85}%
+                </span>
                 {analysis.lines[0].detailedReading?.wealthLuck.rareMark && (
-                  <div className={styles.rareMarkDetail}>희귀한 대박 문양이 감지되었습니다!</div>
+                  <span className={styles.rareMarkBadge}>
+                    ★ {analysis.lines[0].detailedReading.wealthLuck.rareMark}
+                  </span>
                 )}
               </div>
-              <div className={styles.luckItem}>
-                <div className={styles.luckLabel}>💖 연애운 (Love)</div>
-                <div className={styles.luckScoreBar}>
-                  <div className={styles.luckFill} style={{ width: `${analysis.lines[0].detailedReading?.loveLuck.score ?? 88}%`, backgroundColor: '#FF2EF7' }} />
-                </div>
-                <div className={styles.luckScoreValue}>{analysis.lines[0].detailedReading?.loveLuck.score ?? 88}%</div>
-                <div className={styles.spouseLuckBox}>
-                  <span className={styles.spouseLabel}>배우자운:</span>
-                  {analysis.lines[0].detailedReading?.loveLuck.spouseLuck}
-                </div>
+              <div className={styles.luckBar}>
+                <div
+                  className={styles.luckBarFill}
+                  style={{
+                    width: `${analysis.lines[0].detailedReading?.wealthLuck.score ?? 85}%`,
+                    background: "linear-gradient(90deg, #b8860b, #FFD700)",
+                  }}
+                />
               </div>
+              <p className={styles.luckText}>
+                {analysis.lines[0].detailedReading?.wealthLuck.text}
+              </p>
+              {analysis.lines[0].detailedReading?.wealthLuck.rareMark && (
+                <div className={styles.rareMarkDetail}>✦ 희귀 문양 감지 — 대박 기운이 손금에 새겨져 있습니다!</div>
+              )}
             </div>
 
-            <div className={styles.personalizationMsg}>{analysis.personalizationMsg}</div>
+            <div className={styles.luckDivider} />
+
+            {/* 연애운 */}
+            <div className={styles.luckBlock}>
+              <div className={styles.luckBlockHeader}>
+                <span className={styles.luckIcon}>💖</span>
+                <span className={styles.luckName}>연애운</span>
+                <span className={styles.luckScore} style={{ color: "#FF2EF7" }}>
+                  {analysis.lines[0].detailedReading?.loveLuck.score ?? 88}%
+                </span>
+              </div>
+              <div className={styles.luckBar}>
+                <div
+                  className={styles.luckBarFill}
+                  style={{
+                    width: `${analysis.lines[0].detailedReading?.loveLuck.score ?? 88}%`,
+                    background: "linear-gradient(90deg, #9b1a8a, #FF2EF7)",
+                  }}
+                />
+              </div>
+              <p className={styles.luckText}>
+                {analysis.lines[0].detailedReading?.loveLuck.text}
+              </p>
+              <div className={styles.spouseBox}>
+                <span className={styles.spouseTag}>배우자운</span>
+                <p className={styles.spouseText}>
+                  {analysis.lines[0].detailedReading?.loveLuck.spouseLuck}
+                </p>
+              </div>
+            </div>
           </div>
         )}
 
