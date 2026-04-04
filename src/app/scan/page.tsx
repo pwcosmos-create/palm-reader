@@ -12,13 +12,13 @@ function isSkinPixel(r: number, g: number, b: number): boolean {
   const diff = max - min;
   const sat = max === 0 ? 0 : diff / max;
 
-  // Wide skin range: covers light to dark skin tones, various lighting conditions
+  // Skin range: covers various skin tones and lighting conditions
   return (
-    r > 60 && g > 35 && b > 20 &&
+    r > 70 && g > 40 && b > 20 &&
     r > b && r > g &&
-    diff >= 10 &&
-    sat >= 0.06 && sat <= 0.80 &&
-    r - g >= 2 && r - g <= 70
+    diff >= 15 &&
+    sat >= 0.10 && sat <= 0.75 &&
+    r - g >= 4 && r - g <= 65
   );
 }
 
@@ -60,29 +60,28 @@ async function validatePalmStrict(dataUrl: string): Promise<{ ok: boolean; reaso
       }
 
       const overallRatio = skinCount / (SIZE * SIZE);
-      if (overallRatio < 0.18) return resolve({ ok: false, reason: "NO_SKIN" });
+      if (overallRatio < 0.25) return resolve({ ok: false, reason: "NO_SKIN" });
 
       const ratios = cellSkin.map((s) => s / (CELL * CELL));
 
-      // 1.1 Skin Uniformity Check (Anti-Face)
+      // 1.1 Skin Uniformity Check (Anti-Face/Object)
       const meanRatio = ratios.reduce((a, b) => a + b, 0) / 9;
       const variance = ratios.reduce((a, b) => a + Math.pow(b - meanRatio, 2), 0) / 9;
       const stdDev = Math.sqrt(variance);
 
-      if (stdDev > 0.40) return resolve({ ok: false, reason: "LOW_COVERAGE" });
+      if (stdDev > 0.35) return resolve({ ok: false, reason: "LOW_COVERAGE" });
 
-      const highCells = ratios.filter((r) => r >= 0.20).length;
-      if (highCells < 4 || ratios[4] < 0.28) return resolve({ ok: false, reason: "LOW_COVERAGE" });
+      const highCells = ratios.filter((r) => r >= 0.25).length;
+      if (highCells < 5 || ratios[4] < 0.35) return resolve({ ok: false, reason: "LOW_COVERAGE" });
 
       // 2. Texture/Edge density analysis (Sobel)
-      // Only check edges ON skin area to avoid background noise
       let edgeEnergy = 0;
       const cellEdges = new Array(GRID * GRID).fill(0);
-      
+
       for (let y = 1; y < SIZE - 1; y++) {
         for (let x = 1; x < SIZE - 1; x++) {
           if (!totalSkinPixels[y * SIZE + x]) continue;
-          
+
           const getG = (ox: number, oy: number) => {
             const i = ((y + oy) * SIZE + (x + ox)) * 4;
             return (data[i] * 0.299 + data[i + 1] * 0.587 + data[i + 2] * 0.114); // Gray scale
@@ -105,12 +104,11 @@ async function validatePalmStrict(dataUrl: string): Promise<{ ok: boolean; reaso
       }
 
       // 2.1 Distributed Texture Check
-      const edgyCells = cellEdges.filter((e, idx) => e > (cellSkin[idx] * 0.05)).length;
-      if (edgyCells < 2) return resolve({ ok: false, reason: "NO_TEXTURE" });
+      const edgyCells = cellEdges.filter((e, idx) => e > (cellSkin[idx] * 0.07)).length;
+      if (edgyCells < 3) return resolve({ ok: false, reason: "NO_TEXTURE" });
 
-      // Density threshold - lenient for dim lighting
       const density = edgeEnergy / skinCount;
-      if (density < 0.05) return resolve({ ok: false, reason: "NO_TEXTURE" });
+      if (density < 0.07) return resolve({ ok: false, reason: "NO_TEXTURE" });
 
       resolve({ ok: true });
     };
@@ -120,12 +118,12 @@ async function validatePalmStrict(dataUrl: string): Promise<{ ok: boolean; reaso
 }
 
 const ANALYSIS_STEPS = [
-  { label: "손바닥 형상 인식", detail: "Palm geometry mapped" },
-  { label: "주요 선 추출 중", detail: "Extracting major lines" },
-  { label: "신경망 특징 분석", detail: "Neural feature extraction" },
-  { label: "운명선 패턴 해석", detail: "Fate line pattern decoded" },
-  { label: "생명력 지수 측정", detail: "Vitality index calibrated" },
-  { label: "최종 운명 보고서 생성", detail: "Destiny report compiled" },
+  { label: "손바닥 모양 인식", detail: "손바닥 모양을 확인했어요" },
+  { label: "주요 선 찾는 중", detail: "중요한 선들을 찾고 있어요" },
+  { label: "인공지능 특징 분석", detail: "나만의 특징을 공부 중이에요" },
+  { label: "운명 패턴 해석 중", detail: "미래 그림을 그려보고 있어요" },
+  { label: "생명력 지수 측정", detail: "얼마나 씩씩한지 살펴봐요" },
+  { label: "비밀 보고서 생성", detail: "나만의 보물지도가 완성됐어요!" },
 ];
 
 export default function ScanPage() {
