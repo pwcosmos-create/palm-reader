@@ -11,8 +11,8 @@
 |---|---|---|
 | `src/app/scan/page.tsx` | Gemini | ✅ 고정밀 분석 최적화 완료 |
 | `src/app/scan/scan.module.css` | Claude | ✅ 완료 |
-| `src/app/result/page.tsx` | Gemini | ✅ 고도화 분석 & 재물/연애운 통합 완료 |
-| `src/app/result/result.module.css` | Gemini | ✅ 완료 |
+| `src/app/result/page.tsx` | Gemini | ✅ 희귀 문양(M자) & 배우자운 통합 완료 |
+| `src/app/result/result.module.css` | Gemini | ✅ 커뮤니티 트렌드 UI 반영 완료 |
 | `App & Web 반응형 전환` | 공동 | ✅ 합의 완료 |
 | `AI 공동 집필 분석 로직` | 공동 | ✅ 완료 |
 | `src/app/page.tsx` (홈) | - | 미배정 |

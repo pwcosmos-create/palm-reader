@@ -1,43 +1,76 @@
 .container {
+  position: relative;
+  width: 100%;
   min-height: 100vh;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  position: relative;
-  overflow: hidden;
-  padding: 2rem;
-}
-
-.content {
-  position: relative;
-  z-index: 2;
-  text-align: center;
-  max-width: 600px;
+  background: #050510;
   display: flex;
   flex-direction: column;
-  align-items: center;
-  gap: 2rem;
+  overflow-x: hidden;
+  color: #fff;
+}
+
+.auroraBg {
+  position: absolute;
+  top: -50%;
+  left: -50%;
+  width: 200%;
+  height: 200%;
+  background: radial-gradient(circle at 50% 50%, rgba(0, 242, 255, 0.08) 0%, transparent 40%),
+              radial-gradient(circle at 20% 30%, rgba(168, 85, 247, 0.05) 0%, transparent 30%);
+  filter: blur(100px);
+  animation: aurora-move 30s linear infinite;
+  z-index: 1;
+}
+
+@keyframes aurora-move {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
 }
 
 .starField {
   position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  background: radial-gradient(white, rgba(255,255,255,0)) 0 0/2px 2px;
-  opacity: 0.1;
-  animation: drift 60s linear infinite;
+  inset: 0;
+  background-image: 
+    radial-gradient(1px 1px at 20px 30px, #fff, rgba(0,0,0,0)),
+    radial-gradient(1px 1px at 40px 70px, #fff, rgba(0,0,0,0)),
+    radial-gradient(1.5px 1.5px at 150px 200px, rgba(0, 242, 255, 0.4), rgba(0,0,0,0));
+  background-size: 300px 300px;
+  opacity: 0.3;
+  z-index: 2;
+  animation: stars-drift 100s linear infinite;
 }
 
-@keyframes drift {
-  from { transform: translateY(0); }
-  to { transform: translateY(-100%); }
+@keyframes stars-drift {
+  from { background-position: 0 0; }
+  to { background-position: 300px 600px; }
 }
 
-.logoContainer {
+.content {
   position: relative;
-  margin-bottom: 2rem;
+  z-index: 10;
+  max-width: 800px;
+  margin: 0 auto;
+  padding: 4rem 1.5rem;
+  display: flex;
+  flex-direction: column;
+  gap: 4rem;
+  align-items: center;
+}
+
+.hero {
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1.5rem;
+}
+
+.logoWrapper {
+  position: relative;
+  padding: 2rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
 }
 
 .palmPulse {
@@ -45,47 +78,285 @@
   top: 50%;
   left: 50%;
   transform: translate(-50%, -50%);
-  width: 154px;
-  height: 154px;
-  background: radial-gradient(circle, var(--accent) 0%, transparent 70%);
+  width: 140px;
+  height: 140px;
+  background: radial-gradient(circle, rgba(0, 242, 255, 0.15) 0%, transparent 70%);
   border-radius: 50%;
-  z-index: -1;
-  animation: pulse 4s infinite alternate;
-  filter: blur(20px);
+  animation: pulse-glow 3s infinite ease-in-out;
 }
 
-@keyframes pulse {
-  0% { transform: translate(-50%, -50%) scale(0.8); opacity: 0.2; }
-  100% { transform: translate(-50%, -50%) scale(1.3); opacity: 0.5; }
+@keyframes pulse-glow {
+  0%, 100% { transform: translate(-50%, -50%) scale(1); opacity: 0.5; }
+  50% { transform: translate(-50%, -50%) scale(1.3); opacity: 0.8; }
 }
 
-.tagline {
-  font-size: 1.1rem;
-  opacity: 0.8;
+.scannerLine {
+  position: absolute;
+  top: 20%;
+  left: 5%;
+  right: 5%;
+  height: 2px;
+  background: linear-gradient(90deg, transparent, var(--primary), transparent);
+  box-shadow: 0 0 15px var(--primary);
+  animation: scan-move 4s infinite ease-in-out;
+  z-index: 5;
+}
+
+@keyframes scan-move {
+  0%, 100% { transform: translateY(0); opacity: 0.2; }
+  50% { transform: translateY(140px); opacity: 0.8; }
+}
+
+.hero h1 {
+  font-size: clamp(3rem, 10vw, 5.5rem);
+  letter-spacing: 0.15em;
+  margin: 0;
+  position: relative;
+  z-index: 10;
+}
+
+.heroTagline {
+  font-size: 1.15rem;
   line-height: 1.6;
-  margin-bottom: 1rem;
-  text-wrap: balance;
+  opacity: 0.85;
+  color: rgba(255, 255, 255, 0.9);
+  max-width: 500px;
+}
+
+.heroTagline span {
+  font-size: 0.95rem;
+  opacity: 0.7;
+  display: block;
+  margin-top: 0.5rem;
+}
+
+.statusBadges {
+  display: flex;
+  gap: 1rem;
+  margin-top: 1rem;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+
+.statusBadge, .statusBadgeSecondary {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 14px;
+  border-radius: 30px;
+  font-size: 0.75rem;
+  font-weight: 700;
+  backdrop-filter: blur(10px);
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+}
+
+.statusBadge {
+  background: rgba(0, 242, 255, 0.1);
+  border: 1px solid rgba(0, 242, 255, 0.3);
+  color: var(--primary);
+}
+
+.statusBadgeSecondary {
+  background: rgba(168, 85, 247, 0.1);
+  border: 1px solid rgba(168, 85, 247, 0.3);
+  color: #a855f7;
+}
+
+.ctaSection {
+  width: 100%;
+  display: flex;
+  justify-content: center;
+}
+
+.mainCta {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 1.4rem 3.5rem;
+  background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
+  border-radius: 50px;
+  font-weight: 800;
+  font-size: 1.1rem;
+  text-decoration: none;
+  color: #000;
+  box-shadow: 0 0 30px rgba(0, 242, 255, 0.4);
+  transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+  letter-spacing: 0.5px;
+}
+
+.mainCta:hover {
+  transform: translateY(-5px) scale(1.05);
+  box-shadow: 0 0 50px rgba(0, 242, 255, 0.7);
 }
 
 .featureGrid {
   display: grid;
-  grid-template-columns: 1fr 1fr;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
   gap: 1.5rem;
   width: 100%;
 }
 
-.footer {
-  margin-top: 4rem;
+.featureCard {
+  padding: 2.2rem;
   display: flex;
-  gap: 2rem;
-  font-size: 0.9rem;
+  flex-direction: column;
+  gap: 1.2rem;
+  transition: transform 0.4s ease, border-color 0.4s ease;
+  animation: float 6s infinite ease-in-out;
 }
 
-@media (max-width: 480px) {
-  .featureGrid {
-    grid-template-columns: 1fr;
+.featureCard:nth-child(2) { animation-delay: 1s; }
+.featureCard:nth-child(3) { animation-delay: 2s; }
+
+@keyframes float {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-10px); }
+}
+
+.featureCard:hover {
+  border-color: rgba(255, 255, 255, 0.2);
+  transform: scale(1.02);
+}
+
+.iconBox {
+  width: 48px;
+  height: 48px;
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 0.5rem;
+}
+
+.featureCard h3 {
+  font-size: 1.2rem;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  color: var(--primary);
+}
+
+.featureCard p {
+  font-size: 0.9rem;
+  line-height: 1.6;
+  opacity: 0.7;
+}
+
+.processSection {
+  width: 100%;
+  padding: 2rem 0;
+}
+
+.processPath {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  max-width: 600px;
+  margin: 0 auto;
+}
+
+.processStep {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1rem;
+}
+
+.stepCircle {
+  width: 50px;
+  height: 50px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  backdrop-filter: blur(5px);
+  color: var(--primary);
+  box-shadow: 0 0 15px rgba(0, 242, 255, 0.1);
+}
+
+.processLine {
+  flex: 1;
+  height: 1px;
+  background: linear-gradient(90deg, rgba(255, 255, 255, 0), rgba(255, 255, 255, 0.2), rgba(255, 255, 255, 0));
+  margin: 0 1rem;
+}
+
+.processStep span {
+  font-size: 0.75rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  opacity: 0.6;
+}
+
+.footer {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2rem;
+  padding-top: 4rem;
+  border-top: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.footerLinks {
+  display: flex;
+  gap: 2.5rem;
+}
+
+.footerLink {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  text-decoration: none;
+  color: #fff;
+  opacity: 0.6;
+  font-size: 0.9rem;
+  font-weight: 600;
+  transition: opacity 0.3s;
+}
+
+.footerLink:hover {
+  opacity: 1;
+  color: var(--primary);
+}
+
+.copyright {
+  font-size: 0.75rem;
+  opacity: 0.3;
+  letter-spacing: 1px;
+}
+
+/* Animations */
+.fade-in-up {
+  opacity: 0;
+  transform: translateY(30px);
+  animation: fadeInUp 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+@keyframes fadeInUp {
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@media (max-width: 600px) {
+  .processPath {
+    flex-direction: column;
+    gap: 2rem;
   }
-  .footer {
+  .processLine {
+    width: 1px;
+    height: 40px;
+    margin: 0.5rem 0;
+  }
+  .hero h1 {
+    font-size: 3.5rem;
+  }
+  .footerLinks {
     flex-direction: column;
     gap: 1rem;
     align-items: center;
