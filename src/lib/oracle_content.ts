@@ -1,4 +1,4 @@
-﻿/**
+/**
  * Evolutionary Oracle Content Engine 📜🧬
  * Generates 1,500+ character deep analysis for palm lines, wealth, love, and rare marks.
  */
@@ -10,6 +10,7 @@ export interface DeepReading {
   sections: { title: string; content: string }[];
   wealthLuck: { score: number; text: string; rareMark?: string };
   loveLuck: { score: number; text: string; spouseLuck: string };
+  topologyData?: { points: number; curvature: string; stability: string };
 }
 
 export class OracleContent {
@@ -25,6 +26,7 @@ export class OracleContent {
       ],
       wealthLuck: this.getWealthLuck(style, seed),
       loveLuck: this.getLoveLuck(style, seed),
+      topologyData: this.getTopologyData(lineName, seed),
     };
   }
 
@@ -99,7 +101,7 @@ export class OracleContent {
       "타고난 경제적 통찰력이 뛰어납니다. 푼돈보다 큰 흐름을 읽는 안목이 있으며, 특히 " + (isRare ? "M자형 구조" : "선명한 태양선") + "가 부의 증식을 94%의 확률로 보장합니다.",
     ];
     return {
-      score: this.pick(scores as any, seed),
+      score: this.pickScore(scores, seed),
       text: this.pick(texts, seed),
       rareMark: isRare ? this.pick(rareMarks, seed) : undefined
     };
@@ -117,9 +119,19 @@ export class OracleContent {
       "정서적 안식처가 되는 따뜻한 사랑이 지표로 나타나고 있습니다. 배려와 존중을 바탕으로 한 평생의 인연이 당신의 곁을 지킬 것입니다.",
     ];
     return {
-      score: this.pick(scores as any, seed),
+      score: this.pickScore(scores, seed),
       text: this.pick(texts, seed),
       spouseLuck: this.pick(spouseTips, seed)
+    };
+  }
+
+  private static getTopologyData(line: string, seed: number) {
+    const curvatures = ["Linear (0.12)", "Parabolic (0.45)", "S-Curve (0.88)", "Fragmented"];
+    const stabilities = ["Stable", "High Variance", "Evolving", "Master Confirmed"];
+    return {
+      points: 12 + (seed % 10),
+      curvature: this.pick(curvatures, seed),
+      stability: this.pick(stabilities, seed)
     };
   }
 
@@ -148,6 +160,10 @@ export class OracleContent {
   }
 
   private static pick(arr: string[], seed: number): string {
+    return arr[seed % arr.length];
+  }
+
+  private static pickScore(arr: number[], seed: number): number {
     return arr[seed % arr.length];
   }
 }

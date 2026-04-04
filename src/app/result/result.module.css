@@ -797,11 +797,43 @@
   border-radius: 0 8px 8px 0;
 }
 
-.spouseLabel {
-  display: block;
+.summaryBox {
+  margin-top: 1rem;
+  padding: 1.2rem;
+  background: rgba(0, 242, 255, 0.05);
+  border-left: 3px solid var(--primary);
+  border-radius: 0 16px 16px 0;
+  margin-bottom: 2rem;
+}
+
+.aiBadge {
   font-size: 0.6rem;
-  font-weight: bold;
-  color: #FF2EF7;
+  font-weight: 900;
+  color: var(--primary);
+  letter-spacing: 2px;
+  margin-bottom: 0.5rem;
+  opacity: 0.8;
+}
+
+.topologyRow {
+  display: flex;
+  gap: 12px;
+  margin-bottom: 1rem;
+  padding: 8px 12px;
+  background: rgba(255, 255, 255, 0.02);
+  border-radius: 8px;
+  border: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.topoItem {
+  font-size: 0.6rem;
+  color: rgba(255, 255, 255, 0.4);
   text-transform: uppercase;
-  margin-bottom: 4px;
+  letter-spacing: 1px;
+}
+
+.topoItem span {
+  color: #fff;
+  font-weight: bold;
+  margin-left: 4px;
 }

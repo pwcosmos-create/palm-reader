@@ -448,7 +448,10 @@ export default function ResultPage() {
           <div className={`${styles.premiumCard} ${styles.summaryCard} fade-in-up`}>
             <div className={styles.cardAccent} />
             <h3 className="mystical-font text-xl mb-3">Overall Destiny</h3>
-            <p className={styles.summaryText}>{analysis.summary}</p>
+            <div className={styles.summaryBox}>
+              <div className={styles.aiBadge}>GEMINI-CLAUDE HYBRID ENGINE</div>
+              <p className={styles.summaryText}>{analysis.summary}</p>
+            </div>
             
             {/* 💰 [NEW] Wealth & Love Luck Dashboard 💖 */}
             <div className={styles.luckDashboard}>
@@ -494,7 +497,19 @@ export default function ResultPage() {
               <h3 style={{ color: res.color }}>{res.name}</h3>
               <div className={styles.badge} style={{ borderColor: res.color, color: res.color }}>Analysis Complete</div>
             </div>
-            <p className="mb-4 opacity-90 text-sm leading-relaxed">{res.reading}</p>
+            
+            {/* Technical Topology Metadata 🧬 */}
+            {res.detailedReading?.topologyData && (
+              <div className={styles.topologyRow}>
+                <div className={styles.topoItem}>Points: <span>{res.detailedReading.topologyData.points}</span></div>
+                <div className={styles.topoItem}>Curve: <span>{res.detailedReading.topologyData.curvature}</span></div>
+                <div className={styles.topoItem}>Status: <span>{res.detailedReading.topologyData.stability}</span></div>
+              </div>
+            )}
+
+            <p className="mb-4 opacity-90 text-sm leading-relaxed font-semibold" style={{ color: `${res.color}dd` }}>
+              [High-Precision Scan]: {res.reading}
+            </p>
 
             {/* ── Deep Oracle: 1,500+ Character High-Density Intelligence (Stage 13) ──── */}
             {res.detailedReading && (
