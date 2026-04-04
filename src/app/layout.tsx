@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import "./globals.css";
+import GlobalEditFab from "@/components/GlobalEditFab";
 
 export const metadata: Metadata = {
   title: "AI PALMIST | Next-Gen Evolutionary Palmistry",
@@ -21,6 +22,7 @@ export default function RootLayout({
         <div className="app-container">
           {children}
         </div>
+        <GlobalEditFab />
         <script
           dangerouslySetInnerHTML={{
             __html: `

@@ -76,7 +76,12 @@ export default function Home() {
       const loaded = serverConfig ?? loadConfig();
       setConfig(loaded);
       setDraft(loaded);
-      if (serverConfig) saveConfig(serverConfig); // sync cache
+      if (serverConfig) saveConfig(serverConfig);
+      // 다른 페이지에서 연필 버튼 클릭 시 자동 편집 모드 진입
+      if (new URLSearchParams(window.location.search).get("edit") === "1") {
+        setIsEditing(true);
+        window.history.replaceState({}, "", "/");
+      }
     });
   }, []);
 
