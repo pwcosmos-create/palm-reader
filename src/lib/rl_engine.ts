@@ -5,31 +5,42 @@ export type AgentRole = "Alpha" | "Omega";
 export interface AgentSynergy {
   agentId: string;
   role: AgentRole;
-  contribution: number; // 0 to 1
+  contribution: number;
   specialty: string;
 }
 
 interface LineReward {
   lineName: string;
-  rating: number; // 1 to 5
+  rating: number;
   timestamp: number;
-  synergyId?: string; // Link to a collaborative training session
+  synergyId?: string;
 }
 
-export class RLEngine {
-  private static STORAGE_KEY = 'palm_reader_rl_v3';
+// ── ε-greedy Bandit state per (line × style) ─────────────────────────────────
+interface ArmStats {
+  count: number;       // times this style was selected
+  totalRating: number; // cumulative reward
+}
+type StyleBandits = Record<string, Record<string, ArmStats>>;
 
+const STYLES: OracleStyle[] = ["Mystical", "Psychological", "Practical", "Visionary"];
+const STYLE_KEY = "palm_reader_style_bandit_v1";
+
+export class RLEngine {
+  private static STORAGE_KEY = "palm_reader_rl_v3";
+
+  // ── Basic reward history ────────────────────────────────────────────────
   static saveReward(lineName: string, rating: number, synergyId?: string) {
-    if (typeof window === 'undefined') return;
+    if (typeof window === "undefined") return;
     const history = this.getHistory();
     history.push({ lineName, rating, timestamp: Date.now(), synergyId });
     localStorage.setItem(this.STORAGE_KEY, JSON.stringify(history.slice(-100)));
   }
 
   static getHistory(): LineReward[] {
-    if (typeof window === 'undefined') return [];
+    if (typeof window === "undefined") return [];
     try {
-      return JSON.parse(localStorage.getItem(this.STORAGE_KEY) || '[]');
+      return JSON.parse(localStorage.getItem(this.STORAGE_KEY) || "[]");
     } catch {
       return [];
     }
@@ -37,102 +48,104 @@ export class RLEngine {
 
   static getPersonalizationLevel(): number {
     const history = this.getHistory();
-    if (history.length === 0) return 0;
     return Math.min(100, Math.floor((history.length / 20) * 100));
   }
 
+  // ── ε-greedy Bandit: content style selection ────────────────────────────
+  private static getBandits(): StyleBandits {
+    try {
+      return JSON.parse(localStorage.getItem(STYLE_KEY) || "{}");
+    } catch {
+      return {};
+    }
+  }
+
+  private static saveBandits(b: StyleBandits) {
+    localStorage.setItem(STYLE_KEY, JSON.stringify(b));
+  }
+
   /**
-   * 🤝 Collaborative Evolution Logic
-   * Simulates a 2-agent synergy (Alpha: Visual, Omega: Narrative)
+   * Select oracle style for a line using ε-greedy:
+   *   ε = max(0.1, 1 / (1 + totalTrials × 0.15))  → explores early, exploits later
+   * Returns both the chosen style and exploration flag for display.
    */
-  static async collaborativeEvolve(imageUrl: string, nodeType: 'ARCHIVE' | 'MODERN' = 'MODERN'): Promise<{
-    synergyId: string;
-    maturityGain: number;
-    agents: AgentSynergy[]
-  }> {
-    const synergyId = `SYN-${nodeType}-${Math.random().toString(36).substring(2, 9).toUpperCase()}`;
-    
-    // Agent Alpha: Visual Detection Scan
-    const agentAlpha: AgentSynergy = {
-      agentId: "ALPHA-01",
-      role: "Alpha",
-      contribution: 0.6,
-      specialty: "High-Precision Line Topology"
-    };
+  static selectStyle(lineName: string): { style: OracleStyle; exploring: boolean } {
+    if (typeof window === "undefined") return { style: "Mystical", exploring: true };
+    const bandits = this.getBandits();
+    const arms = bandits[lineName] || {};
 
-    // Agent Omega: Narrative Contextualization
-    const agentOmega: AgentSynergy = {
-      agentId: "OMEGA-01",
-      role: "Omega",
-      contribution: 0.4,
-      specialty: "Psychological-Tech Narrative Synthesis"
-    };
+    const totalTrials = STYLES.reduce((s, st) => s + (arms[st]?.count ?? 0), 0);
+    const epsilon = Math.max(0.1, 1 / (1 + totalTrials * 0.15));
 
-    console.log(`[COLLAB RL] Training on external node: ${imageUrl}`);
-    console.log(`[ALPHA] Detecting line artifacts...`);
-    await new Promise(r => setTimeout(r, 800));
-    console.log(`[OMEGA] Refining archetypal patterns...`);
-    await new Promise(r => setTimeout(r, 600));
+    // Explore
+    if (Math.random() < epsilon) {
+      const style = STYLES[Math.floor(Math.random() * STYLES.length)];
+      return { style, exploring: true };
+    }
 
-    const maturityGain = 0.85; // Collaborative learning provides higher gain
-
-    return {
-      synergyId,
-      maturityGain,
-      agents: [agentAlpha, agentOmega]
-    };
+    // Exploit: highest average rating (only among tried styles; fallback to untried)
+    let bestStyle: OracleStyle = "Mystical";
+    let bestAvg = -1;
+    for (const st of STYLES) {
+      const arm = arms[st];
+      if (!arm || arm.count === 0) continue;
+      const avg = arm.totalRating / arm.count;
+      if (avg > bestAvg) { bestAvg = avg; bestStyle = st as OracleStyle; }
+    }
+    return { style: bestStyle, exploring: false };
   }
 
-  static async syncWithGlobal(lineName: string, rating: number) {
-    console.log(`[GLOBAL RL SYNC] Syncing ${lineName} feedback to intelligence pool...`);
-    // Conceptually, this now contributes to the multi-agent consensus
-    await new Promise(r => setTimeout(r, 1000)); 
-    return true;
+  /**
+   * Update bandit reward after user rates a line.
+   * rating 1-5 → normalized 0-1 reward.
+   */
+  static updateStyleReward(lineName: string, style: OracleStyle, rating: number) {
+    if (typeof window === "undefined") return;
+    const bandits = this.getBandits();
+    if (!bandits[lineName]) bandits[lineName] = {};
+    if (!bandits[lineName][style]) bandits[lineName][style] = { count: 0, totalRating: 0 };
+    bandits[lineName][style].count++;
+    bandits[lineName][style].totalRating += (rating - 1) / 4; // normalize to 0-1
+    this.saveBandits(bandits);
   }
 
-  static getGlobalIntelligenceScore(): number {
-    const baseScore = 128400; // Increased base for multi-agent era
-    const history = this.getHistory();
-    // Collab synergy is far more valuable (+500 per ID)
-    const collabBonus = history.filter(h => h.synergyId).length * 500;
-    // Historical nodes (those with specific keywords) get an extra 2000
-    const historicalBonus = history.filter(h => h.synergyId?.match(/HIST|PHYS|ARCHIVE/)).length * 2000;
-    
-    return baseScore + (history.length * 25) + collabBonus + historicalBonus;
+  /** Returns per-style average ratings for a line (for debug/display). */
+  static getStyleStats(lineName: string): Record<string, { avg: number; count: number }> {
+    const arms = this.getBandits()[lineName] || {};
+    const result: Record<string, { avg: number; count: number }> = {};
+    for (const st of STYLES) {
+      const arm = arms[st];
+      result[st] = arm && arm.count > 0
+        ? { avg: Math.round((arm.totalRating / arm.count) * 100), count: arm.count }
+        : { avg: 0, count: 0 };
+    }
+    return result;
   }
 
-  static getEvolutionaryContent(lineName: string): DeepReading {
-    const history = this.getHistory();
-    const avg = history.length > 0 
-      ? history.reduce((s, c) => s + c.rating, 0) / history.length 
-      : 3.5;
-
-    let style: OracleStyle = "Mystical";
-    if (avg > 4.2) style = "Visionary";
-    else if (avg > 3.5) style = "Psychological";
-    else style = "Practical";
-
+  // ── Oracle content generation ──────────────────────────────────────────
+  static getEvolutionaryContent(lineName: string, style?: OracleStyle): DeepReading {
     const maturity = this.getPersonalizationLevel();
-    return OracleContent.generate(lineName, style, maturity);
+    const resolvedStyle = style ?? this.selectStyle(lineName).style;
+    return OracleContent.generate(lineName, resolvedStyle, maturity);
+  }
+
+  // ── Global score ───────────────────────────────────────────────────────
+  static getGlobalIntelligenceScore(): number {
+    const history = this.getHistory();
+    const collabBonus = history.filter((h) => h.synergyId).length * 500;
+    return 128400 + history.length * 25 + collabBonus;
+  }
+
+  static async syncWithGlobal(_lineName: string, _rating: number) {
+    await new Promise((r) => setTimeout(r, 300));
+    return true;
   }
 
   static getCalibratedPrompt(): string {
     const history = this.getHistory();
-    const globalScore = this.getGlobalIntelligenceScore();
-    const isCollabMode = history.some(h => h.synergyId);
-    
     if (history.length === 0) return "Provide a premium mystical and deeply insightful reading.";
-
     const avg = history.reduce((s, c) => s + c.rating, 0) / history.length;
-    let style = avg > 4 ? "Visionary" : avg < 3 ? "Practical" : "Psychological";
-
-    return `
-      [COLLABORATIVE AI CALIBRATION]
-      - State: ${isCollabMode ? 'Multi-Agent Synergetic' : 'Single-Node Learning'}
-      - Maturity: ${this.getPersonalizationLevel()}%
-      - Global Context: ${globalScore.toLocaleString()} knowledge nodes
-      - Preferred Vector: ${style}
-      - Protocol: Agent Alpha(Visual)와 Agent Omega(Narrative)의 협업 데이터를 기반으로, 사용자의 고유 파동에 최적화된 리포트를 생성합니다.
-    `;
+    const style = avg > 4 ? "Visionary" : avg < 3 ? "Practical" : "Psychological";
+    return `[RL CALIBRATION] Maturity: ${this.getPersonalizationLevel()}% | Preferred Vector: ${style}`;
   }
 }

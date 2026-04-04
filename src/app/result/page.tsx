@@ -59,6 +59,9 @@ export default function ResultPage() {
   // Order: [life(0), head(1), heart(2), fate(3)]
   const [detectedScores, setDetectedScores] = useState<number[]>([0, 0, 0, 0]);
 
+  // ── RL: remember which style was selected per line (for reward update) ──
+  const selectedStylesRef = useRef<Record<string, import("@/lib/oracle_content").OracleStyle>>({});
+
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const router = useRouter();
 
@@ -86,33 +89,45 @@ export default function ResultPage() {
       setAnalyzingStage(3); setAnalyzingMessage(stages[2].msg);
       await new Promise(r => setTimeout(r, stages[2].time));
 
+      // ε-greedy style selection — record choices for reward update later
+      const lifeRL  = RLEngine.selectStyle("Life");
+      const headRL  = RLEngine.selectStyle("Head");
+      const heartRL = RLEngine.selectStyle("Heart");
+      const fateRL  = RLEngine.selectStyle("Fate");
+      selectedStylesRef.current = {
+        "생명선 (Life)":  lifeRL.style,
+        "두뇌선 (Head)":  headRL.style,
+        "감정선 (Heart)": heartRL.style,
+        "운명선 (Fate)":  fateRL.style,
+      };
+
       const resultData: AnalysisResult = {
         summary: "Gemini의 '신비적 직관'과 Claude의 '논리적 분석'이 결합된 결과입니다. 당신의 손금은 현대 사회에서 강력한 영향력을 행사할 수 있는 '개척자'의 길을 가리키고 있습니다.",
         lines: [
-          { 
-            name: "생명선 (Life)",  
-            reading: "강한 활력과 에너지가 느껴집니다. 장수와 건강한 신체 구조를 타고나셨네요.", 
-            detailedReading: RLEngine.getEvolutionaryContent("Life"),
-            rating: 0, color: "#00F2FF", rlKey: "life",  orientation: "vertical" 
+          {
+            name: "생명선 (Life)",
+            reading: "",
+            detailedReading: RLEngine.getEvolutionaryContent("Life", lifeRL.style),
+            rating: 0, color: "#00F2FF", rlKey: "life", orientation: "vertical",
           },
-          { 
-            name: "두뇌선 (Head)",  
-            reading: "매우 창의적이고 예술적인 사고를 하시는군요. 상상력이 풍부합니다.",          
-            detailedReading: RLEngine.getEvolutionaryContent("Head"),
-            rating: 0, color: "#FFD700", rlKey: "head",  orientation: "horizontal" 
+          {
+            name: "두뇌선 (Head)",
+            reading: "",
+            detailedReading: RLEngine.getEvolutionaryContent("Head", headRL.style),
+            rating: 0, color: "#FFD700", rlKey: "head", orientation: "horizontal",
           },
-          { 
-            name: "감정선 (Heart)", 
-            reading: "열정적인 사랑을 하시는 타입입니다. 감정이 풍부하고 정이 많으시네요.",       
-            detailedReading: RLEngine.getEvolutionaryContent("Heart"),
-            rating: 0, color: "#FF00E5", rlKey: "heart", orientation: "horizontal" 
+          {
+            name: "감정선 (Heart)",
+            reading: "",
+            detailedReading: RLEngine.getEvolutionaryContent("Heart", heartRL.style),
+            rating: 0, color: "#FF00E5", rlKey: "heart", orientation: "horizontal",
           },
-          { 
-            name: "운명선 (Fate)",  
-            reading: "스스로 개척해나가는 운명입니다. 노력에 따른 성취가 뚜렷할 것입니다.",       
-            detailedReading: RLEngine.getEvolutionaryContent("Fate"),
-            rating: 0, color: "#A855F7", rlKey: "fate",  orientation: "vertical" 
-          }
+          {
+            name: "운명선 (Fate)",
+            reading: "",
+            detailedReading: RLEngine.getEvolutionaryContent("Fate", fateRL.style),
+            rating: 0, color: "#A855F7", rlKey: "fate", orientation: "vertical",
+          },
         ],
         advice: "지금 당신의 잠재력은 85% 이상 활성화되어 있습니다. 새로운 도전을 시작하기에 최적의 시기입니다.",
         personalizationMsg: level > 10
@@ -378,9 +393,13 @@ export default function ResultPage() {
     setAnalysis(updatedAnalysis);
     
     RLEngine.saveReward(newLines[index].name, rating);
+
+    // ε-greedy bandit reward: update the style that was shown for this line
+    const shownStyle = selectedStylesRef.current[newLines[index].name];
+    if (shownStyle) RLEngine.updateStyleReward(newLines[index].name, shownStyle, rating);
+
     setPersonalizationLevel(RLEngine.getPersonalizationLevel());
-    
-    // 🧬 [NEW Stage 9] Global RL Sync
+
     await RLEngine.syncWithGlobal(newLines[index].name, rating);
     setGlobalScore(RLEngine.getGlobalIntelligenceScore());
     
@@ -551,7 +570,14 @@ export default function ResultPage() {
           >
             <div className={styles.lineHeader}>
               <h3 style={{ color: res.color }}>{res.name}</h3>
-              <div className={styles.badge} style={{ borderColor: res.color, color: res.color }}>Analysis Complete</div>
+              <div style={{ display:"flex", gap:"0.4rem", alignItems:"center" }}>
+                <div className={styles.badge} style={{ borderColor: res.color, color: res.color }}>Analysis Complete</div>
+                {selectedStylesRef.current[res.name] && (
+                  <div style={{ fontSize:"0.65rem", opacity:0.55, border:"1px solid rgba(255,255,255,0.1)", borderRadius:10, padding:"2px 7px", letterSpacing:"0.06em" }}>
+                    RL: {selectedStylesRef.current[res.name]}
+                  </div>
+                )}
+              </div>
             </div>
             
             {/* Technical Topology Metadata 🧬 */}
