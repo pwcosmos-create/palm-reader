@@ -761,3 +761,47 @@
     grid-template-columns: 1fr;
   }
 }
+
+.rareMarkBadge {
+  margin-left: 8px;
+  font-size: 0.65rem;
+  background: rgba(255, 215, 0, 0.2);
+  color: #FFD700;
+  padding: 2px 8px;
+  border-radius: 4px;
+  border: 1px solid rgba(255, 215, 0, 0.4);
+  animation: glow 1.5s infinite alternate;
+}
+
+@keyframes glow {
+  from { box-shadow: 0 0 5px rgba(255, 215, 0, 0.2); }
+  to { box-shadow: 0 0 12px rgba(255, 215, 0, 0.5); }
+}
+
+.rareMarkDetail {
+  font-size: 0.65rem;
+  color: #FFD700;
+  margin-top: 4px;
+  font-weight: 600;
+  opacity: 0.8;
+}
+
+.spouseLuckBox {
+  margin-top: 12px;
+  padding: 10px;
+  background: rgba(255, 46, 247, 0.05);
+  border-left: 2px solid #FF2EF7;
+  font-size: 0.75rem;
+  line-height: 1.4;
+  color: rgba(255, 255, 255, 0.8);
+  border-radius: 0 8px 8px 0;
+}
+
+.spouseLabel {
+  display: block;
+  font-size: 0.6rem;
+  font-weight: bold;
+  color: #FF2EF7;
+  text-transform: uppercase;
+  margin-bottom: 4px;
+}

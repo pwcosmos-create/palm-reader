@@ -453,11 +453,19 @@ export default function ResultPage() {
             {/* 💰 [NEW] Wealth & Love Luck Dashboard 💖 */}
             <div className={styles.luckDashboard}>
               <div className={styles.luckItem}>
-                <div className={styles.luckLabel}>💰 재물운 (Wealth)</div>
+                <div className={styles.luckLabel}>
+                  💰 재물운 (Wealth)
+                  {analysis.lines[0].detailedReading?.wealthLuck.rareMark && (
+                    <span className={styles.rareMarkBadge}>★ {analysis.lines[0].detailedReading.wealthLuck.rareMark}</span>
+                  )}
+                </div>
                 <div className={styles.luckScoreBar}>
                   <div className={styles.luckFill} style={{ width: `${analysis.lines[0].detailedReading?.wealthLuck.score ?? 85}%`, backgroundColor: '#FFD700' }} />
                 </div>
                 <div className={styles.luckScoreValue}>{analysis.lines[0].detailedReading?.wealthLuck.score ?? 85}%</div>
+                {analysis.lines[0].detailedReading?.wealthLuck.rareMark && (
+                  <div className={styles.rareMarkDetail}>희귀한 대박 문양이 감지되었습니다!</div>
+                )}
               </div>
               <div className={styles.luckItem}>
                 <div className={styles.luckLabel}>💖 연애운 (Love)</div>
@@ -465,6 +473,10 @@ export default function ResultPage() {
                   <div className={styles.luckFill} style={{ width: `${analysis.lines[0].detailedReading?.loveLuck.score ?? 88}%`, backgroundColor: '#FF2EF7' }} />
                 </div>
                 <div className={styles.luckScoreValue}>{analysis.lines[0].detailedReading?.loveLuck.score ?? 88}%</div>
+                <div className={styles.spouseLuckBox}>
+                  <span className={styles.spouseLabel}>배우자운:</span>
+                  {analysis.lines[0].detailedReading?.loveLuck.spouseLuck}
+                </div>
               </div>
             </div>
 
