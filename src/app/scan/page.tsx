@@ -6,31 +6,59 @@ import styles from "./scan.module.css";
 
 // ── Palm skin-tone validation ──────────────────────────────────────────────
 function isSkinPixel(r: number, g: number, b: number): boolean {
-  // Covers light to dark skin tones via RGB heuristic
+  const max = Math.max(r, g, b);
+  const min = Math.min(r, g, b);
+  const diff = max - min;
+  const sat = max === 0 ? 0 : diff / max;
   return (
     r > 60 && g > 30 && b > 15 &&
     r > b && r >= g &&
-    Math.max(r, g, b) - Math.min(r, g, b) >= 12 &&
-    r - g >= -5 && r - g <= 70
+    diff >= 15 &&
+    sat >= 0.1 && sat <= 0.75 &&
+    r - g >= -10 && r - g <= 80
   );
 }
 
+/**
+ * Palm validation via 3×3 grid skin distribution.
+ * A real palm fills the frame uniformly — random photos / faces don't.
+ *
+ * Pass conditions (all must hold):
+ *   1. Overall skin ratio ≥ 32 %
+ *   2. At least 6 of 9 grid cells have ≥ 28 % skin pixels
+ *   3. Center cell (cell[4]) has ≥ 40 % skin pixels
+ */
 async function validatePalm(dataUrl: string): Promise<boolean> {
   return new Promise((resolve) => {
     const img = new Image();
     img.onload = () => {
-      const size = 80; // sample at low-res for speed
+      const SIZE = 90;
+      const GRID = 3;
+      const CELL = SIZE / GRID; // 30 px per cell
       const c = document.createElement("canvas");
-      c.width = size; c.height = size;
+      c.width = SIZE; c.height = SIZE;
       const ctx = c.getContext("2d")!;
-      ctx.drawImage(img, 0, 0, size, size);
-      const { data } = ctx.getImageData(0, 0, size, size);
-      let skin = 0;
-      for (let i = 0; i < data.length; i += 4) {
-        if (data[i + 3] < 128) continue;
-        if (isSkinPixel(data[i], data[i + 1], data[i + 2])) skin++;
+      ctx.drawImage(img, 0, 0, SIZE, SIZE);
+      const { data } = ctx.getImageData(0, 0, SIZE, SIZE);
+
+      const cellSkin = new Array(GRID * GRID).fill(0);
+      const cellTotal = CELL * CELL;
+
+      for (let py = 0; py < SIZE; py++) {
+        for (let px = 0; px < SIZE; px++) {
+          const i = (py * SIZE + px) * 4;
+          if (data[i + 3] < 128) continue;
+          const ci = Math.floor(py / CELL) * GRID + Math.floor(px / CELL);
+          if (isSkinPixel(data[i], data[i + 1], data[i + 2])) cellSkin[ci]++;
+        }
       }
-      resolve(skin / (size * size) >= 0.18);
+
+      const ratios = cellSkin.map((s) => s / cellTotal);
+      const overallRatio = cellSkin.reduce((a, b) => a + b, 0) / (SIZE * SIZE);
+      const highCells = ratios.filter((r) => r >= 0.28).length;
+      const centerRatio = ratios[4]; // center cell
+
+      resolve(overallRatio >= 0.32 && highCells >= 6 && centerRatio >= 0.40);
     };
     img.onerror = () => resolve(false);
     img.src = dataUrl;
