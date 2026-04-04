@@ -55,6 +55,10 @@ export default function ResultPage() {
   const [expandedLines, setExpandedLines] = useState<Record<number, boolean>>({});
   const [detectionConf, setDetectionConf] = useState(0);
 
+  // ── Real pixel-based clarity scores (0-100) per line ────────────────────
+  // Order: [life(0), head(1), heart(2), fate(3)]
+  const [detectedScores, setDetectedScores] = useState<number[]>([0, 0, 0, 0]);
+
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const router = useRouter();
 
@@ -316,6 +320,30 @@ export default function ResultPage() {
       const fxs = smooth(fys.map(y => findValleyX(y, W*(0.32 + fb.xBias), W*(0.65 + fb.xBias))), 4);
       drawNeon(fys.map((y,i) => ({x:fxs[i], y})), "#A855F7", "Fate",
         fxs[0] + W*0.02, fys[0] - H*0.02, fb.confidence);
+
+      // ── Real clarity score: valley darkness vs surrounding brightness ────
+      const pad = Math.round(Math.min(W, H) * 0.04);
+      const scoreH = (pts: {x:number;y:number}[], horiz: boolean): number => {
+        if (pts.length < 2) return 0;
+        let vSum = 0, sSum = 0;
+        for (const {x, y} of pts) {
+          vSum += gray(x, y);
+          sSum += horiz
+            ? (gray(x, Math.max(0, y-pad)) + gray(x, Math.min(H-1, y+pad))) / 2
+            : (gray(Math.max(0, x-pad), y) + gray(Math.min(W-1, x+pad), y)) / 2;
+        }
+        const contrast = (sSum/pts.length - vSum/pts.length) / Math.max(sSum/pts.length, 1);
+        return Math.round(Math.min(100, Math.max(5, contrast * 220)));
+      };
+
+      const scores = [
+        scoreH(lys.map((y,i) => ({x:lxs[i], y})), false), // life  [0]
+        scoreH(dxs.map((x,i) => ({x, y:dys[i]})), true),  // head  [1]
+        scoreH(hxs.map((x,i) => ({x, y:hys[i]})), true),  // heart [2]
+        scoreH(fys.map((y,i) => ({x:fxs[i], y})), false), // fate  [3]
+      ];
+      setDetectedScores(scores);
+      setDetectionConf(Math.round(scores.reduce((a,b) => a+b, 0) / scores.length));
     };
     img.src = image;
   }, [image, analysis, biases]);
@@ -363,6 +391,34 @@ export default function ResultPage() {
   const toggleExpand = (idx: number) => {
     setExpandedLines(prev => ({ ...prev, [idx]: !prev[idx] }));
   };
+
+  // ── Score-based reading text (based on actual pixel analysis) ────────────
+  function getLineReading(name: string, score: number): string {
+    const readings: Record<string, [string, string, string]> = {
+      "생명선 (Life)": [
+        "생명선이 흐릿하게 감지됩니다. 섬세하고 예민한 기질의 소유자로, 정신적 에너지가 신체보다 강한 유형입니다.",
+        "보통 수준의 생명선이 확인됩니다. 안정적인 체력과 꾸준한 회복력을 갖추고 있습니다.",
+        "매우 선명하고 깊은 생명선이 감지됩니다. 강인한 생명력과 탁월한 회복 탄력성을 나타냅니다.",
+      ],
+      "두뇌선 (Head)": [
+        "두뇌선이 얕게 나타납니다. 직관적·감성적 판단을 선호하는 창의적 사고 유형입니다.",
+        "뚜렷한 두뇌선이 확인됩니다. 균형 잡힌 논리력과 유연한 적응력을 보유하고 있습니다.",
+        "매우 선명한 두뇌선이 감지됩니다. 날카로운 집중력과 분석적 통찰력이 두드러집니다.",
+      ],
+      "감정선 (Heart)": [
+        "감정선이 흐릿하게 감지됩니다. 내면에 깊은 감성을 품은 내성적 타입입니다.",
+        "적당한 깊이의 감정선이 보입니다. 감성과 이성이 균형 잡힌 성격입니다.",
+        "매우 선명한 감정선이 포착됩니다. 풍부한 감정과 깊은 유대 관계를 형성하는 타입입니다.",
+      ],
+      "운명선 (Fate)": [
+        "운명선이 희미하게 보입니다. 자유롭고 유동적인 인생 경로를 추구하는 타입입니다.",
+        "보통 수준의 운명선이 나타납니다. 유연한 목표 의식과 다양한 가능성을 의미합니다.",
+        "강하고 명확한 운명선이 감지됩니다. 뚜렷한 목표 의식과 강한 개척 의지가 느껴집니다.",
+      ],
+    };
+    const tier = score >= 65 ? 2 : score >= 35 ? 1 : 0;
+    return (readings[name] ?? readings["생명선 (Life)"])[tier];
+  }
 
   return (
     <main className={`${styles.container} ${!image ? styles.noImage : ""}`}>
@@ -507,8 +563,20 @@ export default function ResultPage() {
               </div>
             )}
 
+            {/* Real pixel-analysis score bar */}
+            <div style={{ display:"flex", alignItems:"center", gap:"0.6rem", marginBottom:"0.75rem" }}>
+              <span style={{ fontSize:"0.7rem", opacity:0.55, textTransform:"uppercase", letterSpacing:"0.08em", whiteSpace:"nowrap" }}>
+                선 선명도
+              </span>
+              <div style={{ flex:1, height:4, background:"rgba(255,255,255,0.08)", borderRadius:2, overflow:"hidden" }}>
+                <div style={{ height:"100%", width:`${detectedScores[i]}%`, background:res.color, borderRadius:2, transition:"width 1s ease" }} />
+              </div>
+              <span style={{ fontSize:"0.75rem", fontWeight:700, color:res.color, minWidth:"2.5rem", textAlign:"right" }}>
+                {detectedScores[i]}%
+              </span>
+            </div>
             <p className="mb-4 opacity-90 text-sm leading-relaxed font-semibold" style={{ color: `${res.color}dd` }}>
-              [High-Precision Scan]: {res.reading}
+              [Pixel Analysis]: {getLineReading(res.name, detectedScores[i])}
             </p>
 
             {/* ── Deep Oracle: 1,500+ Character High-Density Intelligence (Stage 13) ──── */}
