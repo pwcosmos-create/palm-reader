@@ -722,15 +722,6 @@
   to { opacity: 1; }
 }
 
-.masterBadge {
-  background: radial-gradient(circle at top right, #0a0a14 0%, #020205 100%);
-  color: #fff;
-  min-height: 100vh;
-  position: relative;
-  overflow-x: hidden;
-  padding-bottom: 4rem;
-}
-
 .noImage {
   display: flex;
   align-items: center;
