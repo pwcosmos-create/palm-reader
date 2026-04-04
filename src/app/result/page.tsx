@@ -214,16 +214,32 @@ export default function ResultPage() {
         return (px[i] + px[i+1] + px[i+2]) / 3;
       };
 
-      const minY = (x: number, y0: number, y1: number) => {
-        let best = (y0+y1)/2, minG = 999;
-        for (let y = y0; y <= y1; y += 1.5) { const g = gray(x,y); if (g < minG) { minG = g; best = y; } }
-        return best;
+      /**
+       * 🌊 Valley Detection (Center of Darkness)
+       * Instead of finding the absolute darkest single pixel, we find the "darkest valley" 
+       * by averaging the positions of pixels that are below a threshold.
+       */
+      const findValleyY = (x: number, y0: number, y1: number) => {
+        let samples: {y: number, g: number}[] = [];
+        for (let y = y0; y <= y1; y += 2) {
+          samples.push({ y, g: gray(x, y) });
+        }
+        samples.sort((a, b) => a.g - b.g);
+        // Take the top 15% darkest pixels and find their average position
+        const top = samples.slice(0, Math.ceil(samples.length * 0.15));
+        if (top.length === 0) return (y0 + y1) / 2;
+        return top.reduce((acc, s) => acc + s.y, 0) / top.length;
       };
 
-      const minX = (y: number, x0: number, x1: number) => {
-        let best = (x0+x1)/2, minG = 999;
-        for (let x = x0; x <= x1; x += 1.5) { const g = gray(x,y); if (g < minG) { minG = g; best = x; } }
-        return best;
+      const findValleyX = (y: number, x0: number, x1: number) => {
+        let samples: {x: number, g: number}[] = [];
+        for (let x = x0; x <= x1; x += 2) {
+          samples.push({ x, g: gray(x, y) });
+        }
+        samples.sort((a, b) => a.g - b.g);
+        const top = samples.slice(0, Math.ceil(samples.length * 0.15));
+        if (top.length === 0) return (x0 + x1) / 2;
+        return top.reduce((acc, s) => acc + s.x, 0) / top.length;
       };
 
       const smooth = (arr: number[], w = 3) =>
@@ -278,26 +294,26 @@ export default function ResultPage() {
       const fb = biases.fate  ?? { xBias: 0, yBias: 0, confidence: 0 };
 
       // 감정선 (Heart): horizontal — yBias shifts scan window up/down
-      const hxs = Array.from({length: 14}, (_, i) => W * (0.26 + i * 0.043));
-      const hys = smooth(hxs.map(x => minY(x, H*(0.30 + hb.yBias), H*(0.50 + hb.yBias))), 3);
+      const hxs = Array.from({length: 16}, (_, i) => W * (0.24 + i * 0.042));
+      const hys = smooth(hxs.map(x => findValleyY(x, H*(0.22 + hb.yBias), H*(0.52 + hb.yBias))), 4);
       drawNeon(hxs.map((x,i) => ({x, y:hys[i]})), "#FF2EF7", "Heart",
         hxs[hxs.length-1] + W*0.01, hys[hys.length-1] - H*0.025, hb.confidence);
 
       // 두뇌선 (Head): horizontal — yBias
-      const dxs = Array.from({length: 12}, (_, i) => W * (0.27 + i * 0.045));
-      const dys = smooth(dxs.map(x => minY(x, H*(0.44 + db.yBias), H*(0.63 + db.yBias))), 3);
+      const dxs = Array.from({length: 14}, (_, i) => W * (0.25 + i * 0.046));
+      const dys = smooth(dxs.map(x => findValleyY(x, H*(0.38 + db.yBias), H*(0.68 + db.yBias))), 4);
       drawNeon(dxs.map((x,i) => ({x, y:dys[i]})), "#FFD700", "Head",
         dxs[0] - W*0.11, dys[0] - H*0.015, db.confidence);
 
       // 생명선 (Life): vertical — xBias shifts scan window left/right
-      const lys = Array.from({length: 13}, (_, i) => H * (0.46 + i * 0.038));
-      const lxs = smooth(lys.map(y => minX(y, W*(0.14 + lb.xBias), W*(0.42 + lb.xBias))), 3);
+      const lys = Array.from({length: 15}, (_, i) => H * (0.42 + i * 0.042));
+      const lxs = smooth(lys.map(y => findValleyX(y, W*(0.10 + lb.xBias), W*(0.48 + lb.xBias))), 4);
       drawNeon(lys.map((y,i) => ({x:lxs[i], y})), "#00F2FF", "Life",
         lxs[4] - W*0.11, lys[4], lb.confidence);
 
       // 운명선 (Fate): vertical — xBias
-      const fys = Array.from({length: 11}, (_, i) => H * (0.42 + i * 0.047));
-      const fxs = smooth(fys.map(y => minX(y, W*(0.38 + fb.xBias), W*(0.60 + fb.xBias))), 3);
+      const fys = Array.from({length: 12}, (_, i) => H * (0.38 + i * 0.052));
+      const fxs = smooth(fys.map(y => findValleyX(y, W*(0.32 + fb.xBias), W*(0.65 + fb.xBias))), 4);
       drawNeon(fys.map((y,i) => ({x:fxs[i], y})), "#A855F7", "Fate",
         fxs[0] + W*0.02, fys[0] - H*0.02, fb.confidence);
     };

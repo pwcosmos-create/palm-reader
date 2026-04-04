@@ -1,6 +1,6 @@
 const KEY = "palm_line_bias_v1";
-const LEARN = 0.025;  // per-click learning rate (% of canvas)
-const MAX   = 0.18;   // max shift allowed (18% of canvas dimension)
+const LEARN = 0.045;  // increased from 0.025 for snappier adjustment
+const MAX   = 0.25;   // increased from 0.18 for better coverage
 
 export type LineBias  = { xBias: number; yBias: number; confidence: number };
 export type AllBiases = Record<string, LineBias>;

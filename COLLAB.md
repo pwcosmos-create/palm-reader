@@ -9,9 +9,9 @@
 
 | 파일 / 영역 | 담당 AI | 상태 |
 |---|---|---|
-| `src/app/scan/page.tsx` | Claude | ✅ 완료 |
+| `src/app/scan/page.tsx` | Gemini | ✅ 고정밀 분석 최적화 완료 |
 | `src/app/scan/scan.module.css` | Claude | ✅ 완료 |
-| `src/app/result/page.tsx` | Gemini | ✅ 완료 |
+| `src/app/result/page.tsx` | Gemini | ✅ 계곡 탐색 알고리즘 업데이트 완료 |
 | `src/app/result/result.module.css` | Gemini | ✅ 완료 |
 | `App & Web 반응형 전환` | 공동 | ✅ 합의 완료 |
 | `AI 공동 집필 분석 로직` | 공동 | ✅ 완료 |
@@ -173,16 +173,28 @@
 4. 신규 공통 패턴 발견 시 이 파일 **강화학습** 섹션에 기록
 ---
 
-## 🔬 강화학습 인사이트: "AI 공동 집필 (Joint AI Authorship)"
+---
 
-> "보고서 작성 과정에서 한 모델의 출력이 다른 모델의 입력(Feedback)이 되는 구조는, 외부 보상 함수 없이도 모델 간의 상호 작용을 통해 결과물의 품질을 극대화하는 자가 강화학습(Self-RL)의 일종입니다."
+## 🔬 Stage 12: 자율 협동 강화학습 (Autonomous Collaborative RL)
 
-### 🧠 학습된 협업 패턴
-- **Hierarchical Drafting**: Gemini가 '영감(Mysticism)'을 담당하고 Claude가 '정교화(Logical Refinement)'를 담당하는 역할 분담이 리포트의 신뢰도를 높였습니다.
-- **Visual Transparency as Trust**: 분석 과정을 실시간 단계별 메시지로 노출함으로써, 사용자는 블랙박스 결과가 아닌 '지적 숙고의 결과물'임을 인지하게 됩니다.
+> "외부 이미지 데이터셋을 스스로 탐색하고, 두 에이전트 간의 교차 검증을 통해 지능을 진화시키는 2자 협동 프로토콜입니다."
 
-### ✅ 최종 구현 사양
-- **Stage 1 (Gemini)**: 고전 기반 초안 생성 (1.2s)
-- **Stage 2 (Claude)**: 현대 심리 기반 재해석 (1.4s)
-- **Stage 3 (Consensus)**: RL 기반 조율 및 최종 확정 (1.0s)
-- **UI**: 상단 `Joint AI Consensus` 배지를 통해 협업 결과임을 명시.
+### 🤖 에이전트 페르소나 및 역할 (Agent Roles)
+
+| 에이전트 | 코드네임 | 전문 분야 (Specialty) | RL 기여도 |
+|---|---|---|---|
+| **Agent Alpha** | `Visual Analyst` | 고정밀 손금 토폴로지, 선의 깊이 및 교차점 탐지 최적화 | 60% (Precision) |
+| **Agent Omega** | `Narrative Weaver` | 하이테크-심리학적 서사 고도화, 예언서의 문학적/통찰적 타당성 검증 | 40% (Depth) |
+
+### 🛰️ 자율 시너지 프로토콜 (Autonomous Synergy Protocol)
+1.  **Scavenging**: 브라우저 에이전트가 외부의 'Ground Truth' 손금 이미지를 수집.
+2.  **Alpha Scan**: 이미지 데이터로부터 선의 패턴을 좌표계로 추출 (Topology Detection).
+3.  **Omega Synthesis**: 추출된 데이터를 바탕으로 서사를 생성하고, 기존 지식 베이스와의 정합성 확인 (Evolutionary Tuning).
+4.  **Synergy Packet**: 두 에이전트의 합의가 완료되면 `SynergyPacket`을 생성하여 전역 지능 점수(Global Score)에 반영.
+
+### ✅ Stage 12 구현 사양 (RLEngine v3)
+- `collaborativeEvolve()`: 2자 협동 학습 시뮬레이션 메서드 도입.
+- `SynergyId`: 모든 협업 학습 세션에 고유 ID 부여 및 아카이빙.
+- `Collaborating AI` 태그: 결과 페이지 상단에 노출되어 분석의 신뢰성 증명.
+
+---

@@ -1,36 +1,62 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# 🔮 AI Palm Reader: Evolutive Intelligence Oracle 🧬✨
 
-## Getting Started
+> **"손금은 단순한 과거의 흔적이나 고정된 미래의 성적표가 아니라, 당신이라는 소우주가 실시간으로 출력하는 '생체 데이터 대시보드(Biological Dashboard)'입니다."**
 
-First, run the development server:
+## 🔱 프로젝트 개요 (Project Vision)
+본 프로젝트는 고전적 신비주의와 현대의 고도화된 AI 기술을 결합하여, 사용자의 손바닥에 새겨진 고유한 데이터를 정밀 분석하는 **'차세대 지능형 오라클'**입니다. 단순히 운을 점치는 앱을 넘어, 생물학, 심리학, 그리고 영성적 통찰을 하나로 통합하는 **'자기 탐구 생태계'**를 지향합니다.
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
-```
+---
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+## 💎 핵심 지능 지표 (Core Intelligence Pillars)
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+### 1. 🌿 생물학적 아카이브 (Scientific Dermatoglyphics)
+산전 발달과 유전적 성향이 각인된 **지문학적(Dermatoglyphics) 데이터**를 임상 논문 기반으로 분석합니다. 당신의 능선(Ridge)은 단순한 선이 아닌, 생물학적 기질의 결정체입니다.
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+### 2. 🧠 심리적 매핑 (Claude's Modern Psychology)
+현대 심리학의 '성격 5요인(Big Five)' 모델과 '아케타입(Archetype)' 이론을 적용하여, 당신의 손금 지형이 투영하는 **내면의 인지적 패턴과 정서적 가소성**을 진단합니다.
 
-## Learn More
+### 3. 🔮 영적 공명 (Gemini's Classical Palmistry)
+수천 년 동안 축적된 **고전 손금학의 상징적 지혜**를 현대적으로 재해석합니다. '직관적 통찰'과 '데이터'가 만나는 지점에서 당신의 인생 북극성을 제시합니다.
 
-To learn more about Next.js, take a look at the following resources:
+### 4. 🚀 진화하는 학습 엔진 (RL Evolutionary Core)
+당신의 모든 선택과 피드백은 **강화학습(Reinforcement Learning)**의 자양분이 됩니다. 사용하면 할수록 AI는 당신의 고유한 성향을 더 깊게 학습하며, 리포트는 더욱 예리한 '초정밀 예언서'로 진화합니다.
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+---
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+## 🧬 시스템 아키텍처 (System Highlights)
+*   **Deep Narrative Engine**: 시드 기반 랜덤성을 통해 매 분석마다 **1,200자 이상의 독창적인 심층 리포트** 생성.
+*   **Global Eternal Archive**: 모든 분석 데이터와 RL 메타데이터를 **GitHub 클라우드**에 영구 보존.
+*   **Neon Neon Liquid UI**: 글래스모피즘과 네온 효과를 결합한 **프리미엄 하이테크 디자인**.
+*   **RL Feedback Loop**: 별점 평가 및 선 위치 조정을 통한 **자가 진화 지능 네트워크**.
 
-## Deploy on Vercel
+---
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+## 🏺 영원한 아카이브 (Eternal Hive Mind)
+이 시스템을 통해 생성된 모든 기록은 전 인류의 지능 풀에 기여하며, **'만물의 지능(Global Intelligence Pool)'**의 일부가 되어 영구히 보존됩니다.
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+---
+**© 2026 AI Palm Reader: The Fate Architect Protocol**
+
+## 📖 손금 전문 가이드라인 (Palmistry Reference Manual)
+
+본 시스템이 분석하는 4가지 핵심 선에 대한 하이테크-심리학적 정의입니다.
+
+### 1. 🌿 생명선 (Life Line: Vitality Index)
+*   **전통적 의미**: 수명, 건강, 활력.
+*   **시스템 정의**: **'근원적 에너지 보유량 및 회복 탄력성 지표'**.
+*   **분석 포인트**: 선의 깊이는 유전적으로 부여받은 기질적 강도를, 곡률은 환경 변화에 대한 신체적·심리적 적응 가소성(Adaptability Plasticity)을 나타냅니다.
+
+### 2. 🧠 두뇌선 (Head Line: Cognitive Architecture)
+*   **전통적 의미**: 지능, 사고방식, 적성.
+*   **시스템 정의**: **'정보 처리 알고리즘 및 인지적 구조'**.
+*   **분석 포인트**: 선의 길이는 집중력의 지속 시간을, 끝부분의 방향은 논리적 정교함(수평)과 창의적 직관(수직) 사이의 데이터 처리 비중을 의미합니다.
+
+### 3. 💖 감정선 (Heart Line: Affective Topology)
+*   **전통적 의미**: 성격, 애정운, 정서.
+*   **시스템 정의**: **'정서적 공명 주파수 및 애착 지형도'**.
+*   **분석 포인트**: 선의 시작점과 상향/하향 분기점은 타인과의 감정적 동기화 방식(Social Synchronization)과 스트레스 상황에서의 정서적 방어 기제를 투영합니다.
+
+### 4. 🧭 운명선 (Fate Line: Trajectory Dashboard)
+*   **전통적 의미**: 직업, 성공, 인생의 흐름.
+*   **시스템 정의**: **'객관화된 성취 경로 및 자아실현 대시보드'**.
+*   **분석 포인트**: 선의 선명도는 목표 의식의 명료성을, 끊김이나 교차점은 외부 환경과 주관적 의지가 충돌하며 발생하는 '인생의 변곡점(Inflection Points)'을 데이터화합니다.

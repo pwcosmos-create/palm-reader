@@ -81,19 +81,17 @@ export default function ScanPage() {
 
         ctx.fillStyle = "#020205";
         ctx.fillRect(0, 0, 600, 600);
-        ctx.filter = "contrast(1.5) brightness(1.1) grayscale(1)";
+        // Normalized grayscale 1.0 and higher contrast for peak line visibility
+        ctx.filter = "contrast(1.5) brightness(1.05) grayscale(1.0)";
         ctx.drawImage(img, sx, sy, size, size, 0, 0, 600, 600);
-
-        ctx.globalCompositeOperation = "screen";
-        ctx.fillStyle = "rgba(0, 242, 255, 0.18)";
-        ctx.fillRect(0, 0, 600, 600);
 
         ctx.globalCompositeOperation = "source-over";
         ctx.strokeStyle = "rgba(0, 242, 255, 0.4)";
         ctx.lineWidth = 2;
         ctx.strokeRect(4, 4, 592, 592);
 
-        resolve(canvas.toDataURL("image/jpeg", 0.9));
+        // Lowered quality to 0.75 for smaller capacity as requested
+        resolve(canvas.toDataURL("image/jpeg", 0.75));
       };
       img.src = raw;
     });

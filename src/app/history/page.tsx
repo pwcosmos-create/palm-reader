@@ -9,17 +9,41 @@ interface SavedReading {
   date: string;
   summary: string;
   imageUrl: string;
+  maturity?: number;
+  consensusBadge?: boolean;
 }
 
 export default function HistoryPage() {
   const [history, setHistory] = useState<SavedReading[]>([]);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    // Mock History Data
-    setHistory([
-      { id: "101", date: "2026-04-01", summary: "4대 선이 모두 뚜렷한 건강한 균형미.", imageUrl: "https://via.placeholder.com/150/111231/00F2FF?text=Palm+A" },
-      { id: "102", date: "2026-03-25", summary: "운명선이 강해지는 성취의 시기.", imageUrl: "https://via.placeholder.com/150/111231/FFD700?text=Palm+B" }
-    ]);
+    async function loadHistory() {
+      // 1. Load Local Storage
+      const localData = JSON.parse(localStorage.getItem('palm_history_v2') || '[]');
+      
+      try {
+        // 2. Load GitHub Global Archive 🏺
+        const res = await fetch('/api/fetch?type=palm');
+        const data = await res.json();
+        
+        if (data.records && data.records.length > 0) {
+          // Merge and deduplicate by ID
+          const merged = [...data.records, ...localData];
+          const unique = Array.from(new Map(merged.map(item => [item.id, item])).values()) as SavedReading[];
+          setHistory(unique.sort((a, b) => Number(b.id) - Number(a.id)).slice(0, 50));
+        } else {
+          setHistory(localData);
+        }
+      } catch (err) {
+        console.warn("GitHub Fetch Failed, falling back to local:", err);
+        setHistory(localData);
+      } finally {
+        setLoading(false);
+      }
+    }
+
+    loadHistory();
   }, []);
 
   return (
@@ -33,16 +57,29 @@ export default function HistoryPage() {
         {history.length > 0 ? (
           history.map(item => (
             <Link href={`/result?id=${item.id}`} key={item.id} className={`${styles.item} glass-card`}>
-              <img src={item.imageUrl} alt="History" className={styles.thumb} />
+              <div className={styles.thumbContainer}>
+                <img src={item.imageUrl} alt="History" className={styles.thumb} />
+                <div className={styles.consensusOverlay}>✨</div>
+              </div>
               <div className={styles.itemInfo}>
-                <span className={styles.date}>{item.date}</span>
+                <div className={styles.topRow}>
+                  <span className={styles.date}>{item.date}</span>
+                  <div className={styles.miniBadge}>Joint AI Consensus</div>
+                </div>
                 <p className={styles.summary}>{item.summary}</p>
+                <div className={styles.metaRow}>
+                  <span className="text-[10px] opacity-50">Maturity: {item.maturity}%</span>
+                </div>
               </div>
               <span className={styles.arrow}>→</span>
             </Link>
           ))
         ) : (
-          <div className="text-center p-10 opacity-40">아직 저장된 기록이 없습니다.</div>
+          <div className={styles.emptyState}>
+            <div className={styles.emptyIcon}>🔮</div>
+            <p>아직 기록된 운명이 없습니다.</p>
+            <Link href="/scan" className={styles.startBtn}>첫 스캔 시작하기</Link>
+          </div>
         )}
       </div>
 
