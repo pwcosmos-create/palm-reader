@@ -12,6 +12,21 @@ export interface DeepReading {
     content: string;
   }[];
   totalLength: number;
+  wealthLuck: {
+    score: number;
+    rareMark: string | null;
+    text: string;
+  };
+  loveLuck: {
+    score: number;
+    spouseLuck: string;
+    text: string;
+  };
+  topologyData: {
+    points: number;
+    curvature: string;
+    stability: string;
+  };
 }
 
 export class OracleContent {
@@ -48,10 +63,29 @@ export class OracleContent {
 
     const fullText = sections.map(s => `${s.title}\n${s.content}`).join('\n\n');
     
+    // 💰 Deterministic Luck Scores based on seed
+    const wealthScore = 75 + (seed % 21); // 75-95
+    const loveScore = 70 + (seed % 26);   // 70-95
+    
     return {
       summary: sections[0].content.slice(0, 100) + '...',
       sections,
-      totalLength: fullText.length
+      totalLength: fullText.length,
+      wealthLuck: {
+        score: wealthScore,
+        rareMark: (seed % 7 === 0) ? "M자형" : null,
+        text: "재물운의 흐름이 매우 강력하며, 특히 중년 이후의 자산 규모가 퀀텀 점프할 가능성이 농후합니다."
+      },
+      loveLuck: {
+        score: loveScore,
+        spouseLuck: "당신의 배우자는 지적이며 당신의 부족한 부분을 완벽하게 채워줄 정서적 동반자입니다.",
+        text: "안정적이고 깊은 정서적 교감을 추구하는 타입으로, 진실한 인연과의 만남이 예정되어 있습니다."
+      },
+      topologyData: {
+        points: 400 + (seed % 100),
+        curvature: (seed % 10 > 5) ? "Convex High" : "Linear Optimal",
+        stability: "Stable Phase 13"
+      }
     };
   }
 

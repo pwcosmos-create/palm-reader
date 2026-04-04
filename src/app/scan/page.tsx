@@ -11,13 +11,13 @@ function isSkinPixel(r: number, g: number, b: number): boolean {
   const diff = max - min;
   const sat = max === 0 ? 0 : diff / max;
   
-  // Tighten RGB/HSL range to filter out yellowish/reddish objects
+  // Tighten RGB/HSL range: Palm skin is rarely extremely saturated or dark
   return (
-    r > 80 && g > 40 && b > 25 &&
+    r > 95 && g > 55 && b > 40 &&
     r > b && r > g &&
-    diff >= 20 &&
-    sat >= 0.15 && sat <= 0.65 &&
-    r - g >= 5 && r - g <= 60
+    diff >= 25 &&
+    sat >= 0.18 && sat <= 0.60 &&
+    r - g >= 8 && r - g <= 55
   );
 }
 
@@ -62,19 +62,32 @@ async function validatePalmStrict(dataUrl: string): Promise<{ ok: boolean; reaso
       if (overallRatio < 0.35) return resolve({ ok: false, reason: "NO_SKIN" });
 
       const ratios = cellSkin.map((s) => s / (CELL * CELL));
-      const highCells = ratios.filter((r) => r >= 0.30).length;
-      if (highCells < 6 || ratios[4] < 0.45) return resolve({ ok: false, reason: "LOW_COVERAGE" });
+      
+      // 1.1 Skin Uniformity Check (Anti-Face)
+      // Faces have high variance in skin coverage due to hair, eyes, and complex features.
+      // Palms are relatively consistent across the 3x3 grid.
+      const meanRatio = ratios.reduce((a, b) => a + b, 0) / 9;
+      const variance = ratios.reduce((a, b) => a + Math.pow(b - meanRatio, 2), 0) / 9;
+      const stdDev = Math.sqrt(variance);
+      
+      // If stdDev is too high (> 0.25), it's likely a face or messy background.
+      if (stdDev > 0.25) return resolve({ ok: false, reason: "LOW_COVERAGE" });
+
+      const highCells = ratios.filter((r) => r >= 0.35).length;
+      if (highCells < 6 || ratios[4] < 0.50) return resolve({ ok: false, reason: "LOW_COVERAGE" });
 
       // 2. Texture/Edge density analysis (Sobel)
       // Only check edges ON skin area to avoid background noise
       let edgeEnergy = 0;
+      const cellEdges = new Array(GRID * GRID).fill(0);
+      
       for (let y = 1; y < SIZE - 1; y++) {
         for (let x = 1; x < SIZE - 1; x++) {
           if (!totalSkinPixels[y * SIZE + x]) continue;
           
           const getG = (ox: number, oy: number) => {
             const i = ((y + oy) * SIZE + (x + ox)) * 4;
-            return (data[i] + data[i + 1] + data[i + 2]) / 3;
+            return (data[i] * 0.299 + data[i + 1] * 0.587 + data[i + 2] * 0.114); // Gray scale
           };
 
           const gx = -1 * getG(-1, -1) + 1 * getG(1, -1)
@@ -85,14 +98,24 @@ async function validatePalmStrict(dataUrl: string): Promise<{ ok: boolean; reaso
                    + 1 * getG(-1, 1)  + 2 * getG(0, 1)  + 1 * getG(1, 1);
           
           const mag = Math.sqrt(gx * gx + gy * gy);
-          if (mag > 25) edgeEnergy++; // threshold for 'significant' line detail
+          if (mag > 35) { // Increased threshold to filter out facial skin noise
+            edgeEnergy++;
+            const ci = Math.floor(y / CELL) * GRID + Math.floor(x / CELL);
+            cellEdges[ci]++;
+          }
         }
       }
 
+      // 2.1 Distributed Texture Check
+      // Palm lines are distributed across the hand.
+      // Facial features are localized (eyes/mouth).
+      const edgyCells = cellEdges.filter((e, idx) => e > (cellSkin[idx] * 0.08)).length;
+      if (edgyCells < 4) return resolve({ ok: false, reason: "NO_TEXTURE" });
+
       // Density = significant edges / skin area
       const density = edgeEnergy / skinCount;
-      // Palm lines are usually dense. Smooth things (face, leg) have density < 0.05
-      if (density < 0.08) return resolve({ ok: false, reason: "NO_TEXTURE" });
+      // Increased density threshold to require actual palm-like markings
+      if (density < 0.12) return resolve({ ok: false, reason: "NO_TEXTURE" });
 
       resolve({ ok: true });
     };
