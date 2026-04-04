@@ -18,6 +18,9 @@ import {
   Check,
   RotateCcw,
   X,
+  Heart,
+  Compass,
+  BookOpen,
 } from "lucide-react";
 import {
   DEFAULT_CONFIG,
@@ -239,7 +242,7 @@ export default function Home() {
             </div>
             <div className={styles.statusBadgeSecondary}>
               <Activity size={14} />
-              <span>Global Intelligence: {globalScore.toLocaleString()}</span>
+              <span>전체 분석 수: {globalScore.toLocaleString()}</span>
             </div>
           </div>
         </section>
@@ -331,6 +334,78 @@ export default function Home() {
                 {i < 2 && <div className={styles.processLine} />}
               </div>
             ))}
+          </div>
+        </section>
+
+        {/* 📚 Kids Manual Section */}
+        <section className={styles.manualSection}>
+          <div className={`${styles.manualHeader} fade-in-up`}>
+            <div className={styles.manualIconBox}>
+              <BookOpen size={32} />
+            </div>
+            <h2 className="mystical-font">신기한 손금 도사 놀이!</h2>
+            <p className={styles.manualIntro}>내 손바닥 안에 숨겨진 보물지도를 어떻게 찾는지 알아볼까요?</p>
+          </div>
+
+          <div className={styles.manualGrid}>
+            <div className={`${styles.manualCard} glass-card fade-in-up`} style={{ animationDelay: "0.1s" }}>
+              <div className={styles.stepBadge}>1</div>
+              <h3>밝은 곳에서 손바닥 펴기</h3>
+              <p>카메라 앞에 손바닥을 쫙 펴고 보여주세요. 밝은 곳에서 찍어야 AI 도사가 더 잘 볼 수 있어요!</p>
+            </div>
+            <div className={`${styles.manualCard} glass-card fade-in-up`} style={{ animationDelay: "0.2s" }}>
+              <div className={styles.stepBadge}>2</div>
+              <h3>반짝이는 선 기다리기</h3>
+              <p>AI가 여러분의 손바닥 선을 보고 공부하는 중이에요. 화면에 파란 선들이 나타날 때까지 기다려봐요.</p>
+            </div>
+            <div className={`${styles.manualCard} glass-card fade-in-up`} style={{ animationDelay: "0.3s" }}>
+              <div className={styles.stepBadge}>3</div>
+              <h3>나만의 예언서 읽기</h3>
+              <p>세상에 하나뿐인 나만의 멋진 미래 이야기가 나와요. 엄마, 아빠와 함께 읽으면 더 재밌어요!</p>
+            </div>
+          </div>
+
+          {/* 🔍 Palm Lines Explanation */}
+          <div className={styles.linesExpl}>
+            <h2 className="mystical-font text-center mb-8">손금 선들의 비밀</h2>
+            <div className={styles.linesGrid}>
+              <div className={styles.lineNote}>
+                <div className={`${styles.lineIcon} ${styles.life}`}>
+                  <Zap size={20} />
+                </div>
+                <div>
+                  <h4>생명선: 튼튼이 선!</h4>
+                  <p>내가 얼마나 씩씩하고 에너지가 넘치는지 알려줘요.</p>
+                </div>
+              </div>
+              <div className={styles.lineNote}>
+                <div className={`${styles.lineIcon} ${styles.head}`}>
+                  <Brain size={20} />
+                </div>
+                <div>
+                  <h4>두뇌선: 똑똑이 선!</h4>
+                  <p>내가 어떤 생각을 좋아하는지, 얼마나 슬기로운지 보여줘요.</p>
+                </div>
+              </div>
+              <div className={styles.lineNote}>
+                <div className={`${styles.lineIcon} ${styles.heart}`}>
+                  <Heart size={20} />
+                </div>
+                <div>
+                  <h4>감정선: 마음 선!</h4>
+                  <p>내가 친구들을 얼마나 사랑하고 아끼는지 알려준답니다.</p>
+                </div>
+              </div>
+              <div className={styles.lineNote}>
+                <div className={`${styles.lineIcon} ${styles.fate}`}>
+                  <Compass size={20} />
+                </div>
+                <div>
+                  <h4>운명선: 꿈 선!</h4>
+                  <p>나중에 커서 어떤 멋진 꿈을 이루게 될지 힌트를 줘요.</p>
+                </div>
+              </div>
+            </div>
           </div>
         </section>
 

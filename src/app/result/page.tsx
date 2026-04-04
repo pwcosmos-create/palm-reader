@@ -93,10 +93,10 @@ export default function ResultPage() {
     }
 
     const stages = [
-      { msg: "Agent Alpha: 고해상도 지형 분석 (High-Res Saliency Mapping)...", time: 1000 },
-      { msg: "Agent Omega: 해부학적 제약 조건 검증 (Phalangeal Validation)...", time: 1200 },
-      { msg: "Deep Oracle: 1,500자 이상의 초정밀 서사 매핑 중...", time: 1500 },
-      { msg: "Alpha-Omega Synergy: 최적의 운명 궤적 합의 완료 (Consensus 98%)...", time: 800 }
+      { msg: "알파 도사: 손금 모양을 구석구석 살피는 중...", time: 1000 },
+      { msg: "오메가 도사: 손가락과 손바닥의 위치를 확인해요...", time: 1200 },
+      { msg: "신비한 오라클: 미래에 대한 특별한 이야기를 쓰는 중...", time: 1500 },
+      { msg: "도사들의 합의: 나만의 멋진 운명 지도가 완성됐어요!", time: 800 }
     ];
 
     const runAnalysis = async () => {
@@ -122,10 +122,10 @@ export default function ResultPage() {
       const fateRL  = RLEngine.selectStyle("Fate");
 
       selectedStylesRef.current = {
-        "생명선 (Life)":  lifeRL.style,
-        "두뇌선 (Head)":  headRL.style,
-        "감정선 (Heart)": heartRL.style,
-        "운명선 (Fate)":  fateRL.style,
+        "생명선 (튼튼이 선)":  lifeRL.style,
+        "두뇌선 (똑똑이 선)":  headRL.style,
+        "감정선 (마음 선)": heartRL.style,
+        "운명선 (꿈 선)":  fateRL.style,
       };
 
       // ── RL 컨텍스트 수집 → Gemini에 전달 ─────────────────────────────
@@ -137,10 +137,10 @@ export default function ResultPage() {
           : 0;
         return { avg, count: entries.length };
       };
-      const lifeStats  = getLineStats("생명선 (Life)");
-      const headStats  = getLineStats("두뇌선 (Head)");
-      const heartStats = getLineStats("감정선 (Heart)");
-      const fateStats  = getLineStats("운명선 (Fate)");
+      const lifeStats  = getLineStats("생명선 (튼튼이 선)");
+      const headStats  = getLineStats("두뇌선 (똑똑이 선)");
+      const heartStats = getLineStats("감정선 (마음 선)");
+      const fateStats  = getLineStats("운명선 (꿈 선)");
 
       const rlContext = {
         personalizationLevel: level,
@@ -177,25 +177,25 @@ export default function ResultPage() {
         summary: geminiData?.summary ?? "AI가 당신의 손금을 분석했습니다. 당신의 손금은 강한 의지와 풍부한 감성을 동시에 지닌 복합적인 성격을 나타냅니다.",
         lines: [
           {
-            name: "생명선 (Life)",
+            name: "생명선 (튼튼이 선)",
             reading: geminiData?.life?.reading ?? "",
             detailedReading: RLEngine.getEvolutionaryContent("Life", lifeRL.style),
             rating: 0, color: "#00FF7F", rlKey: "life", orientation: "vertical",
           },
           {
-            name: "두뇌선 (Head)",
+            name: "두뇌선 (똑똑이 선)",
             reading: geminiData?.head?.reading ?? "",
             detailedReading: RLEngine.getEvolutionaryContent("Head", headRL.style),
             rating: 0, color: "#00F2FF", rlKey: "head", orientation: "horizontal",
           },
           {
-            name: "감정선 (Heart)",
+            name: "감정선 (마음 선)",
             reading: geminiData?.heart?.reading ?? "",
             detailedReading: RLEngine.getEvolutionaryContent("Heart", heartRL.style),
             rating: 0, color: "#FF2EF7", rlKey: "heart", orientation: "horizontal",
           },
           {
-            name: "운명선 (Fate)",
+            name: "운명선 (꿈 선)",
             reading: geminiData?.fate?.reading ?? "",
             detailedReading: RLEngine.getEvolutionaryContent("Fate", fateRL.style),
             rating: 0, color: "#FFD700", rlKey: "fate", orientation: "vertical",
@@ -611,25 +611,24 @@ export default function ResultPage() {
             <div className={styles.badgeRow}>
               <h2 className="mystical-font glow-text-secondary">AI 분석 리포트</h2>
               {/* 
-                  Master Evolution Badge: Now visible by default to showcase Stage 13 intelligence, 
-                  even if globalScore is low during initial web test.
+                  Master Evolution Badge: Now visible by default to showcase Stage 13 intelligence.
               */}
               {true && (
-                <div className={styles.masterBadge} title="Global Neural Consolidation Stage 13 Active">
+                <div className={styles.masterBadge} title="글로벌 신경망 통합 Stage 13 활성화">
                   <ShieldCheck size={16} />
-                  <span>Master Evolution</span>
+                  <span>마스터 진화</span>
                 </div>
               )}
               {!analyzing && (
                 <div className={styles.collaborativeBadge}>
                   <span className={styles.badgePulse} />
-                  Collaborating AI Consensus [Alpha & Omega]
+                  AI 지능 협업 분석 중 [알파 & 오메가]
                 </div>
               )}
               {!analyzing && (
                 <div className={styles.archiveBadge}>
                   <Globe size={14} className="mr-1" />
-                  Permanently Archived to GitHub
+                  기록이 GitHub 클라우드에 영구 저장됨
                 </div>
               )}
             </div>
@@ -648,7 +647,7 @@ export default function ResultPage() {
                 <div className={styles.globalBox}>
                   <div className={styles.labelRow}>
                     <span className="text-[10px] opacity-70">글로벌 지능 풀 (Consensus)</span>
-                    {syncing && <span className={styles.syncingBadge}>Syncing...</span>}
+                    {syncing && <span className={styles.syncingBadge}>동기화 중...</span>}
                   </div>
                   <div className={styles.scoreGroup}>
                     <span className={styles.globalValue}>{globalScore.toLocaleString()} pts</span>
@@ -669,9 +668,9 @@ export default function ResultPage() {
           </div>
           <div className={styles.rightHeader}>
             <div className={styles.badgeRL} onClick={() => setExpertMode(!expertMode)} style={{ cursor: "pointer" }}>
-              {expertMode ? "Expert Mode Active" : "Autonomous RL"}
+              {expertMode ? "전문가 모드 활성" : "자율 학습 엔진"}
             </div>
-            {penaltyActive && <div className={styles.penaltyBadge}>Recalibrating...</div>}
+            {penaltyActive && <div className={styles.penaltyBadge}>재보정 중...</div>}
             {topologyMismatch && expertMode && (
               <div className={styles.mismatchBadge}>
                 ⚠️ 위상학적 불일치 (재보정 중)
@@ -683,9 +682,9 @@ export default function ResultPage() {
         {analysis && visibleItems >= 1 && (
           <div className={`${styles.premiumCard} ${styles.summaryCard} fade-in-up`}>
             <div className={styles.cardAccent} />
-            <h3 className="mystical-font text-xl mb-3">Overall Destiny</h3>
+            <h3 className="mystical-font text-xl mb-3">나의 전체 운명</h3>
             <div className={styles.summaryBox}>
-              <div className={styles.aiBadge}>GEMINI-CLAUDE HYBRID ENGINE</div>
+              <div className={styles.aiBadge}>제미나이-클로드 하이브리드 엔진</div>
               <p className={styles.summaryText}>{analysis.summary}</p>
               <button 
                 className={styles.reportBtn}
@@ -777,7 +776,7 @@ export default function ResultPage() {
             <div className={styles.lineHeader}>
               <h3 style={{ color: res.color }}>{res.name}</h3>
               <div style={{ display:"flex", gap:"0.4rem", alignItems:"center" }}>
-                <div className={styles.badge} style={{ borderColor: res.color, color: res.color }}>Analysis Complete</div>
+                <div className={styles.badge} style={{ borderColor: res.color, color: res.color }}>분석 완료</div>
                 {selectedStylesRef.current[res.name] && (
                   <div style={{ fontSize:"0.65rem", opacity:0.55, border:"1px solid rgba(255,255,255,0.1)", borderRadius:10, padding:"2px 7px", letterSpacing:"0.06em" }}>
                     RL: {selectedStylesRef.current[res.name]}
@@ -789,9 +788,9 @@ export default function ResultPage() {
             {/* Technical Topology Metadata 🧬 */}
             {res.detailedReading?.topologyData && (
               <div className={styles.topologyRow}>
-                <div className={styles.topoItem}>Points: <span>{res.detailedReading.topologyData.points}</span></div>
-                <div className={styles.topoItem}>Curve: <span>{res.detailedReading.topologyData.curvature}</span></div>
-                <div className={styles.topoItem}>Status: <span>{res.detailedReading.topologyData.stability}</span></div>
+                <div className={styles.topoItem}>측정점: <span>{res.detailedReading.topologyData.points}</span></div>
+                <div className={styles.topoItem}>곡률: <span>{res.detailedReading.topologyData.curvature}</span></div>
+                <div className={styles.topoItem}>상태: <span>{res.detailedReading.topologyData.stability}</span></div>
               </div>
             )}
 
@@ -830,7 +829,7 @@ export default function ResultPage() {
                 {expandedLines[i] && (
                   <div className={styles.deepContent}>
                     <div className={styles.rlLabel} style={{ backgroundColor: `${res.color}15`, color: res.color }}>
-                      🧠 Evolutionary RL Content — Accuracy {biases[res.rlKey]?.confidence ?? 0}%
+                      🧠 진화형 RL 콘텐츠 — 정확도 {biases[res.rlKey]?.confidence ?? 0}%
                     </div>
                     {res.detailedReading.sections.map((sec, si) => (
                       <div key={si} className={styles.deepSection}>
@@ -839,7 +838,7 @@ export default function ResultPage() {
                       </div>
                     ))}
                     <div className={styles.lengthFoot}>
-                      글로벌 지능 아카이브 모드 | High-Tech Oracle Engine v2.1
+                      글로벌 지능 아카이브 모드 | 하이테크 오라클 엔진 v2.1
                     </div>
                   </div>
                 )}
@@ -877,7 +876,7 @@ export default function ResultPage() {
 
             {expertMode && (
               <div className={styles.ratingBox}>
-                <span className="text-[10px] opacity-50 uppercase tracking-widest">Teaching AI: Give Feedback</span>
+                <span className="text-[10px] opacity-50 uppercase tracking-widest">AI 학습 돕기: 피드백 남기기</span>
                 <div className={styles.stars}>
                   {[1,2,3,4,5].map(star => (
                     <button key={star} onClick={() => handleRating(i, star)} className={res.rating >= star ? styles.starOn : styles.starOff}>★</button>
@@ -891,7 +890,7 @@ export default function ResultPage() {
         {analysis && visibleItems >= analysis.lines.length + 2 && (
           <div className={`${styles.premiumCard} ${styles.adviceCard} fade-in-up`}>
             <div className={styles.cardAccentGold} />
-            <h3 className="mystical-font text-xl mb-3 text-secondary">Divine Insight</h3>
+            <h3 className="mystical-font text-xl mb-3 text-secondary">신의 가르침</h3>
             <p className="text-sm italic opacity-90 leading-relaxed">"{analysis.advice}"</p>
           </div>
         )}

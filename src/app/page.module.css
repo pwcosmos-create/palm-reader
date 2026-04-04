@@ -505,3 +505,182 @@
     align-items: center;
   }
 }
+
+/* 📚 Kids Manual Section - Premium Redesign */
+.manualSection {
+  margin-top: 6rem;
+  padding: 5rem 2rem;
+  background: radial-gradient(circle at top right, rgba(0, 242, 255, 0.08), transparent),
+              radial-gradient(circle at bottom left, rgba(255, 46, 247, 0.08), transparent),
+              rgba(255, 255, 255, 0.01);
+  border-radius: 48px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  position: relative;
+  overflow: hidden;
+  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.3);
+}
+
+.manualHeader {
+  text-align: center;
+  margin-bottom: 4rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.manualIconBox {
+  width: 90px;
+  height: 90px;
+  margin-bottom: 1.5rem;
+  background: linear-gradient(135deg, var(--primary), var(--secondary));
+  border-radius: 28px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  box-shadow: 0 0 40px rgba(0, 242, 255, 0.4);
+  animation: float 4s ease-in-out infinite;
+}
+
+@keyframes float {
+  0%, 100% { transform: translateY(0) rotate(0deg); }
+  50% { transform: translateY(-15px) rotate(3deg); }
+}
+
+.manualHeader h2 {
+  font-size: 3rem;
+  margin-bottom: 1rem;
+  background: linear-gradient(to right, #fff, var(--primary));
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.manualIntro {
+  font-size: 1.2rem;
+  opacity: 0.8;
+  max-width: 600px;
+  line-height: 1.6;
+}
+
+.manualGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 2.5rem;
+  margin-bottom: 6rem;
+}
+
+.manualCard {
+  background: rgba(255, 255, 255, 0.04);
+  backdrop-filter: blur(20px);
+  padding: 3rem 2.5rem;
+  border-radius: 32px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  position: relative;
+  transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+.manualCard:hover {
+  transform: translateY(-12px) scale(1.02);
+  border-color: var(--primary);
+  background: rgba(255, 255, 255, 0.08);
+  box-shadow: 0 25px 60px rgba(0, 242, 255, 0.15);
+}
+
+.stepBadge {
+  position: absolute;
+  top: -18px;
+  left: 2.5rem;
+  background: var(--primary);
+  color: #000;
+  font-weight: 900;
+  width: 40px;
+  height: 40px;
+  border-radius: 14px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.2rem;
+  box-shadow: 0 8px 20px rgba(0, 242, 255, 0.5);
+}
+
+.manualCard h3 {
+  font-size: 1.5rem;
+  margin-bottom: 1.2rem;
+  color: #fff;
+}
+
+.manualCard p {
+  font-size: 1rem;
+  line-height: 1.7;
+  opacity: 0.7;
+}
+
+/* Palm Lines Explanation Box */
+.linesExpl {
+  background: rgba(0, 0, 0, 0.3);
+  border-radius: 40px;
+  padding: 4rem 3rem;
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  box-shadow: inset 0 0 40px rgba(0, 0, 0, 0.2);
+}
+
+.linesGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: 3rem;
+}
+
+.lineNote {
+  display: flex;
+  gap: 1.5rem;
+  align-items: center;
+  transition: transform 0.3s ease;
+}
+
+.lineNote:hover {
+  transform: translateX(10px);
+}
+
+.lineIcon {
+  width: 64px;
+  height: 64px;
+  border-radius: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  background: rgba(255, 255, 255, 0.03);
+  border: 2px solid rgba(255, 255, 255, 0.08);
+}
+
+.lineIcon svg {
+  filter: drop-shadow(0 0 8px currentColor);
+}
+
+.lineIcon.life { border-color: #00FF7F; color: #00FF7F; }
+.lineIcon.head { border-color: #00F2FF; color: #00F2FF; }
+.lineIcon.heart { border-color: #FF2EF7; color: #FF2EF7; }
+.lineIcon.fate { border-color: #FFD700; color: #FFD700; }
+
+.lineNote h4 {
+  font-size: 1.2rem;
+  margin-bottom: 0.4rem;
+  color: #fff;
+  font-weight: 700;
+}
+
+.lineNote p {
+  font-size: 0.9rem;
+  opacity: 0.6;
+  line-height: 1.6;
+}
+
+@media (max-width: 768px) {
+  .manualSection { padding: 3rem 1.5rem; border-radius: 32px; }
+  .manualHeader h2 { font-size: 2.2rem; }
+  .manualGrid { gap: 3rem; }
+  .linesExpl { padding: 2rem 1.5rem; border-radius: 28px; }
+  .linesGrid { gap: 2rem; }
+  .lineNote:hover { transform: none; }
+}

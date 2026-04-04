@@ -25,39 +25,39 @@ export interface HomepageConfig {
 
 export const DEFAULT_CONFIG: HomepageConfig = {
   hero: {
-    title: "AI PALMIST",
-    taglineMain: "Next-Gen Evolutionary Palmistry System —",
-    taglineSub: "당신의 손금에 숨겨진 미래 데이터를 정교하게 해독합니다.",
-    badge1: "Autonomous RL v2.5 Active",
+    title: "AI 손금 도사",
+    taglineMain: "내 손바닥에 숨겨진 보물지도를 찾아볼까요? —",
+    taglineSub: "인공지능이 들려주는 나만의 특별한 미래 이야기.",
+    badge1: "최신 AI 도사 v2.5 가동 중",
   },
   cta: {
-    text: "미래의 봉인 해제",
+    text: "비밀의 문 열기",
   },
   features: [
     {
-      title: "Collaborative RL",
+      title: "함께하는 똑똑이 AI",
       description:
-        "Gemini와 Claude의 지능이 상호 검증하여 전례 없는 정확도를 도출합니다.",
+        "세계에서 제일 똑똑한 인공지능 친구들이 만나 나의 손금을 꼼꼼하게 살펴봐요.",
     },
     {
-      title: "Evolutionary Oracle",
+      title: "나만의 보물지도",
       description:
-        "당신의 피드백을 통해 매순간 진화하는 맞춤형 손금 아카이브 엔진입니다.",
+        "내가 할 때마다 조금씩 변하는 신기한 손금 지도예요! 나만의 예언서를 만들어보세요.",
     },
     {
-      title: "Rare Mark Detection",
+      title: "희귀한 모양 찾기",
       description:
-        "M자 손금, 삼지창 등 백만 명 중 한 명의 희귀 문양을 정밀하게 포착합니다.",
+        "M자 모양이나 삼지창 모양처럼, 백만 명 중 한 명만 가진 아주 특별한 그림도 찾아낼 수 있어요.",
     },
   ],
   process: {
-    sectionTitle: "Evolutionary Path",
-    steps: ["Scan", "Topology", "Destiny"],
+    sectionTitle: "어떻게 하나요?",
+    steps: ["사진 찍기", "선 그리기", "결과 확인"],
   },
   footer: {
-    link1Text: "과거 기록 탐색",
-    link2Text: "글로벌 커뮤니티",
-    copyright: "© 2026 AI Palmist Collective — Stage 13 Intelligence",
+    link1Text: "과거 기록 보기",
+    link2Text: "다 함께 즐기기",
+    copyright: "© 2026 AI 손금 도사 — 미래를 설계하는 친구들",
   },
 };
 
