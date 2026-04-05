@@ -61,7 +61,7 @@ async function validatePalmStrict(dataUrl: string): Promise<{ ok: boolean; reaso
       }
 
       const overallRatio = skinCount / (SIZE * SIZE);
-      if (overallRatio < 0.70) return resolve({ ok: false, reason: "NO_SKIN" }); // Increased to 70% per user request
+      if (overallRatio < 0.60) return resolve({ ok: false, reason: "NO_SKIN" }); // Adjusted from 70% to 60% per user request
 
       const ratios = cellSkin.map((s) => s / (CELL * CELL));
 
@@ -72,8 +72,8 @@ async function validatePalmStrict(dataUrl: string): Promise<{ ok: boolean; reaso
 
       if (stdDev > 0.20) return resolve({ ok: false, reason: "LOW_COVERAGE" }); // Lower variance = more uniform skin
 
-      const highCells = ratios.filter((r) => r >= 0.50).length; // Higher cell baseline (50%)
-      if (highCells < 7 || ratios[4] < 0.75) return resolve({ ok: false, reason: "LOW_COVERAGE" }); // Center must be 75% skin
+      const highCells = ratios.filter((r) => r >= 0.45).length; // Slightly lower cell baseline (45%)
+      if (highCells < 6 || ratios[4] < 0.65) return resolve({ ok: false, reason: "LOW_COVERAGE" }); // Adjusted center to 65%
 
       // 2. Texture/Edge density analysis (Sobel)
       let edgeEnergy = 0;
