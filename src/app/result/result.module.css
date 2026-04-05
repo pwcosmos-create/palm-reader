@@ -13,7 +13,7 @@
   .container {
     display: grid;
     grid-template-columns: 1fr 1.25fr;
-    overflow-y: hidden; /* Disable main scroll, columns handle it */
+    overflow-y: hidden;
   }
 
   .imageHeader {
@@ -34,14 +34,6 @@
     padding: 3rem 4rem !important;
     background: transparent !important;
   }
-
-  .resultsList::before {
-    content: "";
-    position: absolute;
-    inset: 0;
-    background: radial-gradient(circle at 100% 0%, rgba(0, 242, 255, 0.03) 0%, transparent 40%);
-    pointer-events: none;
-  }
 }
 
 .imageHeader {
@@ -57,17 +49,14 @@
   transition: all 0.5s ease;
 }
 
-/* Palm photo — always shown immediately */
 .resultImg {
   position: absolute;
   inset: 0;
   width: 100%;
   height: 100%;
   object-fit: contain;
-  display: block;
 }
 
-/* Line overlay canvas — transparent bg, drawn on top of img */
 .resultCanvas {
   position: absolute;
   inset: 0;
@@ -89,7 +78,6 @@
   color: #fff;
   z-index: 100;
   padding: 2rem;
-  text-align: center;
 }
 
 .spinner {
@@ -103,22 +91,19 @@
   box-shadow: 0 0 15px var(--primary);
 }
 
-@keyframes spin {
-  to { transform: rotate(360deg); }
-}
+@keyframes spin { to { transform: rotate(360deg); } }
 
 .analyzingText {
-  font-family: 'Cinzel', serif;
-  font-size: var(--text-base);   /* clamp 토큰으로 통일 — Claude RL */
-  letter-spacing: 0.1em;
+  font-family: 'Inter', sans-serif;
+  font-size: 1.1rem;
+  letter-spacing: 0.05em;
   color: #fff;
   text-shadow: 0 0 10px rgba(255, 255, 255, 0.5);
   margin-bottom: 2rem;
-  min-height: 1.2em;
 }
 
 .stageBar {
-  width: clamp(160px, 65%, 280px);   /* 반응형으로 수정 — Claude RL */
+  width: min(280px, 80%);
   height: 4px;
   background: rgba(255, 255, 255, 0.1);
   border-radius: 2px;
@@ -129,57 +114,7 @@
   height: 100%;
   background: linear-gradient(90deg, var(--primary), var(--secondary));
   box-shadow: 0 0 10px var(--primary);
-  transition: width 0.8s cubic-bezier(0.4, 0, 0.2, 1);
-}
-
-.badgeRow {
-  display: flex;
-  align-items: center;
-  gap: 1rem;
-  flex-wrap: wrap;
-}
-
-.collaborativeBadge {
-  background: rgba(112, 0, 255, 0.2);
-  border: 1px solid rgba(112, 0, 255, 0.4);
-  padding: 6px 14px;
-  border-radius: 30px;
-  font-size: 0.75rem;
-  font-weight: bold;
-  color: var(--secondary);
-  text-transform: uppercase;
-  letter-spacing: 0.05em;
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  box-shadow: 0 0 15px rgba(112, 0, 255, 0.2);
-  backdrop-filter: blur(5px);
-  animation: pulse-glow 2s infinite ease-in-out;
-}
-
-.badgePulse {
-  width: 8px;
-  height: 8px;
-  background: #a855f7;
-  border-radius: 50%;
-  box-shadow: 0 0 10px #a855f7;
-  animation: pulse-ring 1.5s infinite;
-}
-
-@keyframes pulse-ring {
-  0% { transform: scale(0.8); box-shadow: 0 0 0 0 rgba(168, 85, 247, 0.7); }
-  70% { transform: scale(1.1); box-shadow: 0 0 0 10px rgba(168, 85, 247, 0); }
-  100% { transform: scale(0.8); box-shadow: 0 0 0 0 rgba(168, 85, 247, 0); }
-}
-
-@keyframes pulse-glow {
-  0%, 100% { opacity: 0.8; transform: translateY(0); }
-  50% { opacity: 1; transform: translateY(-2px); }
-}
-
-@keyframes pulseOpacity {
-  0% { opacity: 0.5; }
-  100% { opacity: 1; }
+  transition: width 0.8s ease;
 }
 
 .resultsList {
@@ -193,176 +128,75 @@
   display: flex;
   flex-direction: column;
   gap: 1.5rem;
-  transition: all 0.5s ease;
 }
 
-.headerRow {
+.easyReviewCard {
+  position: relative;
+  background: linear-gradient(135deg, rgba(168, 85, 247, 0.15) 0%, rgba(112, 0, 255, 0.05) 100%);
+  border: 1px solid rgba(168, 85, 247, 0.3);
+  border-radius: 24px;
+  padding: 1.5rem;
   display: flex;
-  justify-content: space-between;
-  align-items: flex-start;
-  margin-bottom: 2rem;
-  gap: 1.5rem;
-}
-
-.rightHeader {
-  display: flex;
-  flex-direction: column;
-  align-items: flex-end;
-  gap: 10px;
-}
-
-/* ...rest of the styles... */
-
-.titleGroup {
-  display: flex;
-  flex-direction: column;
-  gap: 0.5rem;
-}
-
-.maturityBox, .globalBox {
-  display: flex;
-  flex-direction: column;
-  gap: 6px;
-  background: rgba(255, 255, 255, 0.03);
-  padding: 10px 14px;
-  border-radius: 12px;
-  border: 1px solid rgba(255, 255, 255, 0.05);
-  min-width: 170px;
-}
-
-.labelRow {
-  display: flex;
-  justify-content: space-between;
+  gap: 1.2rem;
   align-items: center;
-}
-
-.scoreValue, .globalValue {
-  font-family: 'Cinzel', serif;
-  font-weight: bold;
-  font-size: 0.8rem;
-  color: var(--primary);
-  text-shadow: 0 0 8px rgba(0, 242, 255, 0.4);
-}
-
-.globalValue {
-  color: var(--secondary);
-  text-shadow: 0 0 8px rgba(112, 0, 255, 0.4);
-}
-
-.scoreGroup {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-}
-
-.pulseDot {
-  width: 6px;
-  height: 6px;
-  background: var(--secondary);
-  border-radius: 50%;
-  box-shadow: 0 0 8px var(--secondary);
-  animation: pulse-dot 1.5s infinite ease-in-out;
-}
-
-@keyframes pulse-dot {
-  0%, 100% { transform: scale(1); opacity: 0.5; }
-  50% { transform: scale(1.4); opacity: 1; }
-}
-
-.syncingBadge {
-  font-size: 9px;
-  background: rgba(255, 255, 255, 0.1);
-  padding: 2px 6px;
-  border-radius: 4px;
-  color: var(--primary);
-  animation: blink 1s infinite alternate;
-}
-
-@keyframes blink {
-  from { opacity: 0.4; }
-  to { opacity: 1; }
-}
-
-.progressBar {
-  width: 100%;
-  height: 4px;
-  background: rgba(255, 255, 255, 0.1);
-  border-radius: 2px;
   overflow: hidden;
+  box-shadow: 0 10px 30px rgba(168, 85, 247, 0.1);
 }
 
-.progressFill {
-  height: 100%;
-  background: linear-gradient(90deg, var(--primary), var(--secondary));
-  transition: width 1s cubic-bezier(0.4, 0, 0.2, 1);
+.sparkle {
+  position: absolute;
+  top: -20px; right: -20px;
+  width: 100px; height: 100px;
+  background: radial-gradient(circle, rgba(168, 85, 247, 0.2) 0%, transparent 70%);
+  animation: pulse 3s infinite ease-in-out;
 }
 
-.badgeRL {
-  background: rgba(0, 242, 255, 0.1);
-  color: var(--primary);
-  border: 1px solid var(--primary);
-  font-size: 0.65rem;
-  padding: 0.3rem 0.8rem;
-  border-radius: 20px;
-  font-weight: bold;
-  text-transform: uppercase;
-  letter-spacing: 1px;
-  white-space: nowrap;
-}
+@keyframes pulse { 0%, 100% { opacity: 0.5; transform: scale(1); } 50% { opacity: 0.8; transform: scale(1.2); } }
 
-.penaltyBadge {
-  background: rgba(255, 0, 0, 0.15);
-  color: #ff4d4d;
-  border: 1px solid rgba(255, 77, 77, 0.5);
-  font-size: 0.6rem;
-  padding: 4px 10px;
-  border-radius: 6px;
+.guruIcon { font-size: 2.2rem; }
+
+.easyReviewTitle {
+  font-family: 'Cinzel', serif;
+  color: var(--secondary);
+  font-size: 1rem;
+  margin-bottom: 0.4rem;
   font-weight: 700;
-  text-transform: uppercase;
-  letter-spacing: 0.1em;
-  animation: pulse-red 1.5s infinite ease-in-out;
 }
 
-@keyframes pulse-red {
-  0%, 100% { opacity: 1; box-shadow: 0 0 5px rgba(255, 77, 77, 0.2); }
-  50% { opacity: 0.7; box-shadow: 0 0 15px rgba(255, 77, 77, 0.5); }
+.easyReviewText {
+  color: rgba(255, 255, 255, 0.9);
+  font-size: 0.95rem;
+  line-height: 1.6;
+}
+
+.headerRow { margin-bottom: 1rem; }
+
+.badgeRow { display: flex; align-items: center; gap: 0.8rem; flex-wrap: wrap; }
+
+.masterBadge {
+  background: rgba(255, 215, 0, 0.15);
+  color: #FFD700;
+  padding: 4px 12px;
+  border-radius: 30px;
+  font-size: 0.75rem;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  border: 1px solid rgba(255, 215, 0, 0.3);
 }
 
 .archiveBadge {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  background: rgba(255, 215, 0, 0.1);
-  border: 1px solid rgba(255, 215, 0, 0.3);
-  padding: 6px 14px;
+  background: rgba(255, 255, 255, 0.05);
+  color: rgba(255, 255, 255, 0.6);
+  padding: 4px 12px;
   border-radius: 30px;
   font-size: 0.75rem;
-  font-weight: bold;
-  color: #ffd700;
-  text-shadow: 0 0 10px rgba(255, 215, 0, 0.2);
-  backdrop-filter: blur(5px);
-  animation: fadeIn 0.8s ease forwards;
+  display: flex;
+  align-items: center;
+  gap: 6px;
 }
 
-.badgeIcon {
-  font-size: 0.9rem;
-}
-
-@keyframes fadeIn {
-  from { opacity: 0; transform: translateY(10px); }
-  to { opacity: 1; transform: translateY(0); }
-}
-
-/* Summary / Advice card variants */
-.summaryCard {
-  border-color: rgba(0, 242, 255, 0.15);
-}
-
-.adviceCard {
-  border-color: rgba(255, 215, 0, 0.15);
-}
-
-/* Premium Cards */
 .premiumCard {
   position: relative;
   padding: 1.8rem;
@@ -373,737 +207,48 @@
   overflow: hidden;
 }
 
-.cardAccent {
-  position: absolute;
-  top: 0; left: 0; bottom: 0;
-  width: 4px;
-  background: linear-gradient(to bottom, var(--primary), transparent);
-}
+.cardAccent { position: absolute; left: 0; top: 0; bottom: 0; width: 4px; background: var(--primary); }
+.cardAccentGold { position: absolute; left: 0; top: 0; bottom: 0; width: 4px; background: var(--secondary); }
 
-.cardAccentGold {
-  position: absolute;
-  top: 0; left: 0; bottom: 0;
-  width: 4px;
-  background: linear-gradient(to bottom, var(--secondary), transparent);
-}
-
-.summaryText {
-  font-size: 0.95rem;
-  line-height: 1.6;
-  color: rgba(255, 255, 255, 0.9);
-  margin-bottom: 1.5rem;
-}
-
-.reportBtn {
-  background: rgba(255, 0, 0, 0.05);
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  color: rgba(255, 255, 255, 0.4);
-  padding: 8px 14px;
-  border-radius: 10px;
-  font-size: 0.7rem;
-  cursor: pointer;
-  transition: all 0.25s;
-  width: 100%;
-  text-align: center;
-  font-weight: 600;
-}
-
-.reportBtn:hover {
-  background: rgba(255, 0, 0, 0.1);
-  border-color: rgba(255, 77, 77, 0.3);
-  color: #ff4d4d;
-}
-
-.personalizationMsg {
-  font-size: 0.7rem;
+.summaryBox { margin-top: 1rem; }
+.aiBadge {
+  display: inline-block;
+  font-size: 0.65rem;
+  background: rgba(0, 242, 255, 0.1);
   color: var(--primary);
-  opacity: 0.8;
-  font-family: monospace;
-  letter-spacing: 0.5px;
-}
-
-.lineCard {
-  transition: all 0.6s cubic-bezier(0.16, 1, 0.3, 1);
-}
-
-.lineCard.hidden {
-  opacity: 0;
-  transform: translateY(20px);
-}
-
-.lineCard.visible {
-  opacity: 1;
-  transform: translateY(0);
-}
-
-.lineHeader {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 0.8rem;
-}
-
-.badge {
-  font-size: 0.6rem;
   padding: 2px 8px;
-  border: 1px solid;
-  border-radius: 10px;
-  text-transform: uppercase;
+  border-radius: 4px;
+  margin-bottom: 0.8rem;
   font-weight: 700;
-  letter-spacing: 1px;
 }
 
-.ratingBox {
-  display: flex;
-  flex-direction: column;
-  gap: 0.5rem;
-  margin-top: 1rem;
-  padding-top: 1rem;
-  border-top: 1px solid rgba(255, 255, 255, 0.05);
-}
+.summaryText { font-size: 0.95rem; line-height: 1.65; color: rgba(255, 255, 255, 0.85); }
 
-.stars {
-  display: flex;
-  gap: 0.5rem;
-}
+.luckCard { border-color: rgba(255, 215, 0, 0.2); }
+.luckCardAccent { position: absolute; left: 0; top: 0; bottom: 0; width: 4px; background: var(--secondary); }
 
-.stars button {
-  background: none;
-  border: none;
-  font-size: 1.5rem;
-  cursor: pointer;
-  transition: transform 0.1s, color 0.2s;
-}
+.luckBlock { margin-bottom: 1.5rem; }
+.luckBlockHeader { display: flex; align-items: center; gap: 0.8rem; margin-bottom: 0.6rem; }
+.luckIcon { font-size: 1.2rem; }
+.luckName { font-weight: 600; font-size: 1rem; }
+.luckScore { font-weight: 800; font-family: 'Cinzel', serif; margin-left: auto; }
+.luckText { font-size: 0.9rem; color: rgba(255, 255, 255, 0.7); line-height: 1.5; }
 
-.starOn {
-  color: var(--secondary) !important;
-  text-shadow: 0 0 10px rgba(255, 215, 0, 0.5);
-}
+.luckDivider { height: 1px; background: rgba(255, 255, 255, 0.05); margin: 1.2rem 0; }
 
-.starOn:hover {
-  transform: scale(1.1);
-}
+.lineCard { opacity: 0; transform: translateY(20px); transition: all 0.6s ease; }
+.lineCard.visible { opacity: 1; transform: translateY(0); }
 
-.starOff {
-  color: rgba(255, 255, 255, 0.1) !important;
-}
+.lineHeader { display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.8rem; }
+.scoreBadge { font-size: 0.7rem; font-weight: 800; padding: 4px 10px; border-radius: 10px; }
+.readingText { font-size: 0.9rem; line-height: 1.6; color: rgba(255, 255, 255, 0.8); }
 
-.actions {
-  margin-top: 1rem;
-  display: flex;
-  flex-direction: column;
-  gap: 1rem;
-  transition: all 0.8s ease;
-}
+.adviceCard { border-color: rgba(255, 215, 0, 0.3); background: rgba(255, 215, 0, 0.02); }
 
-.actions.hidden { opacity: 0; pointer-events: none; }
+.actions { display: flex; flex-direction: column; gap: 1rem; margin-top: 1rem; opacity: 0; transition: opacity 1s; }
 .actions.visible { opacity: 1; }
 
-@keyframes fadeInUp {
-  from { opacity: 0; transform: translateY(30px); }
-  to { opacity: 1; transform: translateY(0); }
-}
+.noImage { display: flex; align-items: center; justify-content: center; height: 100vh; }
 
-:global(.fade-in-up) {
-  animation: fadeInUp 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards;
-}
-
-/* ── Line Detection RL confidence box ───────────────────────────────── */
-.detectionBox {
-  display: flex;
-  flex-direction: column;
-  gap: 6px;
-  background: rgba(255, 255, 255, 0.03);
-  padding: 10px 14px;
-  border-radius: 12px;
-  border: 1px solid rgba(74, 222, 128, 0.1);
-  min-width: 170px;
-}
-
-.detectionValue {
-  font-family: 'Cinzel', serif;
-  font-weight: bold;
-  font-size: 0.8rem;
-  color: #4ade80;
-  text-shadow: 0 0 8px rgba(74, 222, 128, 0.4);
-}
-
-.detectionFill {
-  height: 100%;
-  background: linear-gradient(90deg, #4ade80, #00F2FF);
-  transition: width 0.8s cubic-bezier(0.4, 0, 0.2, 1);
-}
-
-.penaltyFlash {
-  animation: bg-red-flash 0.5s ease;
-  border-color: rgba(255, 77, 77, 0.4) !important;
-}
-
-@keyframes bg-red-flash {
-  0% { background: rgba(255, 0, 0, 0.2); }
-  100% { background: rgba(255, 255, 255, 0.03); }
-}
-
-/* ── Per-line position RL adjustment UI ─────────────────────────────── */
-.lineAdjust {
-  display: flex;
-  flex-direction: column;
-  gap: 0.45rem;
-  padding: 0.7rem 0.9rem;
-  border-radius: 10px;
-  background: rgba(255, 255, 255, 0.025);
-  border: 1px solid rgba(255, 255, 255, 0.06);
-  margin-bottom: 0.75rem;
-}
-
-.adjustHeader {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-}
-
-.adjustLabel {
-  font-size: 0.6rem;
-  text-transform: uppercase;
-  letter-spacing: 0.08em;
-  color: rgba(255, 255, 255, 0.4);
-}
-
-.confPill {
-  font-size: 0.6rem;
-  font-weight: 700;
-  padding: 2px 8px;
-  border-radius: 10px;
-  border: 1px solid;
-  letter-spacing: 0.04em;
-}
-
-.adjustBtns {
-  display: flex;
-  gap: 0.45rem;
-  align-items: center;
-}
-
-.adjustBtn {
-  flex: 1;
-  padding: 5px 0;
-  background: rgba(255, 255, 255, 0.04);
-  border: 1px solid;
-  border-radius: 7px;
-  color: rgba(255, 255, 255, 0.65);
-  font-size: 0.72rem;
-  cursor: pointer;
-  transition: background 0.15s, transform 0.1s;
-  font-family: inherit;
-}
-
-.adjustBtn:hover  { background: rgba(255,255,255,0.1); color: #fff; transform: scale(1.04); }
-.adjustBtn:active { transform: scale(0.94); }
-
-.adjustConfirm {
-  flex: 1.4;
-  padding: 5px 0;
-  background: transparent;
-  border: 1px solid;
-  border-radius: 7px;
-  font-size: 0.72rem;
-  font-weight: 600;
-  cursor: pointer;
-  transition: background 0.15s, transform 0.1s;
-  font-family: inherit;
-}
-
-.adjustConfirm:hover  { background: rgba(255,255,255,0.06); transform: scale(1.04); }
-.adjustConfirm:active { transform: scale(0.94); }
-
-.rlFeedback {
-  font-size: 0.62rem;
-  font-family: monospace;
-  letter-spacing: 0.04em;
-  animation: fadeInUp 0.3s ease;
-}
-
-@media (max-width: 480px) {
-  .resultsList {
-    padding: 1.5rem;
-  }
-}
-
-/* ── Deep Oracle: 1,000+ Character Styles ─────────────────────────── */
-.deepOracle {
-  margin: 1.5rem 0;
-  border-radius: 16px;
-  overflow: hidden;
-  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-}
-
-.expandBtn {
-  width: 100%;
-  padding: 14px;
-  background: rgba(255, 255, 255, 0.03);
-  border: 1px dashed rgba(255, 255, 255, 0.15);
-  border-radius: 14px;
-  font-size: var(--text-sm);
-  font-weight: 600;
-  cursor: pointer;
-  transition: all 0.3s;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 10px;
-  backdrop-filter: blur(5px);
-  font-family: 'Cinzel', serif;
-}
-
-.expandBtn:hover {
-  background: rgba(255, 255, 255, 0.08);
-  border-color: var(--primary);
-  transform: translateY(-2px);
-}
-
-.deepContent {
-  margin-top: 1rem;
-  padding: 1.8rem;
-  background: rgba(0, 0, 0, 0.25);
-  border-radius: 20px;
-  border: 1px solid rgba(255, 255, 255, 0.05);
-  animation: slideDown 0.6s cubic-bezier(0.16, 1, 0.3, 1);
-}
-
-.rlLabel {
-  display: inline-block;
-  font-size: 10px;
-  padding: 5px 12px;
-  border-radius: 20px;
-  margin-bottom: 2rem;
-  text-transform: uppercase;
-  letter-spacing: 0.08em;
-  font-weight: 700;
-  box-shadow: 0 0 15px currentColor;
-}
-
-.deepSection {
-  margin-bottom: 2.5rem;
-}
-
-.deepSection h4 {
-  font-family: 'Cinzel', serif;
-  font-size: 1rem;
-  margin-bottom: 0.8rem;
-  letter-spacing: 0.05em;
-  opacity: 0.95;
-}
-
-.deepSection p {
-  font-size: 0.92rem;
-  line-height: 1.85;
-  opacity: 0.85;
-  text-align: justify;
-  word-break: keep-all;
-}
-
-.lengthFoot {
-  margin-top: 3rem;
-  padding-top: 1.2rem;
-  border-top: 2px solid rgba(255, 255, 255, 0.03);
-  font-size: 10px;
-  opacity: 0.3;
-  text-align: right;
-  font-family: monospace;
-  letter-spacing: 1px;
-}
-
-@keyframes slideDown {
-  from { opacity: 0; transform: translateY(-15px) scale(0.98); }
-  to { opacity: 1; transform: translateY(0) scale(1); }
-}
-
-@keyframes fadeIn {
-  from { opacity: 0; }
-  to { opacity: 1; }
-}
-
-.noImage {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-/* 🎨 Fluorescent Neon Utilities */
-.neonText {
-  color: #fff;
-  text-shadow: 
-    0 0 7px #fff,
-    0 0 10px #fff,
-    0 0 21px var(--neon-color),
-    0 0 42px var(--neon-color),
-    0 0 82px var(--neon-color);
-}
-
-@keyframes neonFlame {
-  0%, 100% { filter: drop-shadow(0 0 5px var(--neon-color)); transform: scale(1); }
-  50% { filter: drop-shadow(0 0 20px var(--neon-color)); transform: scale(1.02); }
-}
-
-.neonFlame {
-  animation: neonFlame 2s infinite ease-in-out;
-}
-
-.masterBadge {
-  background: linear-gradient(135deg, #FFD700 0%, #FFA500 50%, #B8860B 100%);
-  color: #000;
-  padding: 0.5rem 1.2rem;
-  border-radius: 50px;
-  font-size: 0.85rem;
-  font-weight: 800;
-  display: flex;
-  align-items: center;
-  gap: 0.6rem;
-  box-shadow: 0 0 20px rgba(255, 215, 0, 0.4);
-  border: 1px solid rgba(255, 255, 255, 0.3);
-  text-transform: uppercase;
-  letter-spacing: 1px;
-  animation: masterPulse 2.5s infinite alternate;
-  z-index: 10;
-  cursor: help;
-}
-
-@keyframes masterPulse {
-  0% { transform: scale(1); box-shadow: 0 0 15px rgba(255, 215, 0, 0.4); }
-  100% { transform: scale(1.05); box-shadow: 0 0 30px rgba(255, 215, 0, 0.7); }
-}
-
-.neuralOverlay {
-  position: absolute;
-  inset: 0;
-  background: radial-gradient(circle at center, rgba(0, 242, 255, 0.1) 0%, transparent 70%);
-  overflow: hidden;
-  pointer-events: none;
-  z-index: 10;
-}
-
-.neuralOverlay::after {
-  content: "";
- position: absolute;
- inset: -100%;
- background-image: 
- linear-gradient(rgba(0, 242, 255, 0.1) 1px, transparent 1px),
- linear-gradient(90deg, rgba(0, 242, 255, 0.1) 1px, transparent 1px);
- background-size: 40px 40px;
- transform: perspective(500px) rotateX(60deg) translateY(0);
- animation: gridMove 20s linear infinite;
-}
-
-/* ── 재물운 & 연애운 독립 카드 ─────────────────────────────────── */
-.luckCard {
-  border-color: rgba(255, 215, 0, 0.2) !important;
-}
-
-.luckCardAccent {
-  position: absolute;
-  top: 0; left: 0; bottom: 0;
-  width: 4px;
-  background: linear-gradient(to bottom, #FFD700, #FF2EF7);
-}
-
-.luckCardTitle {
-  font-size: 1.15rem;
-  margin-bottom: 1.5rem;
-  background: linear-gradient(90deg, #FFD700, #FF2EF7);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
-}
-
-.luckBlock {
-  display: flex;
-  flex-direction: column;
-  gap: 0.75rem;
-}
-
-.luckBlockHeader {
-  display: flex;
-  align-items: center;
-  gap: 0.6rem;
-  flex-wrap: wrap;
-}
-
-.luckIcon { font-size: 1.3rem; }
-
-.luckName {
-  font-size: 1rem;
-  font-weight: 800;
-  letter-spacing: 0.05em;
-  color: rgba(255, 255, 255, 0.9);
-}
-
-.luckScore {
-  font-family: 'Cinzel', serif;
-  font-size: 1.4rem;
-  font-weight: 900;
-  margin-left: auto;
-  text-shadow: 0 0 20px currentColor;
-}
-
-.luckBar {
-  width: 100%;
-  height: 8px;
-  background: rgba(255, 255, 255, 0.08);
-  border-radius: 4px;
-  overflow: hidden;
-}
-
-.luckBarFill {
-  height: 100%;
-  border-radius: 4px;
-  transition: width 1.2s cubic-bezier(0.16, 1, 0.3, 1);
-}
-
-.luckText {
-  font-size: 0.88rem;
-  line-height: 1.65;
-  color: rgba(255, 255, 255, 0.8);
-}
-
-.luckDivider {
-  height: 1px;
-  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.08), transparent);
-  margin: 1.2rem 0;
-}
-
-.spouseBox {
-  margin-top: 0.5rem;
-  padding: 0.9rem 1rem;
-  background: rgba(255, 46, 247, 0.06);
-  border-left: 3px solid #FF2EF7;
-  border-radius: 0 10px 10px 0;
-}
-
-.spouseTag {
-  display: inline-block;
-  font-size: 0.65rem;
-  font-weight: 700;
-  text-transform: uppercase;
-  letter-spacing: 0.1em;
-  color: #FF2EF7;
-  margin-bottom: 0.4rem;
-}
-
-.spouseText {
-  font-size: 0.82rem;
-  line-height: 1.6;
-  color: rgba(255, 255, 255, 0.8);
-}
-
-/* (legacy, kept for compatibility) */
-.luckDashboard {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 1rem;
-  margin: 1.5rem 0;
-  padding: 1.2rem;
-  background: rgba(255, 255, 255, 0.03);
-  border-radius: 16px;
-  border: 1px solid rgba(255, 255, 255, 0.05);
-}
-
-.luckItem {
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-}
-
-.luckLabel {
-  font-size: 0.75rem;
-  font-weight: 700;
-  color: rgba(255, 255, 255, 0.7);
-  letter-spacing: 0.02em;
-}
-
-.luckScoreBar {
-  width: 100%;
-  height: 6px;
-  background: rgba(255, 255, 255, 0.1);
-  border-radius: 3px;
-  overflow: hidden;
-}
-
-.luckFill {
-  height: 100%;
-  border-radius: 3px;
-  box-shadow: 0 0 10px currentColor;
-  transition: width 1.5s cubic-bezier(0.16, 1, 0.3, 1);
-}
-
-.luckScoreValue {
-  font-family: 'Cinzel', serif;
-  font-size: 0.85rem;
-  font-weight: 800;
-  text-align: right;
-  opacity: 0.9;
-}
-
-@media (max-width: 480px) {
-  .luckDashboard {
-    grid-template-columns: 1fr;
-  }
-}
-
-.rareMarkBadge {
-  margin-left: 8px;
-  font-size: 0.65rem;
-  background: rgba(255, 215, 0, 0.2);
-  color: #FFD700;
-  padding: 2px 8px;
-  border-radius: 4px;
-  border: 1px solid rgba(255, 215, 0, 0.4);
-  animation: glow 1.5s infinite alternate;
-}
-
-@keyframes glow {
-  from { box-shadow: 0 0 5px rgba(255, 215, 0, 0.2); }
-  to { box-shadow: 0 0 12px rgba(255, 215, 0, 0.5); }
-}
-
-.rareMarkDetail {
-  font-size: 0.65rem;
-  color: #FFD700;
-  margin-top: 4px;
-  font-weight: 600;
-  opacity: 0.8;
-}
-
-.spouseLuckBox {
-  margin-top: 12px;
-  padding: 10px;
-  background: rgba(255, 46, 247, 0.05);
-  border-left: 2px solid #FF2EF7;
-  font-size: 0.75rem;
-  line-height: 1.4;
-  color: rgba(255, 255, 255, 0.8);
-  border-radius: 0 8px 8px 0;
-}
-
-.summaryBox {
-  margin-top: 1rem;
-  padding: 1.2rem;
-  background: rgba(0, 242, 255, 0.05);
-  border-left: 3px solid var(--primary);
-  border-radius: 0 16px 16px 0;
-  margin-bottom: 2rem;
-}
-
-.aiBadge {
-  font-size: 0.6rem;
-  font-weight: 900;
-  color: var(--primary);
-  letter-spacing: 2px;
-  margin-bottom: 0.5rem;
-  opacity: 0.8;
-}
-
-.topologyRow {
-  display: flex;
-  gap: 12px;
-  margin-bottom: 1rem;
-  padding: 8px 12px;
-  background: rgba(255, 255, 255, 0.02);
-  border-radius: 8px;
-  border: 1px solid rgba(255, 255, 255, 0.05);
-}
-
-.topoItem {
-  font-size: 0.6rem;
-  color: rgba(255, 255, 255, 0.4);
-  text-transform: uppercase;
-  letter-spacing: 1px;
-}
-
-.topoItem span {
-  color: #fff;
-  font-weight: bold;
-  margin-left: 4px;
-}
-/* 🧚 Easy Total Review Card (Guru's Secret Message) */
-.easyReviewCard {
-  background: linear-gradient(135deg, rgba(255, 215, 0, 0.12) 0%, rgba(255, 165, 0, 0.08) 100%);
-  border: 2px solid rgba(255, 215, 0, 0.3);
-  border-radius: 24px;
-  padding: 1.5rem;
-  margin-bottom: 1.5rem;
-  display: flex;
-  align-items: center;
-  gap: 1.2rem;
-  position: relative;
-  overflow: hidden;
-  box-shadow: 0 10px 30px rgba(255, 215, 0, 0.1);
-  backdrop-filter: blur(12px);
-}
-
-.easyReviewCard::before {
-  content: "";
-  position: absolute;
-  top: -50%; left: -50%;
-  width: 200%; height: 200%;
-  background: radial-gradient(circle, rgba(255, 255, 255, 0.1) 0%, transparent 70%);
-  animation: rotate-slow 15s linear infinite;
-  pointer-events: none;
-}
-
-@keyframes rotate-slow {
-  from { transform: rotate(0deg); }
-  to { transform: rotate(360deg); }
-}
-
-.guruIcon {
-  font-size: 2.2rem;
-  filter: drop-shadow(0 0 10px rgba(255, 215, 0, 0.6));
-  animation: bounce-gentle 3s infinite ease-in-out;
-}
-
-@keyframes bounce-gentle {
-  0%, 100% { transform: translateY(0); }
-  50% { transform: translateY(-8px); }
-}
-
-.easyReviewContent {
-  flex: 1;
-  z-index: 2;
-}
-
-.easyReviewTitle {
-  font-family: 'Cinzel', serif;
-  font-size: 1.1rem;
-  color: #FFD700;
-  margin-bottom: 0.5rem;
-  letter-spacing: 1px;
-  text-shadow: 0 0 10px rgba(255, 215, 0, 0.3);
-}
-
-.easyReviewText {
-  font-size: 0.95rem;
-  line-height: 1.6;
-  color: #fff;
-  opacity: 0.95;
-  word-break: keep-all;
-  font-weight: 500;
-}
-
-.sparkle {
-  position: absolute;
-  top: 10px;
-  right: 15px;
-  font-size: 1.2rem;
-  opacity: 0.6;
-}
-
-.sparkle::after {
-  content: "✦";
-  color: #FFD700;
-  animation: blink-sparkle 1.5s infinite;
-}
-
-@keyframes blink-sparkle {
-  0%, 100% { opacity: 0.4; transform: scale(1); }
-  50% { opacity: 1; transform: scale(1.3); }
-}
+@keyframes fadeInUp { from { opacity: 0; transform: translateY(30px); } to { opacity: 1; transform: translateY(0); } }
+:global(.fade-in-up) { animation: fadeInUp 0.8s ease forwards; }

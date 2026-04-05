@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useEffect, useState } from "react";
-import { RLEngine } from "@/lib/rl_engine";
+
 import styles from "./page.module.css";
 import {
   Zap,
@@ -72,7 +72,8 @@ export default function Home() {
   const [saveStatus, setSaveStatus] = useState<"idle" | "saving" | "saved" | "error">("idle");
 
   useEffect(() => {
-    setGlobalScore(RLEngine.getGlobalIntelligenceScore());
+    const history = JSON.parse(localStorage.getItem('palm_history_v2') || '[]');
+    setGlobalScore(128400 + history.length * 25);
     // Server first, localStorage as fallback
     loadConfigFromServer().then((serverConfig) => {
       const loaded = serverConfig ?? loadConfig();

@@ -4,7 +4,6 @@ import { useRef, useState, useEffect, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import styles from "./scan.module.css";
 import { compressImage } from "@/lib/image_utils";
-import { RLEngine } from "@/lib/rl_engine";
 
 // ── Palm skin-tone & texture validation ───────────────────────────────────
 function isSkinPixel(r: number, g: number, b: number): boolean {
@@ -151,12 +150,6 @@ export default function ScanPage() {
   const [progress, setProgress] = useState(0);
   const [validationError, setValidationError] = useState<string | null>(null);
   
-  // 🧤 Stage 15: Recognition Hardening RL (Performance Optimization)
-  useEffect(() => {
-    if (typeof window !== "undefined") {
-      console.log("[RL] Palm detection engine optimized for hybrid mode.");
-    }
-  }, []);
 
   // 자동 인식 상태
   const [autoDetected, setAutoDetected] = useState(false);
