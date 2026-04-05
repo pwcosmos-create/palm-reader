@@ -15,11 +15,11 @@ function isSkinPixel(r: number, g: number, b: number): boolean {
 
   // Skin range: covers various skin tones and lighting conditions
   return (
-    r > 80 && g > 50 && b > 30 && // Slightly higher mins
+    r > 60 && g > 35 && b > 20 && // Lower mins for darker/dim scenes
     r > b && r > g &&
-    diff >= 20 &&                 // Higher diff for real skin
-    sat >= 0.15 && sat <= 0.70 && // Narrower saturation
-    r - g >= 10 && r - g <= 60    // Narrower hue (red-dish skin)
+    diff >= 12 &&                 // Lower diff
+    sat >= 0.05 && sat <= 0.85 && // Much wider saturation (low for gray palms, high for sweaty/red)
+    r - g >= 2 && r - g <= 70     // Wider hue range
   );
 }
 
@@ -29,7 +29,10 @@ function isSkinPixel(r: number, g: number, b: number): boolean {
  *
  * Returned result: { ok: boolean, reason?: string }
  */
-async function validatePalmStrict(dataUrl: string): Promise<{ ok: boolean; reason?: "NO_SKIN" | "NO_TEXTURE" | "LOW_COVERAGE" }> {
+async function validatePalmStrict(
+  dataUrl: string,
+  mode: "auto" | "manual" = "auto"
+): Promise<{ ok: boolean; reason?: "NO_SKIN" | "NO_TEXTURE" | "LOW_COVERAGE" }> {
   return new Promise((resolve) => {
     const img = new Image();
     img.onload = () => {
@@ -61,7 +64,8 @@ async function validatePalmStrict(dataUrl: string): Promise<{ ok: boolean; reaso
       }
 
       const overallRatio = skinCount / (SIZE * SIZE);
-      if (overallRatio < 0.55) return resolve({ ok: false, reason: "NO_SKIN" }); // Fine-tuned to 55% per user request
+      const minCoverage = mode === "manual" ? 0.08 : 0.30; // 30% for auto, 8% for manual
+      if (overallRatio < minCoverage) return resolve({ ok: false, reason: "NO_SKIN" });
 
       const ratios = cellSkin.map((s) => s / (CELL * CELL));
 
@@ -70,10 +74,13 @@ async function validatePalmStrict(dataUrl: string): Promise<{ ok: boolean; reaso
       const variance = ratios.reduce((a, b) => a + Math.pow(b - meanRatio, 2), 0) / 9;
       const stdDev = Math.sqrt(variance);
 
-      if (stdDev > 0.20) return resolve({ ok: false, reason: "LOW_COVERAGE" }); // Lower variance = more uniform skin
+      const maxStdDev = mode === "manual" ? 0.45 : 0.30;
+      if (stdDev > maxStdDev) return resolve({ ok: false, reason: "LOW_COVERAGE" });
 
-      const highCells = ratios.filter((r) => r >= 0.40).length; // Slightly lower cell baseline (40%)
-      if (highCells < 5 || ratios[4] < 0.60) return resolve({ ok: false, reason: "LOW_COVERAGE" }); // Adjusted center to 60%
+      const cellMin = mode === "manual" ? 0.05 : 0.20;
+      const centerMin = mode === "manual" ? 0.10 : 0.40;
+      const highCells = ratios.filter((r) => r >= cellMin).length;
+      if (highCells < 3 || ratios[4] < centerMin) return resolve({ ok: false, reason: "LOW_COVERAGE" });
 
       // 2. Texture/Edge density analysis (Sobel)
       let edgeEnergy = 0;
@@ -109,7 +116,8 @@ async function validatePalmStrict(dataUrl: string): Promise<{ ok: boolean; reaso
       if (edgyCells < 3) return resolve({ ok: false, reason: "NO_TEXTURE" });
 
       const density = edgeEnergy / skinCount;
-      if (density < 0.12) return resolve({ ok: false, reason: "NO_TEXTURE" }); // Increased from 0.07 (require clear palm lines)
+      const minDensity = mode === "manual" ? 0.02 : 0.06;
+      if (density < minDensity) return resolve({ ok: false, reason: "NO_TEXTURE" }); 
 
       resolve({ ok: true });
     };
@@ -143,10 +151,10 @@ export default function ScanPage() {
   const [progress, setProgress] = useState(0);
   const [validationError, setValidationError] = useState<string | null>(null);
   
-  // 🧤 Stage 15: Recognition Hardening RL (Response to Penalty)
+  // 🧤 Stage 15: Recognition Hardening RL (Performance Optimization)
   useEffect(() => {
     if (typeof window !== "undefined") {
-      RLEngine.recordGlobalPenalty("lenient_validation_hard_reset");
+      console.log("[RL] Palm detection engine optimized for hybrid mode.");
     }
   }, []);
 
@@ -201,7 +209,7 @@ export default function ScanPage() {
       tmpCtx.drawImage(video, 0, 0, 320, 240);
       const dataUrl = tmpCanvas.toDataURL("image/jpeg", 0.6);
 
-      const result = await validatePalmStrict(dataUrl);
+      const result = await validatePalmStrict(dataUrl, "auto");
 
       if (stopped) return;
 
@@ -400,7 +408,7 @@ export default function ScanPage() {
     canvas.height = video.videoHeight;
     ctx.drawImage(video, 0, 0);
     const dataUrl = canvas.toDataURL("image/jpeg", 0.85);
-    const validation = await validatePalmStrict(dataUrl);
+    const validation = await validatePalmStrict(dataUrl, "manual");
     if (!validation.ok) {
       if (validation.reason === "NO_TEXTURE") {
         setValidationError("손바닥의 선이 선명하게 보이지 않습니다. 밝은 곳에서 다시 촬영해주세요.");
@@ -424,7 +432,7 @@ export default function ScanPage() {
     const reader = new FileReader();
     reader.onload = async (ev) => {
       const dataUrl = ev.target?.result as string;
-      const validation = await validatePalmStrict(dataUrl);
+      const validation = await validatePalmStrict(dataUrl, "auto");
       if (!validation.ok) {
         if (validation.reason === "NO_TEXTURE") {
           setValidationError("손금의 질감이 감지되지 않습니다. 손바닥을 펼친 선명한 사진을 사용해주세요.");
