@@ -12,13 +12,11 @@ function isSkinPixel(r: number, g: number, b: number): boolean {
   const diff = max - min;
   const sat = max === 0 ? 0 : diff / max;
 
-  // Skin range: covers various skin tones and lighting conditions
+  // Extreme inclusivity: Nearly any color that isn't extreme black or pure white
   return (
-    r > 60 && g > 35 && b > 20 && // Lower mins for darker/dim scenes
-    r > b && r > g &&
-    diff >= 12 &&                 // Lower diff
-    sat >= 0.05 && sat <= 0.85 && // Much wider saturation (low for gray palms, high for sweaty/red)
-    r - g >= 2 && r - g <= 70     // Wider hue range
+    r > 20 && g > 15 && b > 10 &&   // Almost visible pixels
+    max - min >= 3 &&              // Slight color variation
+    r + g + b < 755                 // Not a total white-out
   );
 }
 
@@ -63,8 +61,8 @@ async function validatePalmStrict(
       }
 
       const overallRatio = skinCount / (SIZE * SIZE);
-      const minCoverage = mode === "manual" ? 0.08 : 0.30; // 30% for auto, 8% for manual
-      if (overallRatio < minCoverage) return resolve({ ok: false, reason: "NO_SKIN" });
+      const minCoverage = mode === "manual" ? 0.05 : 0.15; // 15% for auto, 5% for manual
+      if (overallRatio < minCoverage) return resolve({ ok: false, reason: "LOW_COVERAGE" }); // Changed from NO_SKIN to LOW_COVERAGE for better hints
 
       const ratios = cellSkin.map((s) => s / (CELL * CELL));
 
@@ -76,10 +74,10 @@ async function validatePalmStrict(
       const maxStdDev = mode === "manual" ? 0.45 : 0.30;
       if (stdDev > maxStdDev) return resolve({ ok: false, reason: "LOW_COVERAGE" });
 
-      const cellMin = mode === "manual" ? 0.05 : 0.20;
-      const centerMin = mode === "manual" ? 0.10 : 0.40;
+      const cellMin = mode === "manual" ? 0.005 : 0.04;
+      const centerMin = mode === "manual" ? 0.01 : 0.10;
       const highCells = ratios.filter((r) => r >= cellMin).length;
-      if (highCells < 3 || ratios[4] < centerMin) return resolve({ ok: false, reason: "LOW_COVERAGE" });
+      if (highCells < 1 || (mode === "auto" && ratios[4] < centerMin)) return resolve({ ok: false, reason: "LOW_COVERAGE" });
 
       // 2. Texture/Edge density analysis (Sobel)
       let edgeEnergy = 0;
@@ -111,11 +109,11 @@ async function validatePalmStrict(
       }
 
       // 2.1 Distributed Texture Check
-      const edgyCells = cellEdges.filter((e, idx) => e > (cellSkin[idx] * 0.07)).length;
-      if (edgyCells < 3) return resolve({ ok: false, reason: "NO_TEXTURE" });
+      const edgyCells = cellEdges.filter((e, idx) => e > (cellSkin[idx] * 0.03)).length; // 5% to 3%
+      if (edgyCells < 1) return resolve({ ok: false, reason: "NO_TEXTURE" }); // 2 to 1
 
       const density = edgeEnergy / skinCount;
-      const minDensity = mode === "manual" ? 0.02 : 0.06;
+      const minDensity = mode === "manual" ? 0.005 : 0.01; // Further down
       if (density < minDensity) return resolve({ ok: false, reason: "NO_TEXTURE" }); 
 
       resolve({ ok: true });
@@ -126,12 +124,12 @@ async function validatePalmStrict(
 }
 
 const ANALYSIS_STEPS = [
-  { label: "손바닥 모양 인식", detail: "손바닥 모양을 확인했어요" },
-  { label: "주요 선 찾는 중", detail: "중요한 선들을 찾고 있어요" },
-  { label: "인공지능 특징 분석", detail: "나만의 특징을 공부 중이에요" },
-  { label: "운명 패턴 해석 중", detail: "미래 그림을 그려보고 있어요" },
-  { label: "생명력 지수 측정", detail: "얼마나 씩씩한지 살펴봐요" },
-  { label: "비밀 보고서 생성", detail: "나만의 보물지도가 완성됐어요!" },
+  { label: "손바닥 가이드 일치 확인", detail: "에이전트 알파: 형태 인식 중..." },
+  { label: "고해상도 선 지형도 주사", detail: "에이전트 알파: 주요 선 좌표 추출..." },
+  { label: "인공지능 신경망 동기화", detail: "에이전트 오메가: 데이터 수신 중..." },
+  { label: "복합 운명 패턴 서사 직조", detail: "에이전트 오메가: 심층 의미 해석..." },
+  { label: "생명력 및 카르마 지수 산출", detail: "공동 지능: 정밀 수치 계산 중..." },
+  { label: "최종 예언 보고서 봉인", detail: "완료: 나만의 보물지도가 생성되었습니다!" },
 ];
 
 export default function ScanPage() {
@@ -403,13 +401,14 @@ export default function ScanPage() {
     const dataUrl = canvas.toDataURL("image/jpeg", 0.85);
     const validation = await validatePalmStrict(dataUrl, "manual");
     if (!validation.ok) {
-      if (validation.reason === "NO_TEXTURE") {
-        setValidationError("손바닥의 선이 선명하게 보이지 않습니다. 밝은 곳에서 다시 촬영해주세요.");
-      } else if (validation.reason === "NO_SKIN") {
-        setValidationError("손바닥이 감지되지 않았습니다. 손을 가이드에 맞춰주세요.");
-      } else {
-        setValidationError("손바닥을 카메라에 바르게 대고 다시 촬영해주세요.");
-      }
+      setValidationError("⚠️ 인식이 불분명하지만 분석을 진행합니다...");
+      // Show warning briefly then proceed
+      setTimeout(() => {
+        setValidationError(null);
+        ctx.filter = "contrast(1.1) brightness(1.05)";
+        ctx.drawImage(video, 0, 0);
+        beginScan(canvas.toDataURL("image/jpeg", 0.85));
+      }, 800);
       return;
     }
     setValidationError(null);
@@ -427,13 +426,11 @@ export default function ScanPage() {
       const dataUrl = ev.target?.result as string;
       const validation = await validatePalmStrict(dataUrl, "auto");
       if (!validation.ok) {
-        if (validation.reason === "NO_TEXTURE") {
-          setValidationError("손금의 질감이 감지되지 않습니다. 손바닥을 펼친 선명한 사진을 사용해주세요.");
-        } else if (validation.reason === "NO_SKIN") {
-          setValidationError("손바닥이 감지되지 않습니다. 손바닥 사진만 업로드할 수 있습니다.");
-        } else {
-          setValidationError("손바닥을 화면 가득 채운 사진을 사용해주세요.");
-        }
+        setValidationError("⚠️ 손바닥인지 확실하지 않지만 그대로 분석합니다...");
+        setTimeout(() => {
+          setValidationError(null);
+          beginScan(dataUrl);
+        }, 1200);
         return;
       }
       setValidationError(null);
@@ -494,7 +491,11 @@ export default function ScanPage() {
                 ✋ 손바닥 감지됨 — {countdown}초 후 자동 촬영
               </p>
             ) : (
-              <p className={styles.guideHint}>손바닥을 가이드 안에 맞춰주세요 — 자동 인식</p>
+              <p className={styles.guideHint}>
+                손바닥을 가이드 안에 맞춰주세요
+                <br/>
+                <span style={{ fontSize: "0.85rem", opacity: 0.7 }}>인식이 안 될 때는 직접 촬영 버튼을 누르세요</span>
+              </p>
             )}
           </div>
         )}

@@ -64,11 +64,11 @@ export default function HistoryPage() {
               <div className={styles.itemInfo}>
                 <div className={styles.topRow}>
                   <span className={styles.date}>{item.date}</span>
-                  <div className={styles.miniBadge}>Joint AI Consensus</div>
+                  <div className={styles.miniBadge}>AI 공동 지능 합의</div>
                 </div>
                 <p className={styles.summary}>{item.summary}</p>
                 <div className={styles.metaRow}>
-                  <span className="text-[10px] opacity-50">Maturity: {item.maturity}%</span>
+                  <span className="text-[10px] opacity-50">분석 완성도: {item.maturity}%</span>
                 </div>
               </div>
               <span className={styles.arrow}>→</span>

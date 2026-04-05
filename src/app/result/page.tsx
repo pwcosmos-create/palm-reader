@@ -7,10 +7,12 @@ import styles from "./result.module.css";
 import { 
   ShieldCheck,
   Globe,
-  Smartphone,
   ChevronRight,
   Download,
-  Share2
+  Share2,
+  Sparkles,
+  Cpu,
+  RefreshCw
 } from "lucide-react";
 
 interface LineAnalysis {
@@ -39,6 +41,7 @@ export default function ResultPage() {
   const [syncing, setSyncing] = useState(false);
   const [analyzingMessage, setAnalyzingMessage] = useState("데이터 수집 중...");
   const [analyzingStage, setAnalyzingStage] = useState(0);
+  const [error, setError] = useState<string | null>(null);
 
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const router = useRouter();
@@ -52,79 +55,74 @@ export default function ResultPage() {
     setImage(data);
 
     const runAnalysis = async () => {
-      setAnalyzingStage(1);
-      setAnalyzingMessage("AI 전용 채널 개방 및 신경망 동기화 중...");
-      await new Promise((r) => setTimeout(r, 1200));
-
-      setAnalyzingStage(2);
-      setAnalyzingMessage("Gemini 2.0 Flash: 고해상도 이미지 심층 픽셀 스캔...");
-      let geminiData: any = null;
       try {
+        setAnalyzingStage(1);
+        setAnalyzingMessage("AI 전용 채널 개방 및 신경망 동기화 중...");
+        await new Promise((r) => setTimeout(r, 800));
+
+        setAnalyzingStage(2);
+        setAnalyzingMessage("Gemini 2.0 Flash: 고해상도 이미지 심층 픽셀 스캔...");
+        
         const res = await fetch("/api/analyze", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ image: data }),
         });
+        
         const json = await res.json();
-        if (json.ok) geminiData = json.data;
+        if (!json.ok) throw new Error(json.error || "분석 실패");
+
+        const geminiData = json.data;
+
+        setAnalyzingStage(3);
+        setAnalyzingMessage("1,000포인트 운명 궤적 및 카르마 분석 보고서 작성 중...");
+        await new Promise((r) => setTimeout(r, 1500));
+
+        const resultData: AnalysisResult = {
+          summary: geminiData.summary,
+          easySummary: geminiData.easySummary,
+          lines: [
+            {
+              name: "생명선 (튼튼이 선)",
+              reading: geminiData.life?.reading,
+              color: "#00FF7F",
+              score: geminiData.life?.score || 0,
+            },
+            {
+              name: "두뇌선 (똑똑이 선)",
+              reading: geminiData.head?.reading,
+              color: "#00F2FF",
+              score: geminiData.head?.score || 0,
+            },
+            {
+              name: "감정선 (마음 선)",
+              reading: geminiData.heart?.reading,
+              color: "#FF2EF7",
+              score: geminiData.heart?.score || 0,
+            },
+            {
+              name: "운명선 (꿈 선)",
+              reading: geminiData.fate?.reading,
+              color: "#FFD700",
+              score: geminiData.fate?.score || 0,
+            },
+          ],
+          wealth: geminiData.wealth,
+          love: geminiData.love,
+          specialSigns: geminiData.specialSigns || [],
+          advice: geminiData.advice,
+          personalizationMsg: "Gemini 2.0 Flash AI가 심층 분석한 결과입니다."
+        };
+
+        setAnalysis(resultData);
+        setAnalyzing(false);
+        setAnalyzingStage(4);
+        syncResultToServer(resultData);
       } catch (e) {
         console.error("Gemini API Error:", e);
+        setError("AI 분석 중 오류가 발생했습니다. 카메라 조명을 확인하고 다시 시도해 주세요.");
+        setAnalyzing(false);
       }
-
-      setAnalyzingStage(3);
-      setAnalyzingMessage("1,000포인트 운명 궤적 및 카르마 분석 보고서 작성 중...");
-      await new Promise((r) => setTimeout(r, 2000));
-
-      setAnalyzingStage(4);
-      setAnalyzingMessage("고해상도 데이터 수신 및 최종 오라클 정제 완료...");
-      await new Promise((r) => setTimeout(r, 1000));
-
-      const resultData: AnalysisResult = {
-        summary: geminiData?.summary ?? "AI가 당신의 손금을 분석했습니다. 풍요로운 미래와 강한 생명력이 엿보입니다.",
-        easySummary: geminiData?.easySummary ?? "안녕 친구야! 너의 손금은 정말 특별해. 앞으로 좋은 일만 가득할 거야!",
-        lines: [
-          {
-            name: "생명선 (튼튼이 선)",
-            reading: geminiData?.life?.reading ?? "강한 생명력이 느껴지는 선입니다.",
-            color: "#00FF7F",
-            score: geminiData?.life?.score ?? 85,
-          },
-          {
-            name: "두뇌선 (똑똑이 선)",
-            reading: geminiData?.head?.reading ?? "명석한 두뇌와 빠른 판단력이 돋보입니다.",
-            color: "#00F2FF",
-            score: geminiData?.head?.score ?? 90,
-          },
-          {
-            name: "감정선 (마음 선)",
-            reading: geminiData?.heart?.reading ?? "따뜻한 공감 능력과 풍부한 감성이 특징입니다.",
-            color: "#FF2EF7",
-            score: geminiData?.heart?.score ?? 88,
-          },
-          {
-            name: "운명선 (꿈 선)",
-            reading: geminiData?.fate?.reading ?? "자신의 길을 뚜벅뚜벅 걸어가는 멋진 의지가 보입니다.",
-            color: "#FFD700",
-            score: geminiData?.fate?.score ?? 82,
-          },
-        ],
-        wealth: {
-          score: geminiData?.wealth?.score ?? 85,
-          text: geminiData?.wealth?.text ?? "금전적으로 풍요로운 흐름이 예상됩니다."
-        },
-        love: {
-          score: geminiData?.love?.score ?? 80,
-          text: geminiData?.love?.text ?? "진솔한 관계를 통해 행복을 찾을 것입니다."
-        },
-        specialSigns: geminiData?.specialSigns || [],
-        advice: geminiData?.advice ?? "오늘은 당신의 직관을 믿고 새로운 도전을 시작해보세요.",
-        personalizationMsg: "Gemini 2.0 Flash AI가 심층 분석한 결과입니다."
-      };
-
-      setAnalysis(resultData);
-      setAnalyzing(false);
-      setAnalyzingStage(4);
-      syncResultToServer(resultData);
     };
 
     runAnalysis();
@@ -221,16 +219,8 @@ export default function ResultPage() {
         ctx.fillStyle = color;
         ctx.font = `bold ${Math.floor(W * 0.026)}px Inter, sans-serif`;
         ctx.fillText(label, lx, ly);
-
-        ctx.fillStyle = "#fff";
-        ctx.shadowBlur = 10;
-        ctx.globalAlpha = 1;
-        ctx.beginPath();
-        ctx.arc(pts[0].x, pts[0].y, W * 0.007, 0, Math.PI * 2);
-        ctx.fill();
       };
 
-      // Mock paths that look relatively natural
       const heartLine = Array.from({ length: 15 }, (_, i) => ({
         x: W * (0.9 - i * 0.05),
         y: H * (0.35 + Math.sin(i * 0.4) * 0.02),
@@ -248,13 +238,28 @@ export default function ResultPage() {
         y: H * (0.85 - i * 0.06),
       }));
 
-      drawNeon(heartLine, analysis.lines[2].color, "HEART", heartLine[0].x, heartLine[0].y - 30);
-      drawNeon(headLine, analysis.lines[1].color, "HEAD", headLine[0].x, headLine[0].y - 30);
-      drawNeon(lifeLine, analysis.lines[0].color, "LIFE", lifeLine[0].x - 30, lifeLine[0].y - 30);
-      drawNeon(fateLine, analysis.lines[3].color, "FATE", fateLine[0].x - 30, fateLine[0].y + 30);
+      drawNeon(heartLine, analysis.lines[2].color, "감정선", heartLine[0].x, heartLine[0].y - 30);
+      drawNeon(headLine, analysis.lines[1].color, "두뇌선", headLine[0].x, headLine[0].y - 30);
+      drawNeon(lifeLine, analysis.lines[0].color, "생명선", lifeLine[0].x - 30, lifeLine[0].y - 30);
+      drawNeon(fateLine, analysis.lines[3].color, "운명선", fateLine[0].x - 30, fateLine[0].y + 30);
     };
     img.src = image;
   }, [image, analysis]);
+
+  if (error) {
+    return (
+      <main className={styles.container}>
+        <div className={styles.errorCard}>
+          <div className={styles.errorIcon}>⚠️</div>
+          <h2 className={styles.errorTitle}>분석 실패</h2>
+          <p className={styles.errorText}>{error}</p>
+          <button className="btn-primary w-full mt-6" onClick={() => router.push("/scan")}>
+            <RefreshCw size={18} className="mr-2" /> 다시 촬영하기
+          </button>
+        </div>
+      </main>
+    );
+  }
 
   return (
     <main className={`${styles.container} ${!image ? styles.noImage : ""}`}>
@@ -278,31 +283,11 @@ export default function ResultPage() {
       <div className={styles.resultsList}>
         {analysis && visibleItems >= 1 && (
           <div className={`${styles.easyReviewCard} fade-in-up`}>
-            <div className={styles.sparkle} />
             <div className={styles.guruIcon}>🔮</div>
             <div className={styles.easyReviewContent}>
               <h3 className={styles.easyReviewTitle}>도사의 아주 쉬운 총평</h3>
               <p className={styles.easyReviewText}>{analysis.easySummary}</p>
             </div>
-          </div>
-        )}
-
-        {analysis?.specialSigns && analysis.specialSigns.length > 0 && visibleItems >= 1 && (
-          <div className={`${styles.premiumCard} ${styles.specialCard} fade-in-up`}>
-            <div className={styles.cardAccentGold} />
-            <h3 className="mystical-font text-xl mb-4 flex items-center gap-2">
-              <span className="text-secondary">✦</span> 희귀 문양 발견
-            </h3>
-            {analysis.specialSigns.map((sign, idx) => (
-              <div key={idx} className={styles.specialSignItem}>
-                <div className={styles.signHeader}>
-                  <span className={styles.signEmoji}>{sign.emoji}</span>
-                  <span className={styles.signName}>{sign.name}</span>
-                </div>
-                <p className={styles.signReading}>{sign.reading}</p>
-                {idx < (analysis.specialSigns?.length || 0) - 1 && <div className={styles.signDivider} />}
-              </div>
-            ))}
           </div>
         )}
 
@@ -312,14 +297,8 @@ export default function ResultPage() {
               <h2 className="mystical-font glow-text-secondary">AI 분석 리포트</h2>
               <div className={styles.masterBadge}>
                 <ShieldCheck size={16} />
-                <span>AI 직통 채널</span>
+                <span>AI 공동 지능 합의</span>
               </div>
-              {!analyzing && (
-                <div className={styles.archiveBadge}>
-                  <Globe size={14} className="mr-1" />
-                  기록 저장됨
-                </div>
-              )}
             </div>
           </div>
         </div>
@@ -329,7 +308,10 @@ export default function ResultPage() {
             <div className={styles.cardAccent} />
             <h3 className="mystical-font text-xl mb-3">나의 전체 운명</h3>
             <div className={styles.summaryBox}>
-              <div className={styles.aiBadge}>GEMINI-2.5 심층 분석</div>
+              <div className={styles.deepOracleBadge}>
+                <Sparkles size={12} />
+                <span>Deep Oracle 분석 패킷</span>
+              </div>
               <p className={styles.summaryText}>{analysis.summary}</p>
             </div>
           </div>
@@ -339,7 +321,6 @@ export default function ResultPage() {
           <div className={`${styles.premiumCard} ${styles.luckCard} fade-in-up`}>
             <div className={styles.luckCardAccent} />
             <h3 className="mystical-font text-xl mb-4">✦ 오늘의 행운</h3>
-            
             <div className={styles.luckBlock}>
               <div className={styles.luckBlockHeader}>
                 <span className={styles.luckIcon}>💰</span>
@@ -348,9 +329,7 @@ export default function ResultPage() {
               </div>
               <p className={styles.luckText}>{analysis.wealth.text}</p>
             </div>
-
             <div className={styles.luckDivider} />
-
             <div className={styles.luckBlock}>
               <div className={styles.luckBlockHeader}>
                 <span className={styles.luckIcon}>💖</span>
@@ -368,16 +347,20 @@ export default function ResultPage() {
             className={`${styles.lineCard} ${visibleItems >= i + 4 ? styles.visible : styles.hidden} glass-card p-6 mb-4`}
           >
             <div className={styles.lineHeader}>
-              <h3 style={{ color: res.color }}>{res.name}</h3>
+              <h3 style={{ color: res.color }}>{res.name} 상세 예측</h3>
               <span className={styles.scoreBadge} style={{ backgroundColor: `${res.color}22`, color: res.color }}>
-                {res.score}점
+                에너지 지수: {res.score}
               </span>
+            </div>
+            <div className={styles.deepOracleBadge}>
+              <Cpu size={12} />
+              <span>에이전트 합의 완료</span>
             </div>
             <p className={styles.readingText}>{res.reading}</p>
           </div>
         ))}
 
-        {analysis && visibleItems >= analysis.lines.length + 4 && (
+        {analysis && visibleItems >= (analysis.lines?.length || 0) + 4 && (
           <div className={`${styles.premiumCard} ${styles.adviceCard} fade-in-up`}>
             <div className={styles.cardAccentGold} />
             <h3 className="mystical-font text-xl mb-3 text-secondary">오늘의 조언</h3>

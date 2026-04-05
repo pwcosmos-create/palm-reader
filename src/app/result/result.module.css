@@ -95,7 +95,7 @@
 
 .analyzingText {
   font-family: 'Inter', sans-serif;
-  font-size: 1.1rem;
+  font-size: var(--text-base);
   letter-spacing: 0.05em;
   color: #fff;
   text-shadow: 0 0 10px rgba(255, 255, 255, 0.5);
@@ -103,7 +103,7 @@
 }
 
 .stageBar {
-  width: min(280px, 80%);
+  width: clamp(160px, 65%, 280px);
   height: 4px;
   background: rgba(255, 255, 255, 0.1);
   border-radius: 2px;
@@ -262,11 +262,29 @@
 }
 
 .summaryText {
-  font-size: 0.95rem;
-  line-height: 1.8;
-  color: rgba(255, 255, 255, 0.9);
+  font-size: 0.98rem;
+  line-height: 1.95;
+  color: rgba(255, 255, 255, 0.95);
   white-space: pre-wrap;
-  letter-spacing: 0.01rem;
+  letter-spacing: 0.02rem;
+  text-align: justify;
+  word-break: keep-all;
+}
+
+.deepOracleBadge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: linear-gradient(90deg, rgba(168, 85, 247, 0.2), rgba(112, 0, 255, 0.2));
+  color: #c084fc;
+  padding: 4px 10px;
+  border-radius: 6px;
+  font-size: 0.65rem;
+  font-weight: 800;
+  border: 1px solid rgba(168, 85, 247, 0.3);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  margin-bottom: 1rem;
 }
 
 .luckCard { border-color: rgba(255, 215, 0, 0.2); }
@@ -287,13 +305,14 @@
 .lineHeader { display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.8rem; }
 .scoreBadge { font-size: 0.7rem; font-weight: 800; padding: 4px 10px; border-radius: 10px; }
 .readingText {
-  font-size: 0.92rem;
-  line-height: 1.85;
-  color: rgba(255, 255, 255, 0.85);
-  margin-top: 1rem;
+  font-size: 0.94rem;
+  line-height: 2;
+  color: rgba(255, 255, 255, 0.88);
+  margin-top: 1.2rem;
   white-space: pre-wrap;
-  letter-spacing: 0.012rem;
+  letter-spacing: 0.015rem;
   text-align: justify;
+  word-break: keep-all;
 }
 
 .adviceCard { border-color: rgba(255, 215, 0, 0.3); background: rgba(255, 215, 0, 0.02); }
