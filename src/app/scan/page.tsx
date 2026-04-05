@@ -4,6 +4,7 @@ import { useRef, useState, useEffect, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import styles from "./scan.module.css";
 import { compressImage } from "@/lib/image_utils";
+import { RLEngine } from "@/lib/rl_engine";
 
 // ── Palm skin-tone & texture validation ───────────────────────────────────
 function isSkinPixel(r: number, g: number, b: number): boolean {
@@ -14,11 +15,11 @@ function isSkinPixel(r: number, g: number, b: number): boolean {
 
   // Skin range: covers various skin tones and lighting conditions
   return (
-    r > 70 && g > 40 && b > 20 &&
+    r > 80 && g > 50 && b > 30 && // Slightly higher mins
     r > b && r > g &&
-    diff >= 15 &&
-    sat >= 0.10 && sat <= 0.75 &&
-    r - g >= 4 && r - g <= 65
+    diff >= 20 &&                 // Higher diff for real skin
+    sat >= 0.15 && sat <= 0.70 && // Narrower saturation
+    r - g >= 10 && r - g <= 60    // Narrower hue (red-dish skin)
   );
 }
 
@@ -60,7 +61,7 @@ async function validatePalmStrict(dataUrl: string): Promise<{ ok: boolean; reaso
       }
 
       const overallRatio = skinCount / (SIZE * SIZE);
-      if (overallRatio < 0.25) return resolve({ ok: false, reason: "NO_SKIN" });
+      if (overallRatio < 0.70) return resolve({ ok: false, reason: "NO_SKIN" }); // Increased to 70% per user request
 
       const ratios = cellSkin.map((s) => s / (CELL * CELL));
 
@@ -69,10 +70,10 @@ async function validatePalmStrict(dataUrl: string): Promise<{ ok: boolean; reaso
       const variance = ratios.reduce((a, b) => a + Math.pow(b - meanRatio, 2), 0) / 9;
       const stdDev = Math.sqrt(variance);
 
-      if (stdDev > 0.35) return resolve({ ok: false, reason: "LOW_COVERAGE" });
+      if (stdDev > 0.20) return resolve({ ok: false, reason: "LOW_COVERAGE" }); // Lower variance = more uniform skin
 
-      const highCells = ratios.filter((r) => r >= 0.25).length;
-      if (highCells < 5 || ratios[4] < 0.35) return resolve({ ok: false, reason: "LOW_COVERAGE" });
+      const highCells = ratios.filter((r) => r >= 0.50).length; // Higher cell baseline (50%)
+      if (highCells < 7 || ratios[4] < 0.75) return resolve({ ok: false, reason: "LOW_COVERAGE" }); // Center must be 75% skin
 
       // 2. Texture/Edge density analysis (Sobel)
       let edgeEnergy = 0;
@@ -108,7 +109,7 @@ async function validatePalmStrict(dataUrl: string): Promise<{ ok: boolean; reaso
       if (edgyCells < 3) return resolve({ ok: false, reason: "NO_TEXTURE" });
 
       const density = edgeEnergy / skinCount;
-      if (density < 0.07) return resolve({ ok: false, reason: "NO_TEXTURE" });
+      if (density < 0.12) return resolve({ ok: false, reason: "NO_TEXTURE" }); // Increased from 0.07 (require clear palm lines)
 
       resolve({ ok: true });
     };
@@ -141,6 +142,13 @@ export default function ScanPage() {
   const [stepIndex, setStepIndex] = useState(0);
   const [progress, setProgress] = useState(0);
   const [validationError, setValidationError] = useState<string | null>(null);
+  
+  // 🧤 Stage 15: Recognition Hardening RL (Response to Penalty)
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      RLEngine.recordGlobalPenalty("lenient_validation_hard_reset");
+    }
+  }, []);
 
   // 자동 인식 상태
   const [autoDetected, setAutoDetected] = useState(false);
