@@ -33,6 +33,7 @@ interface LineAnalysis {
 
 interface AnalysisResult {
   summary: string;
+  easySummary: string; // ✨ NEW: Easy Total Review
   lines: LineAnalysis[];
   advice: string;
   personalizationMsg: string;
@@ -175,6 +176,7 @@ export default function ResultPage() {
 
       const resultData: AnalysisResult = {
         summary: geminiData?.summary ?? "AI가 당신의 손금을 분석했습니다. 당신의 손금은 강한 의지와 풍부한 감성을 동시에 지닌 복합적인 성격을 나타냅니다.",
+        easySummary: geminiData?.easySummary ?? "안녕 친구야! 너의 예쁜 손을 보니 정말 힘이 넘치고 마음이 아주 착하다는 게 느껴져. 앞으로 멋진 일이 일어날 거야!",
         lines: [
           {
             name: "생명선 (튼튼이 선)",
@@ -606,6 +608,18 @@ export default function ResultPage() {
       )}
 
       <div className={styles.resultsList}>
+        {/* 🧚 NEW: Guru's Secret Easy Review - High Priority for Easy Total Review */}
+        {analysis && visibleItems >= 1 && (
+          <div className={`${styles.easyReviewCard} fade-in-up`}>
+            <div className={styles.sparkle} />
+            <div className={styles.guruIcon}>🔮</div>
+            <div className={styles.easyReviewContent}>
+              <h3 className={styles.easyReviewTitle}>도사의 아주 쉬운 총평</h3>
+              <p className={styles.easyReviewText}>{analysis.easySummary}</p>
+            </div>
+          </div>
+        )}
+
         <div className={styles.headerRow}>
           <div className={styles.titleGroup}>
             <div className={styles.badgeRow}>

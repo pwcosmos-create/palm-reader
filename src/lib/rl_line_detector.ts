@@ -25,7 +25,7 @@ const DEFAULT_BIAS: LineBias = {
  * These normalized [x0, y0, x1, y1] boxes define where lines MUST be.
  */
 const LANDMARKS: Record<string, [number, number, number, number]> = {
-  heart: [0.15, 0.15, 0.95, 0.45], // Top horizontal
+  heart: [0.15, 0.22, 0.95, 0.45], // Top horizontal (Lowered y0 from 0.15 to 0.22 to avoid fingers)
   head:  [0.15, 0.35, 0.95, 0.65], // Middle horizontal
   life:  [0.05, 0.35, 0.55, 0.95], // Curve around thumb
   fate:  [0.30, 0.30, 0.75, 0.95], // Vertical center
@@ -144,7 +144,16 @@ export const RLLineDetector = {
     if (ny < y0) dist = Math.max(dist, y0 - ny);
     else if (ny > y1) dist = Math.max(dist, ny - y1);
 
-    return Math.exp(-dist * 12); // Sharp decay outside the 'Veda' zone
+    const exitPenalty = Math.exp(-dist * 12); // Sharp decay outside the 'Veda' zone
+    
+    // 🧤 Stage 14: Finger Exclusion RL (Guardrail)
+    // High-altitude penalty to prevent line drift into finger segments (y < 0.20)
+    if (ny < 0.20) {
+      const fingerPenalty = Math.pow(ny / 0.20, 2); // Squared penalty as it gets closer to top
+      return exitPenalty * fingerPenalty;
+    }
+
+    return exitPenalty;
   },
 
   /**
