@@ -24,9 +24,10 @@ interface AnalysisResult {
   summary: string;
   easySummary: string;
   lines: LineAnalysis[];
-  advice: string;
   wealth: { score: number; text: string };
   love: { score: number; text: string };
+  specialSigns?: { name: string; reading: string; emoji: string }[];
+  advice: string;
   personalizationMsg: string;
 }
 
@@ -52,11 +53,11 @@ export default function ResultPage() {
 
     const runAnalysis = async () => {
       setAnalyzingStage(1);
-      setAnalyzingMessage("AI 전용 채널 개방 중...");
-      await new Promise((r) => setTimeout(r, 800));
+      setAnalyzingMessage("AI 전용 채널 개방 및 신경망 동기화 중...");
+      await new Promise((r) => setTimeout(r, 1200));
 
       setAnalyzingStage(2);
-      setAnalyzingMessage("Gemini-2.5-Flash: 고해상도 이미지 처리 중...");
+      setAnalyzingMessage("Gemini 2.0 Flash: 고해상도 이미지 심층 픽셀 스캔...");
       let geminiData: any = null;
       try {
         const res = await fetch("/api/analyze", {
@@ -71,7 +72,11 @@ export default function ResultPage() {
       }
 
       setAnalyzingStage(3);
-      setAnalyzingMessage("운명 알고리즘 데이터 수신 완료...");
+      setAnalyzingMessage("1,000포인트 운명 궤적 및 카르마 분석 보고서 작성 중...");
+      await new Promise((r) => setTimeout(r, 2000));
+
+      setAnalyzingStage(4);
+      setAnalyzingMessage("고해상도 데이터 수신 및 최종 오라클 정제 완료...");
       await new Promise((r) => setTimeout(r, 1000));
 
       const resultData: AnalysisResult = {
@@ -111,8 +116,9 @@ export default function ResultPage() {
           score: geminiData?.love?.score ?? 80,
           text: geminiData?.love?.text ?? "진솔한 관계를 통해 행복을 찾을 것입니다."
         },
+        specialSigns: geminiData?.specialSigns || [],
         advice: geminiData?.advice ?? "오늘은 당신의 직관을 믿고 새로운 도전을 시작해보세요.",
-        personalizationMsg: "Gemini-2.5-Flash-Preview AI가 심층 분석한 결과입니다."
+        personalizationMsg: "Gemini 2.0 Flash AI가 심층 분석한 결과입니다."
       };
 
       setAnalysis(resultData);
@@ -278,6 +284,25 @@ export default function ResultPage() {
               <h3 className={styles.easyReviewTitle}>도사의 아주 쉬운 총평</h3>
               <p className={styles.easyReviewText}>{analysis.easySummary}</p>
             </div>
+          </div>
+        )}
+
+        {analysis?.specialSigns && analysis.specialSigns.length > 0 && visibleItems >= 1 && (
+          <div className={`${styles.premiumCard} ${styles.specialCard} fade-in-up`}>
+            <div className={styles.cardAccentGold} />
+            <h3 className="mystical-font text-xl mb-4 flex items-center gap-2">
+              <span className="text-secondary">✦</span> 희귀 문양 발견
+            </h3>
+            {analysis.specialSigns.map((sign, idx) => (
+              <div key={idx} className={styles.specialSignItem}>
+                <div className={styles.signHeader}>
+                  <span className={styles.signEmoji}>{sign.emoji}</span>
+                  <span className={styles.signName}>{sign.name}</span>
+                </div>
+                <p className={styles.signReading}>{sign.reading}</p>
+                {idx < (analysis.specialSigns?.length || 0) - 1 && <div className={styles.signDivider} />}
+              </div>
+            ))}
           </div>
         )}
 
